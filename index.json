@@ -12,7 +12,7 @@
       ],
       "icon": "RobotIcon",
       "channels": {
-        "latest": "1.0.3"
+        "latest": "1.0.4"
       },
       "versions": {
         "1.0.0": {
@@ -58,6 +58,19 @@
           "url": "https://dxckie-cell.github.io/Capri-pet/pool/dxckie.capri-pet@1.0.3.zip",
           "sha256": "9a7c25e6ccd9a941322f8a3e4ab4ba3fe4d391eb3107803cc00b3248ca548106",
           "size": 4919,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        },
+        "1.0.4": {
+          "url": "https://dxckie-cell.github.io/Capri-pet/pool/dxckie.capri-pet@1.0.4.zip",
+          "sha256": "5b603a052a1c86f88ae58b7fae006a2481d7f0ec595506bddd2fd9a4f4a715bb",
+          "size": 5085,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
