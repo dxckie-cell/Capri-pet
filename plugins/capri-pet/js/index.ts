@@ -29,8 +29,13 @@ const save = () => {
 	)
 }
 
-/** The component may be a plain function, memo() or forwardRef(). */
+/** The component may be a class, a plain function, memo() or forwardRef(). */
 function findPatchTarget(exports: any): [any, string] | undefined {
+	// Class components (React Native's AppContainer is one) are patched through their prototype.
+	for (const c of [exports, exports?.default]) {
+		if (typeof c === 'function' && typeof c.prototype?.render === 'function')
+			return [c.prototype, 'render']
+	}
 	const d = exports?.default
 	if (typeof d === 'function') return [exports, 'default']
 	if (typeof d?.type === 'function') return [d, 'type']
@@ -76,7 +81,10 @@ export default plugin<{ jsonStorage: PetState }>({
 					if (hosted) return
 					try {
 						const target = findPatchTarget(exports)
-						if (!target) return
+						if (!target) {
+							toast(`Capri Pet: found ${name} but can't patch it`)
+							return
+						}
 						api.cleanup(
 							after(target[0], target[1], (ret: any) => {
 								// Never break the app: on any problem, return what Discord rendered.
