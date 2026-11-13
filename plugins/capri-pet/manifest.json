@@ -8,7 +8,7 @@
 		"choccychan aka btmc727 <554071670143451176> (https://github.com/OTKUSteyler \"GitHub\")"
 	],
 	"icon": "RobotIcon",
-	"version": "1.0.6",
+	"version": "1.0.7",
 	"dependencies": {
 		"valenced.api": {
 			"version": ">=1 <2"

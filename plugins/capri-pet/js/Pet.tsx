@@ -8,13 +8,7 @@ import {
 	useRef,
 	useState,
 } from 'react'
-import {
-	Animated,
-	Dimensions,
-	PanResponder,
-	Text,
-	View,
-} from 'react-native'
+import { Animated, Dimensions, Text, View } from 'react-native'
 import { onTouch, touch } from './follow'
 import {
 	feed,
@@ -153,8 +147,10 @@ export class Safe extends Component<
 
 	componentDidCatch(error: any, info?: { componentStack?: string | null }) {
 		console.warn('[capri-pet] pet crashed and was hidden', error)
-		// Two short messages, since one long one gets cut off on screen.
+		// Short messages, since one long one gets cut off on screen.
 		toast(`Capri crashed: ${String(error?.message ?? error).slice(0, 80)}`)
+		const frames = String(error?.stack ?? '').split('\n').slice(1, 4)
+		for (const f of frames) toast(`Capri at: ${f.trim().slice(0, 70)}`)
 		const where = (info?.componentStack ?? '').trim().split('\n')[0]
 		if (where) toast(`Capri in: ${where.trim().slice(0, 60)}`)
 	}
@@ -202,7 +198,12 @@ export default function PetOverlay({
 		y: pet.y ?? height * 0.55,
 	}).current
 	const cur = useRef({ ...home }).current
-	const pos = useRef(new Animated.ValueXY(cur)).current
+	const px = useRef(new Animated.Value(cur.x)).current
+	const py = useRef(new Animated.Value(cur.y)).current
+	const place = () => {
+		px.setValue(cur.x)
+		py.setValue(cur.y)
+	}
 	const facing = useRef(new Animated.Value(1)).current // 1 = right, -1 = left
 	const phase = useRef(new Animated.Value(0)).current
 	const dragging = useRef(false)
@@ -262,7 +263,7 @@ export default function PetOverlay({
 				cur.y += (dy / dist) * step
 				cur.x = Math.max(0, Math.min(cur.x, width - SIZE))
 				cur.y = Math.max(30, Math.min(cur.y, height - SIZE - 60))
-				pos.setValue({ x: cur.x, y: cur.y })
+				place()
 				if (Math.abs(dx) > 4) facing.setValue(dx > 0 ? 1 : -1)
 				p += dt * 14
 				phase.setValue(Math.sin(p))
@@ -288,28 +289,35 @@ export default function PetOverlay({
 		}
 	}, [])
 
+	// Plain touch-responder props instead of PanResponder: tap to pat, long-press to feed, drag to move.
 	// biome-ignore lint/correctness/useExhaustiveDependencies: built once, reads live refs and the shared pet object
 	const responder = useMemo(() => {
 		let moved = false
 		let pressAt = 0
 		let startX = 0
 		let startY = 0
-		return PanResponder.create({
-			onStartShouldSetPanResponder: () => true,
-			onPanResponderGrant: () => {
+		let fromX = 0
+		let fromY = 0
+		return {
+			onStartShouldSetResponder: () => true,
+			onResponderGrant: (e: any) => {
 				moved = false
 				pressAt = Date.now()
 				startX = cur.x
 				startY = cur.y
+				fromX = e.nativeEvent.pageX
+				fromY = e.nativeEvent.pageY
 				dragging.current = true
 			},
-			onPanResponderMove: (_e, g) => {
-				if (Math.abs(g.dx) + Math.abs(g.dy) > 6) moved = true
-				cur.x = startX + g.dx
-				cur.y = startY + g.dy
-				pos.setValue({ x: cur.x, y: cur.y })
+			onResponderMove: (e: any) => {
+				const dx = e.nativeEvent.pageX - fromX
+				const dy = e.nativeEvent.pageY - fromY
+				if (Math.abs(dx) + Math.abs(dy) > 6) moved = true
+				cur.x = startX + dx
+				cur.y = startY + dy
+				place()
 			},
-			onPanResponderRelease: () => {
+			onResponderRelease: () => {
 				dragging.current = false
 				if (moved) {
 					// Dropping her sets her new "home" spot.
@@ -322,10 +330,10 @@ export default function PetOverlay({
 					act(pat)
 				}
 			},
-			onPanResponderTerminate: () => {
+			onResponderTerminate: () => {
 				dragging.current = false
 			},
-		})
+		}
 	}, [])
 
 	const hungry = pet.hunger > 70
@@ -337,10 +345,10 @@ export default function PetOverlay({
 			style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
 		>
 			<Animated.View
-				{...responder.panHandlers}
+				{...responder}
 				style={{
 					position: 'absolute',
-					transform: [{ translateX: pos.x }, { translateY: pos.y }],
+					transform: [{ translateX: px }, { translateY: py }],
 				}}
 			>
 				{bubble && (
