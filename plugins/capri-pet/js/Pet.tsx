@@ -151,11 +151,12 @@ export class Safe extends Component<
 		return { failed: true }
 	}
 
-	componentDidCatch(error: unknown) {
+	componentDidCatch(error: any, info?: { componentStack?: string | null }) {
 		console.warn('[capri-pet] pet crashed and was hidden', error)
-		toast(
-			`Capri Pet crashed and was hidden: ${String(error).slice(0, 100)}`,
-		)
+		// Two short messages, since one long one gets cut off on screen.
+		toast(`Capri crashed: ${String(error?.message ?? error).slice(0, 80)}`)
+		const where = (info?.componentStack ?? '').trim().split('\n')[0]
+		if (where) toast(`Capri in: ${where.trim().slice(0, 60)}`)
 	}
 
 	render() {
