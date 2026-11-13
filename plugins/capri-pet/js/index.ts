@@ -29,17 +29,53 @@ const save = () => {
 	)
 }
 
-/** The component may be a class, a plain function, memo() or forwardRef(). */
-function findPatchTarget(exports: any): [any, string] | undefined {
-	// Class components (React Native's AppContainer is one) are patched through their prototype.
-	for (const c of [exports, exports?.default]) {
-		if (typeof c === 'function' && typeof c.prototype?.render === 'function')
-			return [c.prototype, 'render']
+/** Turns one export into something `after` can patch: a class, function, memo() or forwardRef(). */
+function targetOf(holder: any, key: string): [any, string] | undefined {
+	let v: any
+	try {
+		v = holder[key]
+	} catch {
+		return
 	}
-	const d = exports?.default
-	if (typeof d === 'function') return [exports, 'default']
-	if (typeof d?.type === 'function') return [d, 'type']
-	if (typeof d?.render === 'function') return [d, 'render']
+	// Class components (React Native's AppContainer is one) are patched through their prototype.
+	if (typeof v === 'function') {
+		return typeof v.prototype?.render === 'function'
+			? [v.prototype, 'render']
+			: [holder, key]
+	}
+	if (v && typeof v === 'object') {
+		if (typeof v.type === 'function') return [v, 'type']
+		if (typeof v.render === 'function') return [v, 'render']
+	}
+}
+
+/** Looks at the module itself, its default export, then every other export. */
+function findPatchTarget(exports: any): [any, string] | undefined {
+	if (typeof exports === 'function' && exports.prototype?.render)
+		return [exports.prototype, 'render']
+	if (exports && typeof exports === 'object') {
+		if (typeof exports.type === 'function') return [exports, 'type']
+		if (typeof exports.render === 'function') return [exports, 'render']
+		let keys: string[] = []
+		try {
+			keys = [...new Set(['default', ...Object.keys(exports)])]
+		} catch {}
+		for (const key of keys) {
+			const target = targetOf(exports, key)
+			if (target) return target
+		}
+	}
+}
+
+/** A short description of an export, for the on-screen message. */
+function describe(exports: any): string {
+	let keys = ''
+	try {
+		keys = Object.keys(exports ?? {})
+			.slice(0, 5)
+			.join(',')
+	} catch {}
+	return `${typeof exports}${keys ? ` {${keys}}` : ''}`
 }
 
 export default plugin<{ jsonStorage: PetState }>({
@@ -82,7 +118,9 @@ export default plugin<{ jsonStorage: PetState }>({
 					try {
 						const target = findPatchTarget(exports)
 						if (!target) {
-							toast(`Capri Pet: found ${name} but can't patch it`)
+							toast(
+								`Capri Pet: found ${name} but can't patch it (${describe(exports)})`,
+							)
 							return
 						}
 						api.cleanup(
