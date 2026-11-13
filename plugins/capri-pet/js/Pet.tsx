@@ -1,6 +1,13 @@
 // Always-on-screen pet that chases your finger around, oneko-style.
 // Drawn from plain Views (an original neon cyber-kitten): no image assets.
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import {
+	Component,
+	type ReactNode,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from 'react'
 import {
 	Animated,
 	Dimensions,
@@ -132,6 +139,26 @@ function Kitten({
 	)
 }
 
+/** Keeps an error in the pet from taking the app down: if she fails to render, she just disappears. */
+export class Safe extends Component<
+	{ children?: ReactNode },
+	{ failed: boolean }
+> {
+	state = { failed: false }
+
+	static getDerivedStateFromError() {
+		return { failed: true }
+	}
+
+	componentDidCatch(error: unknown) {
+		console.warn('[capri-pet] pet crashed and was hidden', error)
+	}
+
+	render() {
+		return this.state.failed ? null : this.props.children
+	}
+}
+
 /** Wraps the app root so every touch is observed (never consumed) and the pet is drawn on top. */
 export function PetHost({
 	pet,
@@ -150,7 +177,9 @@ export function PetHost({
 			onTouchEndCapture={onTouch}
 		>
 			{children}
-			<PetOverlay pet={pet} save={save} />
+			<Safe>
+				<PetOverlay pet={pet} save={save} />
+			</Safe>
 		</View>
 	)
 }

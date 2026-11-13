@@ -6,7 +6,7 @@ import { getModules } from '@valenced/modules/finders'
 import { withName } from '@valenced/modules/finders/filters'
 import { after } from '@valenced/patcher'
 import { createElement, Fragment } from 'react'
-import PetOverlay, { PetHost } from './Pet'
+import PetOverlay, { PetHost, Safe } from './Pet'
 import { newPet, type PetState, tick } from './pet'
 
 // Hosts that wrap the whole app (so touches can be watched and chased), best first,
@@ -71,16 +71,27 @@ export default plugin<{ jsonStorage: PetState }>({
 						const target = findPatchTarget(exports)
 						if (!target) return
 						api.cleanup(
-							after(target[0], target[1], (ret: any) =>
-								full
-									? createElement(PetHost, { pet, save }, ret)
-									: createElement(
-											Fragment,
-											null,
-											ret,
-											createElement(PetOverlay, { pet, save }),
-										),
-							),
+							after(target[0], target[1], (ret: any) => {
+								// Never break the app: on any problem, return what Discord rendered.
+								if (ret == null) return ret
+								try {
+									return full
+										? createElement(PetHost, { pet, save }, ret)
+										: createElement(
+												Fragment,
+												null,
+												ret,
+												createElement(
+													Safe,
+													null,
+													createElement(PetOverlay, { pet, save }),
+												),
+											)
+								} catch (e) {
+									api.plugin.reportError(e)
+									return ret
+								}
+							}),
 						)
 						hosted = true
 					} catch (e) {
