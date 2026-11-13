@@ -1,0 +1,34 @@
+{
+  "format": 1,
+  "name": "dxckie-cell Capri Pet",
+  "description": "Capri Pet, a neon cyber-kitten pet plugin for Valenced.",
+  "plugins": {
+    "dxckie.capri-pet": {
+      "name": "Capri Pet",
+      "description": "A neon cyber-kitten pet that floats on your screen. Drag her, pat her, feed her.",
+      "author": "dxckie (https://github.com/dxckie-cell \"GitHub\")",
+      "contributors": [
+        "choccychan aka btmc727 <554071670143451176> (https://github.com/OTKUSteyler \"GitHub\")"
+      ],
+      "icon": "RobotIcon",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://dxckie-cell.github.io/Capri-pet/pool/dxckie.capri-pet@1.0.0.zip",
+          "sha256": "fba4ab478c74d79f462bc0ef0eacb3f9d34235e3fbee4ceafb0ebb93e2ba801d",
+          "size": 3852,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        }
+      }
+    }
+  }
+}
