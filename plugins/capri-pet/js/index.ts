@@ -3,9 +3,9 @@
 
 import type { JsonStorage } from '@valenced/json-storage'
 import { getModules } from '@valenced/modules/finders'
-import { withName } from '@valenced/modules/finders/filters'
-import { after } from '@valenced/patcher'
-import { createElement, Fragment } from 'react'
+import { withName, withProps } from '@valenced/modules/finders/filters'
+import { before } from '@valenced/patcher'
+import * as React from 'react'
 import PetOverlay, { PetHost, Safe } from './Pet'
 import { newPet, type PetState, tick } from './pet'
 import { toast } from './toast'
@@ -14,6 +14,8 @@ import { toast } from './toast'
 // then a fallback that can only draw the pet.
 const FULL_HOSTS = ['AppContainer', 'App']
 const OVERLAY_HOSTS = ['AppToastContainer']
+
+type Mode = 'full' | 'overlay'
 
 // One shared pet object: the overlay reads it live and `save` writes it to disk.
 const pet: PetState = newPet()
@@ -29,60 +31,74 @@ const save = () => {
 	)
 }
 
-/** Turns one export into something `after` can patch: a class, function, memo() or forwardRef(). */
-function targetOf(holder: any, key: string): [any, string] | undefined {
-	let v: any
-	try {
-		v = holder[key]
-	} catch {
-		return
-	}
-	// Class components (React Native's AppContainer is one) are patched through their prototype.
-	if (typeof v === 'function') {
-		return typeof v.prototype?.render === 'function'
-			? [v.prototype, 'render']
-			: [holder, key]
-	}
-	if (v && typeof v === 'object') {
-		if (typeof v.type === 'function') return [v, 'type']
-		if (typeof v.render === 'function') return [v, 'render']
-	}
-}
+// The app's components are exported as bare functions, so they can't be patched in place.
+// Instead, every element made from one of them is swapped for a wrapper that draws the pet too.
+const targets = new Map<Function, Mode>()
+const wrappers = new Map<Function, Function>()
+let chosen: Function | undefined
+let bypass = false
 
-/** Looks at the module itself, its default export, then every other export. */
-function findPatchTarget(exports: any): [any, string] | undefined {
-	if (typeof exports === 'function' && exports.prototype?.render)
-		return [exports.prototype, 'render']
-	if (exports && typeof exports === 'object') {
-		if (typeof exports.type === 'function') return [exports, 'type']
-		if (typeof exports.render === 'function') return [exports, 'render']
-		let keys: string[] = []
-		try {
-			keys = [...new Set(['default', ...Object.keys(exports)])]
-		} catch {}
-		for (const key of keys) {
-			const target = targetOf(exports, key)
-			if (target) return target
+function wrapperFor(orig: Function, mode: Mode) {
+	let wrapper = wrappers.get(orig)
+	if (!wrapper) {
+		// Builds the original element without running it through the swap again.
+		const inner = (props: any) => {
+			bypass = true
+			try {
+				return React.createElement(orig as any, props)
+			} finally {
+				bypass = false
+			}
 		}
+		wrapper = (props: any) =>
+			mode === 'full'
+				? React.createElement(PetHost, { pet, save }, inner(props))
+				: React.createElement(
+						React.Fragment,
+						null,
+						inner(props),
+						React.createElement(
+							Safe,
+							null,
+							React.createElement(PetOverlay, { pet, save }),
+						),
+					)
+		wrappers.set(orig, wrapper)
+	}
+	return wrapper
+}
+
+// A before-hook on element creation: returns the arguments, with the type swapped for the host.
+const intercept = (args: any[]) => {
+	try {
+		const type = args?.[0]
+		if (bypass || typeof type !== 'function') return args
+		const mode = targets.get(type)
+		if (!mode) return args
+		if (!chosen) {
+			chosen = type
+			toast(`Capri Pet: attached to ${type.name || mode}`)
+		}
+		if (type !== chosen) return args
+		return [wrapperFor(type, mode), ...args.slice(1)]
+	} catch {
+		return args
 	}
 }
 
-/** A short description of an export, for the on-screen message. */
-function describe(exports: any): string {
-	let keys = ''
-	try {
-		keys = Object.keys(exports ?? {})
-			.slice(0, 5)
-			.join(',')
-	} catch {}
-	return `${typeof exports}${keys ? ` {${keys}}` : ''}`
-}
+/** The component is the module's export itself, or its default export. */
+const componentOf = (exports: any): Function | undefined =>
+	typeof exports === 'function'
+		? exports
+		: typeof exports?.default === 'function'
+			? exports.default
+			: undefined
 
 export default plugin<{ jsonStorage: PetState }>({
 	jsonStorage: { default: newPet(), load: true },
 
 	start(api) {
-		// Wrapping the app root only takes effect on the next mount, so enabling mid-session needs a reload.
+		// Swapping the app root only takes effect on the next mount, so enabling mid-session needs a reload.
 		if (api.plugin.startedLate) {
 			toast('Capri Pet: fully restart Discord to show her')
 			api.plugin.requireReload()
@@ -93,6 +109,9 @@ export default plugin<{ jsonStorage: PetState }>({
 		api.cleanup(() => {
 			clearTimeout(saveTimer)
 			storage = undefined
+			targets.clear()
+			wrappers.clear()
+			chosen = undefined
 		})
 
 		// Load the saved pet and hand it to the already-mounted overlay.
@@ -106,57 +125,43 @@ export default plugin<{ jsonStorage: PetState }>({
 			.catch(e => api.plugin.reportError(e))
 
 		toast('Capri Pet: loaded')
-		let hosted = false
+		const found: string[] = []
 		const missing = setTimeout(() => {
-			if (!hosted) toast("Capri Pet: couldn't find the app to attach to")
+			if (!chosen)
+				toast(
+					`Capri Pet: never saw the app render (found: ${found.join(', ') || 'none'})`,
+				)
 		}, 8000)
 		api.cleanup(() => clearTimeout(missing))
-		const hook = (name: string, full: boolean) => {
+
+		const hook = (name: string, mode: Mode) => {
 			api.cleanup(
 				getModules(withName<any>(name), exports => {
-					if (hosted) return
-					try {
-						const target = findPatchTarget(exports)
-						if (!target) {
-							toast(
-								`Capri Pet: found ${name} but can't patch it (${describe(exports)})`,
-							)
-							return
-						}
-						api.cleanup(
-							after(target[0], target[1], (ret: any) => {
-								// Never break the app: on any problem, return what Discord rendered.
-								if (ret == null) return ret
-								try {
-									return full
-										? createElement(PetHost, { pet, save }, ret)
-										: createElement(
-												Fragment,
-												null,
-												ret,
-												createElement(
-													Safe,
-													null,
-													createElement(PetOverlay, { pet, save }),
-												),
-											)
-								} catch (e) {
-									api.plugin.reportError(e)
-									return ret
-								}
-							}),
-						)
-						hosted = true
-						toast(`Capri Pet: attached to ${name}`)
-					} catch (e) {
-						api.plugin.reportError(e)
-					}
+					const component = componentOf(exports)
+					if (!component) return
+					found.push(name)
+					targets.set(component, mode)
 				}),
 			)
 		}
+		for (const n of FULL_HOSTS) hook(n, 'full')
+		for (const n of OVERLAY_HOSTS) hook(n, 'overlay')
 
-		for (const n of FULL_HOSTS) hook(n, true)
-		for (const n of OVERLAY_HOSTS) hook(n, false)
+		const patch = (obj: any, key: string) => {
+			try {
+				api.cleanup(before(obj, key, intercept))
+			} catch (e) {
+				api.plugin.reportError(e)
+			}
+		}
+		patch(React, 'createElement')
+		api.cleanup(
+			getModules(withProps('jsx', 'jsxs'), (mod: any) => {
+				const runtime = mod?.jsx ? mod : mod?.default
+				for (const key of ['jsx', 'jsxs', 'jsxDEV'])
+					if (typeof runtime?.[key] === 'function') patch(runtime, key)
+			}),
+		)
 	},
 
 	// Unpatching can't remove what Discord already rendered with the pet.
