@@ -134,6 +134,18 @@ function Kitten({
 	)
 }
 
+// Diagnostic: runs each risky call on its own and names the one that throws.
+const probed = new Set<string>()
+function probe(label: string, fn: () => unknown) {
+	try {
+		fn()
+	} catch (e: any) {
+		if (probed.has(label)) return
+		probed.add(label)
+		toast(`Capri probe ${label}: ${String(e?.message ?? e).slice(0, 50)}`)
+	}
+}
+
 /** Keeps an error in the pet from taking the app down: if she fails to render, she just disappears. */
 export class Safe extends Component<
 	{ children?: ReactNode },
@@ -192,6 +204,15 @@ export default function PetOverlay({
 	pet: PetState
 	save: () => void
 }) {
+	probe('dimensions', () => Dimensions.get('window'))
+	probe('animated', () => new Animated.Value(0).interpolate({ inputRange: [0, 1], outputRange: [0, 1] }))
+	probe('useRef', () => useRef(0))
+	probe('useState', () => useState(0))
+	probe('useMemo', () => useMemo(() => 0, []))
+	probe('useEffect', () => useEffect(() => {}, []))
+	probe('jsx', () => <Text>x</Text>)
+	probe('animatedJsx', () => <Animated.View />)
+	probe('pet', () => level(pet))
 	const { width, height } = Dimensions.get('window')
 	const home = useRef({
 		x: pet.x ?? width - SIZE - 12,
