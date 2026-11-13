@@ -8,6 +8,7 @@ import { after } from '@valenced/patcher'
 import { createElement, Fragment } from 'react'
 import PetOverlay, { PetHost, Safe } from './Pet'
 import { newPet, type PetState, tick } from './pet'
+import { toast } from './toast'
 
 // Hosts that wrap the whole app (so touches can be watched and chased), best first,
 // then a fallback that can only draw the pet.
@@ -42,6 +43,7 @@ export default plugin<{ jsonStorage: PetState }>({
 	start(api) {
 		// Wrapping the app root only takes effect on the next mount, so enabling mid-session needs a reload.
 		if (api.plugin.startedLate) {
+			toast('Capri Pet: fully restart Discord to show her')
 			api.plugin.requireReload()
 			return
 		}
@@ -62,7 +64,12 @@ export default plugin<{ jsonStorage: PetState }>({
 			})
 			.catch(e => api.plugin.reportError(e))
 
+		toast('Capri Pet: loaded')
 		let hosted = false
+		const missing = setTimeout(() => {
+			if (!hosted) toast("Capri Pet: couldn't find the app to attach to")
+		}, 8000)
+		api.cleanup(() => clearTimeout(missing))
 		const hook = (name: string, full: boolean) => {
 			api.cleanup(
 				getModules(withName<any>(name), exports => {
@@ -94,6 +101,7 @@ export default plugin<{ jsonStorage: PetState }>({
 							}),
 						)
 						hosted = true
+						toast(`Capri Pet: attached to ${name}`)
 					} catch (e) {
 						api.plugin.reportError(e)
 					}

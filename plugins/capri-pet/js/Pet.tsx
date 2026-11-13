@@ -26,6 +26,7 @@ import {
 	speak,
 	tick,
 } from './pet'
+import { toast } from './toast'
 
 const SIZE = 64
 const FOLLOW_MS = 6000 // keep chasing this long after the last touch, then go home
@@ -152,6 +153,9 @@ export class Safe extends Component<
 
 	componentDidCatch(error: unknown) {
 		console.warn('[capri-pet] pet crashed and was hidden', error)
+		toast(
+			`Capri Pet crashed and was hidden: ${String(error).slice(0, 100)}`,
+		)
 	}
 
 	render() {
