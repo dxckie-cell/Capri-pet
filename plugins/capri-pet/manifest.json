@@ -8,10 +8,10 @@
 		"bleelblep (https://github.com/bleelblep \"GitHub\")"
 	],
 	"icon": "ReactionIcon",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"dependencies": {
 		"valenced.api": {
-			"version": ">=1.1 <2"
+			"version": ">=1.0 <2"
 		},
 		"discord": {
 			"version": "*"
