@@ -5,14 +5,14 @@
   "plugins": {
     "dxckie.capri-pet": {
       "name": "Capri Pet",
-      "description": "A neon cyber-kitten pet that floats on your screen. Drag her, pat her, feed her.",
+      "description": "A pet that lives on top of Discord: a unicorn, a cat, a dog, seasonal pets and the boss pets. Tap, pet, feed, shake and throw it.",
       "author": "dxckie (https://github.com/dxckie-cell \"GitHub\")",
       "contributors": [
-        "choccychan aka btmc727 <554071670143451176> (https://github.com/OTKUSteyler \"GitHub\")"
+        "bleelblep (https://github.com/bleelblep \"GitHub\")"
       ],
-      "icon": "RobotIcon",
+      "icon": "ReactionIcon",
       "channels": {
-        "latest": "1.0.8"
+        "latest": "2.0.0"
       },
       "versions": {
         "1.0.0": {
@@ -126,6 +126,19 @@
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        },
+        "2.0.0": {
+          "url": "https://dxckie-cell.github.io/Capri-pet/pool/dxckie.capri-pet@2.0.0.zip",
+          "sha256": "6513f0e16dc051060bb4a881f0b22ab4c9ca5366fd67eb2b3974b330eec22fc1",
+          "size": 762515,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1.1 <2"
             },
             "discord": {
               "version": "*"
