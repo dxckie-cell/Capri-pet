@@ -1,15 +1,16 @@
+
 # Build output
-build/
-plugins/*/build/
-
-# JS
-node_modules/
-
 # CI working files
+# JS
+# Misc
+*.class
+*.iml
+.DS_Store
+.gradle/
+.idea/
+build/
+local.properties
+node_modules/
+plugins/*/build/
 published/
 releases.json
-
-# Misc
-.DS_Store
-.idea/
-*.iml

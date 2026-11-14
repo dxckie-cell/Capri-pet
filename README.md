@@ -1,25 +1,5 @@
-# Capri Pet for Valenced
+# Capri Pet
 
-A neon cyber-kitten that floats over Valenced and chases your finger. Drag her to move her home, tap to pat her, long-press to feed or nap. Her stats are saved between sessions.
+A native Valenced plugin: a pet that lives on top of Discord (unicorn, cats, dogs, Snowman, Dragon, Headless Horseman, Krampus). Port of Sparkle; see NOTICE.md.
 
-Port of choccychan's Capri Pet from [chocos-plugins](https://github.com/OTKUSteyler/chocos-plugins).
-
-## Install
-
-Add this repository in Valenced's plugin repository settings:
-
-https://dxckie-cell.github.io/Capri-pet
-
-Install **Capri Pet**, then reload Valenced.
-
-## Development
-
-```sh
-bun install
-bun run package
-bun run serve
-```
-
-Bump `version` in `plugins/capri-pet/manifest.json` and push to `main` to publish a new release.
-
-Licensed under GPL-3.0.
+Needs a Valenced build with native plugin support (API 1.1+). Fully restart Discord after installing.
