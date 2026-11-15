@@ -56,17 +56,20 @@ internal object Looks {
 	const val NYAN = 1
 	/** 2..7 the six cats, 8..13 the six dogs (SheetLook.all, in PetData's order). */
 	const val FIRST_SHEET = 2
-	/** 14 was Gary the Snail, left out for the same reason. */
-	const val GARY = 14
+	// ↓ NEW: Capri occupies the slot that Gary held — Gary's constant moves to 15
+	const val CAPRI = 14
+	/** 15 was Gary the Snail, left out for the same reason. BUMPED from 14 → 15. */
+	const val GARY = 15
 	/** Seasonal pets, in SeasonalData's order, then BossData's; new entries append to preserve saved IDs. */
-	const val FIRST_SEASONAL = 15
+	const val FIRST_SEASONAL = 16   // ← was 15, bumped by 1 to make room for CAPRI
 	val LAST get() = FIRST_SEASONAL + SeasonalData.pets.size + BossData.pets.size - 1
 
 	enum class Kind { UNICORN, CAT, DOG, SEASONAL }
 
 	fun of(id: Int): Look = when (id) {
-		in FIRST_SHEET until GARY -> SheetLook.all[id - FIRST_SHEET]
-		in FIRST_SEASONAL..LAST -> SheetLook.seasonal[id - FIRST_SEASONAL]
+		in FIRST_SHEET until CAPRI -> SheetLook.all[id - FIRST_SHEET]  // 2–13: cats & dogs
+		CAPRI                      -> SheetLook.capri                   // 14: Capri  ← NEW
+		in FIRST_SEASONAL..LAST    -> SheetLook.seasonal[id - FIRST_SEASONAL]
 		else -> UnicornLook
 	}
 
@@ -77,36 +80,4 @@ internal object Looks {
 
 	val current: Look get() = of(Settings.look)
 	val kind: Kind get() = kindOf(Settings.look)
-}
-
-internal object Looks {
-    const val UNICORN = 0
-    /** 1 was Nyan Cat, which this plugin leaves out; the id is kept free so the other ids stay put. */
-    const val NYAN = 1
-    /** 2..7 the six cats, 8..13 the six dogs (SheetLook.all, in PetData's order). */
-    const val FIRST_SHEET = 2
-    // ↓ NEW: Capri occupies the slot that Gary held — Gary's constant moves to 15
-    const val CAPRI = 14
-    /** 15 was Gary the Snail, left out for the same reason. BUMPED from 14 → 15. */
-    const val GARY = 15
-    /** Seasonal pets, in SeasonalData's order, then BossData's; new entries append to preserve saved IDs. */
-    const val FIRST_SEASONAL = 16   // ← was 15, bumped by 1 to make room for CAPRI
-    val LAST get() = FIRST_SEASONAL + SeasonalData.pets.size + BossData.pets.size - 1
-
-    enum class Kind { UNICORN, CAT, DOG, SEASONAL }
-
-    fun of(id: Int): Look = when (id) {
-        in FIRST_SHEET until CAPRI -> SheetLook.all[id - FIRST_SHEET]  // 2–13: cats & dogs
-        CAPRI                      -> SheetLook.capri                   // 14: Capri  ← NEW
-        in FIRST_SEASONAL..LAST    -> SheetLook.seasonal[id - FIRST_SEASONAL]
-        else -> UnicornLook
-    }
-
-    fun kindOf(id: Int): Kind = when (val look = of(id)) {
-        is SheetLook -> look.kind
-        else -> Kind.UNICORN
-    }
-
-    val current: Look get() = of(Settings.look)
-    val kind: Kind get() = kindOf(Settings.look)
 }

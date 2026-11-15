@@ -331,39 +331,20 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind) : Look
 
 		/** Seasonal holiday pets, in SeasonalData's order, then the boss pets (BossData.kt). */
 		val seasonal: List<SheetLook> by lazy { (SeasonalData.pets + BossData.pets).map { SheetLook(it, Looks.Kind.SEASONAL) } }
+
+		/**
+		 * Capri — Project Capricorn construct from Cyberpunk: Edgerunners 2.
+		 * Fan art, non-commercial. Sprites drawn separately; see HOW_TO_ADD_CAPRI.md.
+		 *
+		 * Uses Kind.CAT so she gets SMALL_ANIMAL_SCALE (1.7×) for screen size.
+		 * Change to Kind.DOG for a larger baseline, or add Kind.CAPRI in Looks for
+		 * custom refW.
+		 */
+		val capri: SheetLook by lazy {
+			SheetLook(
+				PetData.pets.first { it.id == "capri" },
+				Looks.Kind.CAT
+			)
+		}
 	}
 }
-
-      companion object {
-    // … existing constants (PAD_TOP, PAD_SIDE, CAT_REF_W, DOG_REF_W, FALLBACKS, outlineColour) …
-
-    /** All twelve LuizMelo cats and dogs, in PetData's order. */
-    val all: List<SheetLook> by lazy {
-        PetData.pets.map {
-            SheetLook(it, if (it.id.startsWith("dog_")) Looks.Kind.DOG else Looks.Kind.CAT)
-        }
-    }
-
-    /** Seasonal holiday pets, in SeasonalData's order, then the boss pets (BossData.kt). */
-    val seasonal: List<SheetLook> by lazy {
-        (SeasonalData.pets + BossData.pets).map { SheetLook(it, Looks.Kind.SEASONAL) }
-    }
-
-    // ↓ NEW — Capri ───────────────────────────────────────────────────────────
-    /**
-     * Capri — Project Capricorn construct from Cyberpunk: Edgerunners 2.
-     * Fan art, non-commercial. Sprites drawn separately; see HOW_TO_ADD_CAPRI.md.
-     *
-     * Uses Kind.CAT so she gets SMALL_ANIMAL_SCALE (1.7×) for screen size.
-     * Change to Kind.DOG for a larger baseline, or add Kind.CAPRI in Looks for
-     * custom refW.
-     */
-    val capri: SheetLook by lazy {
-        SheetLook(
-            PetData.pets.first { it.id == "capri" },
-            Looks.Kind.CAT
-        )
-    }
-    // ─────────────────────────────────────────────────────────────────────────
-	  }
-	  
