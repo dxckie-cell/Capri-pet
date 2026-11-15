@@ -170,18 +170,19 @@ internal object PetData {
 		)),
 		Pet("capri", "Capri", 80, 140, mapOf(
 		    "idle" to (24 to CapriStrips.idle),
+		    "walk" to (8 to CapriStrips.walk),
+		    "run" to (8 to CapriStrips.run),
+		    "jump" to (6 to CapriStrips.jump),
+		    "hurt" to (4 to CapriStrips.hurt),
+		    "itch" to (8 to CapriStrips.itch),
+		    "sleep" to (8 to CapriStrips.sleep),
 		    "sit" to (6 to CapriStrips.sit),
-		    "sleep" to (5 to CapriStrips.sleep),
-		    "talk" to (4 to CapriStrips.talk),
-		    "curious" to (5 to CapriStrips.curious),
-		    "victory" to (8 to CapriStrips.victory),
-		    "alarm" to (4 to CapriStrips.alarm),
-		    "flinch" to (3 to CapriStrips.flinch),
-		    "fall" to (4 to CapriStrips.fall),
-		    "land" to (4 to CapriStrips.land),
-		    "shake" to (6 to CapriStrips.shake),
-		    "outro" to (7 to CapriStrips.outro),
-		    "walk" to (8 to CapriStrips.walk)
+		    "lay" to (6 to CapriStrips.lay),
+		    "voice" to (6 to CapriStrips.voice),
+		    "stretch" to (8 to CapriStrips.stretch),
+		    "lick1" to (8 to CapriStrips.lick1),
+		    "lick2" to (8 to CapriStrips.lick2),
+		    "outro" to (7 to CapriStrips.outro)
 		)),
 	)
 }

@@ -1,0 +1,6 @@
+package com.dxckie.capri
+
+// Capri strip: sit | part 3/3 | 6f | 80x140px
+internal object CapriStrip_Sit_P3 {
+    const val DATA = "+IkcIHeAnB/nx+03s0IrMckcf9NObQPUu6i7FS87a94hnxKOdzQKE+bM+STmV2BUgNp7WPUAP0OHfErokE9NDgeoVAGBQSCJ6/Oi9ykrpWXwKxdxUfmb6gA199leUg5NnKlNnB+3XwPKPFICt80CwJLyz1qkarhLTfiqU38RyGSSycBPzDhAyaLbf0sVIKACjC4HTjbhGTTnlxMHyO13XBKqcsCj+Nn56WjdSlS9qZSWsRnm2ibAZM+vc375wU/kALkD5Pw4P26/6ZelgoSLbedxALcAAC2Xm5LqwAfUwRDasaeJBsJwfvnNT+QAuQPk/Dg/br/pFdppfwC3IM9dh5bLTSk37B3vaBRu9LYLNkhxj8RxfvnPT+QAuQPk/Dg/br/pFfo+5bnr0jJms1qaDUA/ApXzy39+IgfIHSDnx/lx+02v2CDhhPMpeHqD4x512Ca3CrRyMxm67ycTP5ED5A6Q8+P8uP2mV+hWRboGtXTIpwR6bEt70QDnx/klXIE8Mf8tct/M9Wl7s3X2evLE/LfIZABI3+sT899Ky3udab87rc/H+XH75fbLhQsX7gC5A+T8uHDhwoULFy5cuHDhwoULFy5cuHDhwoULFy5cuHDhwoULFy5cuORM/n+oOkzFWSVUOwAAAABJRU5ErkJggg=="
+}
