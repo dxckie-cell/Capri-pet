@@ -180,7 +180,8 @@ internal object PetData {
 		    "fall" to (4 to CapriStrips.fall),
 		    "land" to (4 to CapriStrips.land),
 		    "shake" to (6 to CapriStrips.shake),
-		    "outro" to (7 to CapriStrips.outro)
+		    "outro" to (7 to CapriStrips.outro),
+		    "walk" to (8 to CapriStrips.walk)
 		)),
 	)
 }
