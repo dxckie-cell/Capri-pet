@@ -179,7 +179,8 @@ internal object PetData {
 		    "flinch" to (3 to CapriStrips.flinch),
 		    "fall" to (4 to CapriStrips.fall),
 		    "land" to (4 to CapriStrips.land),
-		    "shake" to (6 to CapriStrips.shake)
+		    "shake" to (6 to CapriStrips.shake),
+		    "outro" to (7 to CapriStrips.outro)
 		)),
 	)
 }

@@ -13,4 +13,5 @@ internal object CapriStrips {
     val fall get() = arrayOf(CapriStrip_Fall_P1.DATA + CapriStrip_Fall_P2.DATA + CapriStrip_Fall_P3.DATA)
     val land get() = arrayOf(CapriStrip_Land_P1.DATA + CapriStrip_Land_P2.DATA)
     val shake get() = arrayOf(CapriStrip_Shake_P1.DATA + CapriStrip_Shake_P2.DATA)
+    val outro get() = arrayOf(CapriStrip_Outro_P1.DATA + CapriStrip_Outro_P2.DATA + CapriStrip_Outro_P3.DATA + CapriStrip_Outro_P4.DATA + CapriStrip_Outro_P5.DATA + CapriStrip_Outro_P6.DATA + CapriStrip_Outro_P7.DATA)
 }

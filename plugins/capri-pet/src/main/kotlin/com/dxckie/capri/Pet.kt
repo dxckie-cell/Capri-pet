@@ -570,7 +570,7 @@ internal object Pet {
 		lastInteraction = now()
 		hop(dp(500f), quiet = true)
 		repeat(3) { spawn(Particle.SPARK) }
-		Sounds.appear()
+		appearFx(); Sounds.appear()
 		say("hello")
 		savePosition()
 		schedule(0)
@@ -739,7 +739,7 @@ internal object Pet {
 			if (greet) {
 				greet = false
 				hop(dp(420f), quiet = true)
-				Sounds.appear()
+				appearFx(); Sounds.appear()
 				say(if (love() < LONELY) "missed" else "hello")
 			}
 		}
@@ -1207,10 +1207,13 @@ internal object Pet {
 	}
 
 	private fun stepLeaving(t: Float, b: FloatArray) {
-		// Flies off the top on its rainbow while the outro plays.
-		y -= dp(420f) * (1f / 60f)
-		x += dp(120f) * facing * (1f / 60f)
-		if (t - animStart >= Looks.current.duration(Anim.OUTRO) + 0.2f || y + h < b[2] - dp(20f)) {
+		// Flies off the top on its rainbow while the outro plays; a teleporting look stays put.
+		val teleports = (Looks.current as? SheetLook)?.teleports == true
+		if (!teleports) {
+			y -= dp(420f) * (1f / 60f)
+			x += dp(120f) * facing * (1f / 60f)
+		}
+		if (t - animStart >= Looks.current.duration(Anim.OUTRO) + 0.2f || (!teleports && y + h < b[2] - dp(20f))) {
 			val done = afterLeave
 			afterLeave = null
 			done?.invoke()
@@ -1224,6 +1227,12 @@ internal object Pet {
 			anim = next
 			animStart = now()
 		}
+	}
+
+	/** A teleporting look (Capri) plays its outro backwards when it shows up. */
+	private fun appearFx() {
+		val look = Looks.current
+		if ((look as? SheetLook)?.teleports == true) setMood(Anim.INTRO, look.duration(Anim.INTRO))
 	}
 
 	private fun setMood(next: Anim, seconds: Float, still: Int = -1) {
@@ -1926,7 +1935,7 @@ internal object Pet {
 		if (quiet) return
 		hop(dp(420f), quiet = true)
 		repeat(2) { spawn(Particle.SPARK) }
-		Sounds.appear()
+		appearFx(); Sounds.appear()
 		if (love() < LONELY) say("missed") else if (Random.nextFloat() < 0.6f) say("typing_hello")
 	}
 

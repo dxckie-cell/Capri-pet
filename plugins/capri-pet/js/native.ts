@@ -161,7 +161,7 @@ export function sizeLabel(dp: number): string {
 /** Every pet, by id (native's Looks: 0 unicorn, 2-13 cats and dogs, 14 Capri, 16-19 seasonal and boss pets). */
 export const LOOKS = [
 	{ id: 0, label: "Unicorn", kind: "unicorn", defaultName: "Capri", bubbles: "bubbles", leaves: "flies off on its rainbow" },
-	{ id: 14, label: "Capri", pack: "classic", kind: "cat", defaultName: "Capri", bubbles: "bubbles", leaves: "trots off" },
+	{ id: 14, label: "Capri", pack: "classic", kind: "cat", defaultName: "Capri", bubbles: "bubbles", leaves: "teleports away" },
 	...SEASONAL_PETS,
 	...BOSS_PETS,
 	{ id: 2, label: "Ginger cat", kind: "cat", defaultName: "Ginger", bubbles: "bubbles", leaves: "trots off" },

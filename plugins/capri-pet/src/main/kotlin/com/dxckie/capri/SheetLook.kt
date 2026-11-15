@@ -78,7 +78,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind) : Look
 	private enum class Over { NONE, ZS, HEART, ALERT, MAIL, MUSIC, BOLT, BATTERY, DIZZY, SPARKLES }
 
 	/** Which strip, how fast, whether it loops (else holds the last frame), and what goes on top. */
-	private class Pick(val strip: String, val fps: Float, val loop: Boolean = true, val over: Over = Over.NONE, val still: Int = -1)
+	private class Pick(val strip: String, val fps: Float, val loop: Boolean = true, val over: Over = Over.NONE, val still: Int = -1, val reverse: Boolean = false)
 	/** Purchased packs use their own poses rather than the original cats' grooming names. */
 	private fun seasonalPick(anim: Anim, still: Int): Pick = when (anim) {
 		Anim.IDLE -> Pick("idle", idleFps)
@@ -87,6 +87,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind) : Look
 		// Pet.kt owns the jump trajectory; source jumps include baked-in travel.
 		Anim.JUMP -> Pick("takeoff", 10f, loop = false)
 		Anim.OUTRO -> Pick("outro", 8f, loop = false)
+		Anim.INTRO -> Pick("outro", 8f, loop = false, reverse = true)
 		Anim.SPIN -> Pick("spin", 10f)
 		Anim.SLEEP -> Pick("rest", 3f, over = if (pet.id.startsWith("christmas_") || pet.id == "cotton_boo") Over.NONE else Over.ZS)
 		Anim.SAD -> Pick("sad", 3f)
@@ -114,7 +115,11 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind) : Look
 	fun variantStrip(still: Int): String =
 		frames(if (revisedSeasonal) seasonalPick(Anim.VARIANT, still).strip else pick(Anim.VARIANT, 0f, still).strip).first
 
+	/** Looks with their own "outro" strip (Capri's teleport) leave and return in place with it. */
+	val teleports: Boolean get() = !revisedSeasonal && pet.strips.containsKey("outro")
+
 	override fun duration(anim: Anim): Float {
+		if (teleports && (anim == Anim.OUTRO || anim == Anim.INTRO)) return pet.strips.getValue("outro").first / 8f
 		if (!revisedSeasonal) return super<Look>.duration(anim)
 		val p = seasonalPick(anim, -1)
 		return (pet.strips[p.strip]?.first ?: 1) / p.fps.coerceAtLeast(1f)
@@ -124,6 +129,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind) : Look
 		Anim.IDLE, Anim.HANG -> Pick("idle", 8f)
 		Anim.WALK -> Pick("walk", 10f)
 		Anim.JUMP, Anim.OUTRO -> Pick("run", 12f)
+		Anim.INTRO -> Pick("idle", 8f)
 		Anim.SPIN -> Pick("run", 14f)
 		Anim.HAPPY -> Pick("itch", 8f, over = Over.SPARKLES)
 		Anim.SLEEP -> Pick(if ((s * 0.8f).toInt() % 2 == 0) "sleep1" else "sleep2", 0f, over = Over.ZS)
@@ -164,6 +170,8 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind) : Look
 	override fun frame(anim: Anim, seconds: Float, still: Int): Bitmap? = runCatching {
 		val p = when {
 			revisedSeasonal -> seasonalPick(anim, still)
+			teleports && anim == Anim.OUTRO -> Pick("outro", 8f, loop = false)
+			teleports && anim == Anim.INTRO -> Pick("outro", 8f, loop = false, reverse = true)
 			anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 4f)
 			anim == Anim.JUMP && pet.strips.containsKey("jump") -> Pick("jump", 10f, loop = false)
 			anim == Anim.SHAKE && pet.strips.containsKey("hurt") -> Pick("hurt", 8f, loop = false, over = Over.ALERT)
@@ -175,7 +183,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind) : Look
 			p.fps <= 0f -> 0
 			p.loop -> (seconds * p.fps).toInt().mod(list.size)
 			else -> (seconds * p.fps).toInt().coerceIn(0, list.size - 1)
-		}
+		}.let { if (p.reverse) list.size - 1 - it else it }
 		val phase = (seconds * 4f).toInt() % 3
 		val key = "$name:$index:${p.over}:${if (p.over == Over.ZS || p.over == Over.SPARKLES || p.over == Over.DIZZY) phase else 0}:$outlineColour"
 		val base = cache.getOrPut(key) { compose(list[index], p.over, phase) }

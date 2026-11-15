@@ -26,6 +26,8 @@ internal enum class Anim(val strip: String, val fps: Float, val loop: Boolean, v
 	LOW_BATTERY("low_battery", 2f, false),
 	SHAKE("shake_burst", 0f, false),
 	OUTRO("outro_exit", 8f, false, directional = true),
+	/** Coming back on screen; only looks with their own "outro" strip play it (backwards). */
+	INTRO("intro", 8f, false, directional = true),
 	/** Four stills: plain, holding a heart, sparkling, sunglasses. Idle fidgets. */
 	VARIANT("extra_variants", 0f, false),
 	/**
