@@ -3,6 +3,14 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.0.2',
+		date: '2026-11-15',
+		title: 'Capri joins the pets',
+		changes: [
+			'New pet: Capri, from Cyberpunk: Edgerunners 2 (fan art).',
+		],
+	},
+	{
 		version: '2.0.0',
 		date: '2026-11-14',
 		title: 'Capri Pet, now native',
