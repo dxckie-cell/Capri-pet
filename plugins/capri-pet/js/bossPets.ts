@@ -1,6 +1,6 @@
 export const BOSS_PETS = [
   {
-    "id": 17,
+    "id": 18,
     "label": "Headless Horseman",
     "pack": "halloween",
     "kind": "seasonal",
@@ -9,7 +9,7 @@ export const BOSS_PETS = [
     "leaves": "sinks into the floor"
   },
   {
-    "id": 18,
+    "id": 19,
     "label": "Krampus",
     "pack": "christmas",
     "kind": "seasonal",

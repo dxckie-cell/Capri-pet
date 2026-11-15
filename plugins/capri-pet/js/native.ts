@@ -71,7 +71,7 @@ export interface CapriStorage {
 	treats: boolean
 	/** What it calls itself. */
 	name: string
-	/** Which pet: 0 unicorn, 1 Nyan Cat, 2–13 cats/dogs, 14 Gary, 15–18 seasonal. */
+	/** Which pet: 0 unicorn, 1 Nyan Cat, 2–13 cats/dogs, 14 Capri, 15 Gary (unused), 16–19 seasonal and boss pets. */
 	look: number
 	/** Picker-only preference; hiding a pack does not dismiss the active pet. */
 	hiddenPacks: string[]
@@ -158,9 +158,10 @@ export function sizeLabel(dp: number): string {
 	return `Between ${SIZE_STOPS[above - 1].label} and ${SIZE_STOPS[above].label}`
 }
 
-/** Every pet, by id (native's Looks: 0 unicorn, 2-13 cats and dogs, 15-18 seasonal and boss pets). */
+/** Every pet, by id (native's Looks: 0 unicorn, 2-13 cats and dogs, 14 Capri, 16-19 seasonal and boss pets). */
 export const LOOKS = [
 	{ id: 0, label: "Unicorn", kind: "unicorn", defaultName: "Capri", bubbles: "bubbles", leaves: "flies off on its rainbow" },
+	{ id: 14, label: "Capri", pack: "classic", kind: "cat", defaultName: "Capri", bubbles: "bubbles", leaves: "trots off" },
 	...SEASONAL_PETS,
 	...BOSS_PETS,
 	{ id: 2, label: "Ginger cat", kind: "cat", defaultName: "Ginger", bubbles: "bubbles", leaves: "trots off" },
