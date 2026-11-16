@@ -181,6 +181,7 @@ internal object Bubbles {
 	}
 
 	fun clear() {
+		Possess.clear()
 		running = false
 		Choreographer.getInstance().removeFrameCallback(frame)
 		bubbles.clear()

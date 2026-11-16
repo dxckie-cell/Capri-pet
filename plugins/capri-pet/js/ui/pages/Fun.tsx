@@ -69,22 +69,14 @@ export default function Fun() {
 
 					<TableRadioGroup
 						key={`bubbles-${bubbleChoice}`}
-						title={nyan ? "Rainbow puffs" : "Bubbles"}
-						description={
-							nyan
-								? "Now and then, and when it's happy, rainbow stars drift out to the edges and burst. With the screen effect, rainbow bands drift across the screen too and each burst ripples it."
-								: "Now and then, and when it's happy, bubbles drift out to the edges and pop. With the screen effect, the screen shimmers with soap-bubble colours too and each pop ripples it."
-						}
+						title="Possession"
+						description="Now and then, and when she's happy, she dives into the screen: red lightning runs round its edge and eyes open all over it, watching her. With the screen glitch, bars of red, purple and green tear across it too."
 						defaultValue={bubbleChoice}
 						onChange={(value: string) => update({ bubbles: value !== "off", bubbleFx: value === "fx" })}
 					>
 						<TableRadioRow label="Off" value="off" />
-						<TableRadioRow label={nyan ? "Puffs" : "Bubbles"} value="plain" />
-						<TableRadioRow
-							label={nyan ? "Puffs and rainbow screen" : "Bubbles and bubble screen"}
-							subLabel="Below Android 13 the colours show but the screen doesn't bend. Works alongside VFX."
-							value="fx"
-						/>
+						<TableRadioRow label="Possession" value="plain" />
+						<TableRadioRow label="Possession and screen glitch" subLabel="Works on any Android. Works alongside VFX." value="fx" />
 					</TableRadioGroup>
 
 					<RateSlider
@@ -153,8 +145,8 @@ export default function Fun() {
 
 					<TableRowGroup title="Try it" hasIcons>
 						<TableRow
-							label={nyan ? "Blow rainbow puffs now" : "Blow bubbles now"}
-							subLabel={`See them without waiting.${needsShow}`}
+							label="Possess the screen now"
+							subLabel={`See it without waiting.${needsShow}`}
 							icon={rowIcon("PlayIcon")}
 							disabled={!s.show}
 							onPress={() => call("blow")}

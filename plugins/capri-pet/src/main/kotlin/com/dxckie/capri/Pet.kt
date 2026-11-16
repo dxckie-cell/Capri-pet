@@ -1721,6 +1721,12 @@ internal object Pet {
 		if (mood != Anim.BLOW || t >= moodUntil) return
 		val root = decor ?: return
 		val frame = ((t - animStart) * Anim.BLOW.fps).toInt()
+		if (Settings.look == Looks.CAPRI) {
+			// Capri doesn't blow bubbles: she possesses the screen (Possess.kt) on the first blow frame.
+			if (frame >= 6 && released == 0) { released = 1; Possess.start(root, x + w / 2f, y + h * 0.3f); Sounds.bloop() }
+			if (Possess.active) Possess.follow(x + w / 2f, y + h * 0.3f)
+			return
+		}
 		val scale = w / Looks.current.cellW
 		while (released < Looks.current.blowReleases.size && frame >= Looks.current.blowReleases[released].frame) {
 			val r = Looks.current.blowReleases[released]
