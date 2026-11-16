@@ -1268,12 +1268,16 @@ internal object Pet {
 		anim = next
 	}
 
+	/** Capri-style look: teleports, and has one flying pose for Spin that has to face the way she goes. */
+	private val teleportLook get() = Looks.current.let { it is SheetLook && it.teleports }
+
 	private fun compose(t: Float): Anim {
 		if (mood != null && t >= moodUntil) mood = null
 		return when {
 			state == State.LEAVING -> Anim.OUTRO
 			stuck && state in setOf(State.STUCK, State.PRESS, State.PET) &&
 				Looks.current.hasMotionPoses -> Anim.HANG
+			state == State.DRAG && teleportLook -> Anim.SPIN
 			state == State.DRAG && wound &&
 				Looks.current.hasMotionPoses -> Anim.SPIN
 			state == State.DRAG -> Anim.SURPRISED
@@ -1301,7 +1305,7 @@ internal object Pet {
 		val motionFrame = motionName?.let { Motion.frame(it, elapsed) }
 		val motion = if (motionFrame != null) MotionData.strips.getValue(motionName!!) else null
 		v.frame = motionFrame ?: playingFrame(t) ?: Looks.current.frame(next, elapsed, still)
-		v.flip = Looks.current.directional(next) && facing < 0
+		v.flip = (Looks.current.directional(next) || (next == Anim.SPIN && teleportLook)) && facing < 0
 		// Motion cells include room for a full tumble. Keep their native pixel
 		// scale rather than squeezing them into the normal logical pet cell.
 		val pixelScale = w / Looks.current.cellW
@@ -1384,6 +1388,8 @@ internal object Pet {
 					y = clamp(ry - touchOy, -h * maxOf(0.2f, Looks.current.headroom), height - h * 0.5f)
 					val first = history.first()
 					if (t - first[0] > 0.005f) dragVx = (rx - first[1]) / (t - first[0])
+					// Her flying pose leans the way she is being carried.
+					if (abs(dragVx) > dp(40f)) facing = if (dragVx > 0) 1 else -1
 					wind(t, rx, ry)
 				} else if (state == State.PET) {
 					val dx = rx - petAnchor
