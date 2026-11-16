@@ -332,7 +332,7 @@ internal object Pet {
 	private var view: PetView? = null
 	/** Nyan Cat's rainbow and stars, just behind the pet (Trail.kt). */
 	private var trail: TrailView? = null
-	private var bubble: TextView? = null
+	private var bubble: CapriBubble? = null
 	private val particles = ArrayList<View>()
 
 	var state = State.IDLE
@@ -627,14 +627,7 @@ internal object Pet {
 		if (away) pet.visibility = View.INVISIBLE
 		root.addView(pet, FrameLayout.LayoutParams(w.toInt(), h.toInt()))
 		view = pet
-		val text = TextView(context).apply {
-			setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13f)
-			maxWidth = dp(220f).toInt()
-			val pad = dp(10f).toInt()
-			setPadding(pad, dp(6f).toInt(), pad, dp(6f).toInt())
-			ggSans(context)?.let { typeface = it }
-			visibility = View.GONE
-		}
+		val text = CapriBubble(context).apply { visibility = View.GONE }
 		root.addView(text, FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT))
 		bubble = text
 		posReady = false
@@ -2551,14 +2544,6 @@ internal object Pet {
 		val pick = options.filter { it != lastPhrase }.ifEmpty { options }.random()
 		val text = (if (name.isNullOrBlank()) pick else pick.replace("{name}", name)).replace("{me}", Settings.name)
 		lastPhrase = pick
-		val palette = discordPalette(bubbleView.context)
-		bubbleView.background = GradientDrawable().apply {
-			cornerRadius = dp(12f)
-			setColor(palette.surface)
-			setStroke(maxOf(1, dp(1f).toInt()), palette.border)
-		}
-		bubbleView.setTextColor(palette.text)
-		bubbleView.elevation = dp(2f)
 		bubbleView.animate().cancel()
 		bubbleView.text = text
 		bubbleView.alpha = 0f
