@@ -3,6 +3,14 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.2.3',
+		date: '2026-11-16',
+		title: 'Same bolt everywhere',
+		changes: [
+			'The animation tester and Spin now draw the same heavy red pixel slash as her real teleport, not the old thin bolt.',
+		],
+	},
+	{
 		version: '2.2.2',
 		date: '2026-11-16',
 		title: 'Bolt in the picker',

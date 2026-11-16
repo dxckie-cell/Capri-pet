@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.PointF
 import android.graphics.RectF
 import android.util.Base64
 
@@ -175,8 +176,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 			revisedSeasonal -> seasonalPick(anim, still)
 			teleports && anim == Anim.OUTRO -> Pick("outro", 8f, loop = false)
 			teleports && anim == Anim.INTRO -> Pick("outro", 8f, loop = false, reverse = true)
-			// The live pet draws the bolt itself (BoltView); the picker's preview has no room, so its strip carries a bolt.
-			teleports && anim == Anim.WALK -> Pick(if (preview) "walkfx" else "walk", 24f, loop = false)
+			teleports && anim == Anim.WALK -> Pick("walk", 24f, loop = false)
 			anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 4f)
 			anim == Anim.JUMP && pet.strips.containsKey("jump") -> Pick("jump", 10f, loop = false)
 			anim == Anim.SHAKE && pet.strips.containsKey("hurt") -> Pick("hurt", 8f, loop = false, over = Over.ALERT)
@@ -192,10 +192,35 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 		val phase = (seconds * 4f).toInt() % 3
 		val key = "$name:$index:${p.over}:${if (p.over == Over.ZS || p.over == Over.SPARKLES || p.over == Over.DIZZY) phase else 0}:$outlineColour"
 		val base = cache.getOrPut(key) { compose(list[index], p.over, phase) }
-		if (revisedSeasonal && anim == Anim.BLOW) {
+		// Her walk and spin strips are blank where the slash goes. Live walk draws it full-screen (BoltView);
+		// the picker preview and Spin draw it over her own cell with the same painter.
+		val boltF = when {
+			!teleports -> -1
+			anim == Anim.WALK && preview -> index
+			anim == Anim.SPIN -> 4 + index % 9
+			else -> -1
+		}
+		if (boltF >= 0) {
+			cache.getOrPut("$key:bolt$boltF") { withBolt(base, boltF) }
+		} else if (revisedSeasonal && anim == Anim.BLOW) {
 			cache.getOrPut("bubble:$index:$outlineColour") { attachedBubble(base, index) }
 		} else base
 	}.getOrNull()
+
+	private val boltPainters = HashMap<Long, BoltPainter>()
+
+	/** [base] with slash frame [f] over it, in the same style as the live teleport. */
+	private fun withBolt(base: Bitmap, f: Int): Bitmap {
+		val w = base.width; val h = base.height
+		val painter = boltPainters.getOrPut(w.toLong() shl 32 or h.toLong()) {
+			val d = w / 300f
+			val route = BoltPainter.route(PointF(w * 0.12f, h * 0.7f), PointF(w * 0.88f, h * 0.35f), w.toFloat(), h.toFloat(), d)
+			BoltPainter(route, 1f, w * 0.05f, 0.4f)
+		}
+		val out = base.copy(Bitmap.Config.ARGB_8888, true)
+		painter.draw(Canvas(out), w, h, f, f)
+		return out
+	}
 
 	// ------------------------------------------------------------------------------------------
 	// Drawing

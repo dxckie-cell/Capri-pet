@@ -171,7 +171,6 @@ internal object PetData {
 		Pet("capri", "Capri", 80, 140, mapOf(
 		    "idle" to (24 to CapriStrips.idle),
 		    "walk" to (17 to CapriStrips.walk),
-		    "walkfx" to (17 to CapriStrips.walkfx),
 		    "run" to (9 to CapriStrips.run),
 		    "jump" to (6 to CapriStrips.jump),
 		    "hurt" to (4 to CapriStrips.hurt),

@@ -22,12 +22,13 @@ import kotlin.random.Random
  * bolt runs to the target while she is hidden, 13-16 the bolt collapses onto the target as she re-forms.
  * Full-screen and touch-transparent; removes itself when done. Main thread only.
  */
-internal class BoltView(context: Context, private val route: List<PointF>) : View(context) {
-	private val started = System.nanoTime()
-	private val seed = Random.nextInt()
-	private val density = resources.displayMetrics.density
-	/** Screen pixels per bolt pixel: the slash is drawn small and scaled up unsmoothed, so it reads as pixel art. */
-	private val pix = density * 2.2f
+/**
+ * Draws the slash for one animation frame onto any canvas: the live full-screen [BoltView], and the
+ * picker preview / Spin frames of Capri's own cell. [pix] is how many canvas pixels one bolt pixel covers
+ * (the slash is drawn small and scaled up unsmoothed, so it reads as pixel art); [radius] is half its
+ * widest thickness; [slide] scales how far glitch bands jump sideways.
+ */
+internal class BoltPainter(private val route: List<PointF>, private val pix: Float, private val radius: Float, private val slide: Float = 1f) {
 	private val red = Paint().apply { color = 0xFFFF003D.toInt(); style = Paint.Style.FILL }
 	private val green = Paint().apply { color = 0xFF00F452.toInt(); style = Paint.Style.FILL }
 	private val spark = Paint().apply { style = Paint.Style.FILL }
@@ -35,18 +36,16 @@ internal class BoltView(context: Context, private val route: List<PointF>) : Vie
 	private val blit = Paint().apply { isFilterBitmap = false }
 	private val cum = FloatArray(route.size).also { for (i in 1 until route.size) it[i] = it[i - 1] + hypot(route[i].x - route[i - 1].x, route[i].y - route[i - 1].y) }
 	private val total = cum.last().coerceAtLeast(1f)
-	private val radius = density * 7f
 	private var bmp: Bitmap? = null
 	private var bmpCanvas: Canvas? = null
 
-	override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-		bmp?.recycle()
-		bmp = Bitmap.createBitmap(max(1, (w / pix).toInt() + 1), max(1, (h / pix).toInt() + 1), Bitmap.Config.ARGB_8888).also { bmpCanvas = Canvas(it) }
-	}
-
-	override fun onDraw(canvas: Canvas) {
-		val f = ((System.nanoTime() - started) / 1e9f * FPS).toInt()
-		if (f >= FRAMES) { (parent as? ViewGroup)?.post { (parent as? ViewGroup)?.removeView(this) }; return }
+	/** Frame [f] (0-16) of the 17-frame timeline onto [canvas], a [w] x [h] area; [seed] varies the sparks and glitch. */
+	fun draw(canvas: Canvas, w: Int, h: Int, f: Int, seed: Int) {
+		val bw = max(1, (w / pix).toInt() + 1); val bh = max(1, (h / pix).toInt() + 1)
+		if (bmp?.width != bw || bmp?.height != bh) {
+			bmp?.recycle()
+			bmp = Bitmap.createBitmap(bw, bh, Bitmap.Config.ARGB_8888).also { bmpCanvas = Canvas(it) }
+		}
 		val bm = bmp ?: return
 		val bc = bmpCanvas ?: return
 		val rnd = Random(seed + f * 7919)
@@ -54,17 +53,16 @@ internal class BoltView(context: Context, private val route: List<PointF>) : Vie
 			f < 3 -> 0f to 0f
 			f == 3 -> 0f to 0.05f
 			f <= 12 -> 0f to HEAD[f - 4]
-			else -> (1f - REACH[f - 13]) to 1f
+			else -> (1f - REACH[(f - 13).coerceAtMost(3)]) to 1f
 		}
 		bm.eraseColor(0)
 		if (b > a) {
 			val path = ribbon(a, b)
 			bc.save()
 			bc.scale(1f / pix, 1f / pix)
-			// Green offset layer under the red slash, like the old bolt.
+			// Green offset layer under the red slash.
 			bc.translate(0f, radius * 0.45f); bc.drawPath(path, green); bc.translate(0f, -radius * 0.45f)
 			bc.drawPath(path, red)
-			// Thin forks off the bolt and a scatter of sparks.
 			repeat(3) {
 				val p = at(a + (b - a) * rnd.nextFloat())
 				val ang = rnd.nextFloat() * 6.2832f; val len = radius * (1.5f + rnd.nextFloat() * 2.5f)
@@ -82,12 +80,11 @@ internal class BoltView(context: Context, private val route: List<PointF>) : Vie
 		val band = 4
 		var y = 0
 		while (y < bm.height) {
-			val bh = min(band, bm.height - y)
-			val dx = if (rnd.nextFloat() < 0.1f) (rnd.nextInt(-6, 7)) * pix else 0f
-			canvas.drawBitmap(bm, Rect(0, y, bm.width, y + bh), RectF(dx, y * pix, dx + bm.width * pix, (y + bh) * pix), blit)
-			y += bh
+			val bandH = min(band, bm.height - y)
+			val dx = if (rnd.nextFloat() < 0.1f) rnd.nextInt(-6, 7) * pix * slide else 0f
+			canvas.drawBitmap(bm, Rect(0, y, bm.width, y + bandH), RectF(dx, y * pix, dx + bm.width * pix, (y + bandH) * pix), blit)
+			y += bandH
 		}
-		postInvalidateOnAnimation()
 	}
 
 	private fun at(frac: Float): PointF {
@@ -150,5 +147,24 @@ internal class BoltView(context: Context, private val route: List<PointF>) : Vie
 			pts.add(to)
 			return pts
 		}
+	}
+}
+
+/** The live slash: full-screen, touch-transparent, removes itself after its 17 frames at 24 fps. */
+internal class BoltView(context: Context, route: List<PointF>) : View(context) {
+	private val started = System.nanoTime()
+	private val seed = Random.nextInt()
+	private val density = resources.displayMetrics.density
+	private val painter = BoltPainter(route, density * 2.2f, density * 7f)
+
+	override fun onDraw(canvas: Canvas) {
+		val f = ((System.nanoTime() - started) / 1e9f * 24f).toInt()
+		if (f >= 17) { (parent as? ViewGroup)?.post { (parent as? ViewGroup)?.removeView(this) }; return }
+		painter.draw(canvas, width, height, f, seed)
+		postInvalidateOnAnimation()
+	}
+
+	companion object {
+		fun route(from: PointF, to: PointF, w: Float, h: Float, density: Float) = BoltPainter.route(from, to, w, h, density)
 	}
 }

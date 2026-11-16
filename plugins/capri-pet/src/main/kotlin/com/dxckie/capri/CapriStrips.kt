@@ -16,5 +16,4 @@ internal object CapriStrips {
     val lick1 get() = arrayOf(CapriStrip_Lick1_P1.DATA + CapriStrip_Lick1_P2.DATA + CapriStrip_Lick1_P3.DATA)
     val lick2 get() = arrayOf(CapriStrip_Lick2_P1.DATA + CapriStrip_Lick2_P2.DATA + CapriStrip_Lick2_P3.DATA)
     val outro get() = arrayOf(CapriStrip_Outro_P1.DATA + CapriStrip_Outro_P2.DATA + CapriStrip_Outro_P3.DATA + CapriStrip_Outro_P4.DATA + CapriStrip_Outro_P5.DATA + CapriStrip_Outro_P6.DATA + CapriStrip_Outro_P7.DATA)
-    val walkfx get() = arrayOf(CapriStrip_Walkfx_P1.DATA + CapriStrip_Walkfx_P2.DATA + CapriStrip_Walkfx_P3.DATA + CapriStrip_Walkfx_P4.DATA + CapriStrip_Walkfx_P5.DATA + CapriStrip_Walkfx_P6.DATA)
 }
