@@ -22,7 +22,7 @@ import kotlin.random.Random
  * Main thread only.
  */
 internal object StarStrike {
-	private const val SECONDS = 4.4f
+	private const val SECONDS = 5.4f
 	private const val BOLT_AT = 2.0f
 	private const val RED = 0xFFFF003D.toInt()
 	private const val PURPLE = 0xFF7A3DFF.toInt()
@@ -41,7 +41,7 @@ internal object StarStrike {
 	private var toY = 0f
 	private var stars = FloatArray(0)
 	private var rays = emptyList<FloatArray>()
-	private var zig = emptyList<Pair<Float, Float>>()
+	private var sparks = FloatArray(0)
 
 	private fun now() = SystemClock.uptimeMillis() / 1000f
 
@@ -71,16 +71,8 @@ internal object StarStrike {
 			floatArrayOf(Random.nextFloat() * 6.2832f, dp(30f + Random.nextFloat() * 70f), 0.02f + Random.nextFloat() * 0.05f,
 				when (Random.nextInt(4)) { 0 -> RED.toFloat(); 1 -> PURPLE.toFloat(); else -> 0xFFFFFFFF.toInt().toFloat() })
 		}
-		// A tight zigzag from her to the star.
-		val n = 16
-		val dx = toX - x; val dy = toY - y
-		val len = hypot(dx, dy).coerceAtLeast(1f)
-		val nx = -dy / len; val ny = dx / len
-		zig = List(n + 1) { i ->
-			val k = i / n.toFloat()
-			val off = if (i == 0 || i == n) 0f else (if (i % 2 == 0) 1f else -1f) * dp(9f + Random.nextFloat() * 6f)
-			(x + dx * k + nx * off) to (y + dy * k + ny * off)
-		}
+		// Spark shower after the strike: angle, speed.
+		sparks = FloatArray(28 * 2).also { v -> for (i in 0 until 28) { v[i * 2] = Random.nextFloat() * 6.2832f; v[i * 2 + 1] = dp(40f + Random.nextFloat() * 140f) } }
 		startedAt = now()
 		layer = Layer().also { root.overlay.add(it) }
 		running = true
@@ -101,6 +93,20 @@ internal object StarStrike {
 			if (now() - startedAt > SECONDS) { clear(); return }
 			layer?.invalidateSelf()
 			Choreographer.getInstance().postFrameCallback(this)
+		}
+	}
+
+	/** The bolt's zigzag for animation frame [tick]: new corners every frame, so it crackles. */
+	private fun zigAt(tick: Int): List<Pair<Float, Float>> {
+		val rnd = Random(tick * 977 + 13)
+		val n = 16
+		val dx = toX - fromX; val dy = toY - fromY
+		val len = hypot(dx, dy).coerceAtLeast(1f)
+		val nx = -dy / len; val ny = dx / len
+		return List(n + 1) { i ->
+			val k = i / n.toFloat()
+			val off = if (i == 0 || i == n) 0f else (if (i % 2 == 0) 1f else -1f) * dp(8f + rnd.nextFloat() * 9f)
+			(fromX + dx * k + nx * off) to (fromY + dy * k + ny * off)
 		}
 	}
 
@@ -129,7 +135,7 @@ internal object StarStrike {
 				canvas.drawCircle(stars[i * 3], stars[i * 3 + 1], stars[i * 3 + 2], fill)
 			}
 			line.color = PURPLE; line.strokeWidth = dp(0.8f); line.alpha = a(dim * 0.5f)
-			for (i in 0 until 9) canvas.drawLine(stars[i * 3], stars[i * 3 + 1], stars[(i + 1) * 3], stars[(i + 1) * 3 + 1], line)
+			for (i in 0 until (dim * 9f).toInt()) canvas.drawLine(stars[i * 3], stars[i * 3 + 1], stars[(i + 1) * 3], stars[(i + 1) * 3 + 1], line)
 			val grow = ((t - 0.3f) / 0.4f).coerceIn(0f, 1f)
 			val twinkle = 1f + 0.12f * sin(t * 9f)
 			val struck = t >= BOLT_AT
@@ -145,22 +151,56 @@ internal object StarStrike {
 				canvas.drawCircle(fromX + (toX - fromX) * k, fromY + (toY - fromY) * k, dp(0.8f + 2.2f * k), fill)
 			}
 
+			// Glints run up the trail, and the dots twinkle.
+			if (trail >= 1f && !struck) {
+				for (g in 0 until 3) {
+					val k = ((t * 0.9f + g / 3f) % 1f)
+					fill.color = 0xFFFFFFFF.toInt(); fill.alpha = a(1f)
+					canvas.drawPath(starPath(fromX + (toX - fromX) * k, fromY + (toY - fromY) * k, dp(5f + 4f * k)), fill)
+				}
+			}
+			// Charge: rings close in on her just before the bolt.
+			if (t in (BOLT_AT - 0.6f)..BOLT_AT) {
+				val c = (t - (BOLT_AT - 0.6f)) / 0.6f
+				for (g in 0 until 3) {
+					val k = ((c + g / 3f) % 1f)
+					line.color = if (g == 1) PURPLE else RED; line.strokeWidth = dp(1.4f); line.alpha = a(k)
+					canvas.drawCircle(fromX, fromY, dp(60f) * (1f - k) + dp(8f), line)
+				}
+			}
+
 			// 3. The strike: a ring round her, the zigzag bolt, then the burst at the star.
 			if (struck) {
 				val fl = (1f - (t - BOLT_AT) / 0.55f).coerceIn(0f, 1f)
-				if (fl > 0f) {
+				if (fl > 0f && Random((t * 24f).toInt() * 31).nextFloat() < 0.85f) {
 					line.color = RED; line.alpha = a(fl); line.strokeWidth = dp(1.5f)
 					canvas.drawCircle(fromX, fromY, dp(34f) + dp(8f) * (1f - fl), line)
 					val path = Path()
-					zig.forEachIndexed { i, (px, py) -> if (i == 0) path.moveTo(px, py) else path.lineTo(px, py) }
+					val tick = (t * 24f).toInt()
+					zigAt(tick).forEachIndexed { i, (px, py) -> if (i == 0) path.moveTo(px, py) else path.lineTo(px, py) }
 					line.color = PURPLE; line.strokeWidth = dp(7f); line.alpha = a(fl); canvas.drawPath(path, line)
 					line.color = RED; line.strokeWidth = dp(5f); canvas.drawPath(path, line)
 					line.color = 0xFFFFFFFF.toInt(); line.strokeWidth = dp(2.2f); canvas.drawPath(path, line)
 				}
+				// White flash, then three shockwave rings and falling sparks.
+				val flash = (1f - (t - BOLT_AT) / 0.15f).coerceIn(0f, 1f)
+				if (flash > 0f) { fill.color = 0xFFFFFFFF.toInt(); fill.alpha = a(flash * 0.3f); canvas.drawRect(0f, 0f, w, h, fill) }
+				for (g in 0 until 3) {
+					val k = ((t - BOLT_AT - g * 0.14f) / 0.9f)
+					if (k in 0f..1f) { line.color = if (g == 1) PURPLE else RED; line.strokeWidth = dp(2.2f) * (1f - k); line.alpha = a(1f - k); canvas.drawCircle(toX, toY, dp(24f) + dp(170f) * k, line) }
+				}
+				val sp = t - BOLT_AT
+				for (i in 0 until sparks.size / 2) {
+					val ang = sparks[i * 2]; val v = sparks[i * 2 + 1]
+					val px = toX + cos(ang) * v * sp * 1.4f; val py = toY + sin(ang) * v * sp * 1.4f + dp(60f) * sp * sp
+					fill.color = if (i % 3 == 0) RED else if (i % 3 == 1) 0xFFFFFFFF.toInt() else LAVENDER
+					fill.alpha = a(1f - sp / 1.6f)
+					canvas.drawRect(px, py, px + dp(2.5f), py + dp(2.5f), fill)
+				}
 				val rayFade = (1f - burst).coerceIn(0f, 1f) * (if (burst < 0.1f) 1f else 0.9f)
 				for (r in rays) {
 					val len = r[1] * (0.4f + 0.6f * burst); val r0 = dp(22f) + dp(14f) * burst
-					val ang = r[0]; val half = r[2]
+					val ang = r[0] + sin(t * 40f + r[1]) * 0.012f; val half = r[2] * (0.85f + 0.3f * sin(t * 30f + r[0]))
 					val p = Path()
 					p.moveTo(toX + cos(ang - half) * r0, toY + sin(ang - half) * r0)
 					p.lineTo(toX + cos(ang) * (r0 + len), toY + sin(ang) * (r0 + len))
