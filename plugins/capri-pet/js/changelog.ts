@@ -3,6 +3,15 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.4.0',
+		date: '2026-11-16',
+		title: 'Star strike',
+		changes: [
+			'The spell is replaced by a star strike: a faint constellation, a trail of sparkles to a bright star, then a lightning bolt that bursts it into rays and a crosshair.',
+			'It no longer needs VFX, and the spell list page is gone from Fun.',
+		],
+	},
+	{
 		version: '2.3.4',
 		date: '2026-11-16',
 		title: 'Old edge back',

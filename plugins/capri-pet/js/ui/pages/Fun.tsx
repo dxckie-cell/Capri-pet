@@ -3,30 +3,20 @@ import { BOSS_PETS } from "../../bossPets"
 import { FieldRow } from "../fieldGroup"
 import { rowIcon } from "../icon"
 import { RateSlider } from "../rateSlider"
-import { SPELLS_ROUTE } from "../routes"
 import { useBottomPadding } from "../safeArea"
 import { call, update, useSettings } from "../state"
-import { ReactNavigationNative } from "@valenced/externals/react-navigation"
 import * as components from "@valenced/components"
 import { Design } from "@valenced/discord/design"
 import * as ReactNative from "react-native"
 
-/** The extras: bubbles or rainbow puffs, magic, treats, eating buttons, and buttons to try them. */
+/** The extras: bubbles or rainbow puffs, star strike, treats, eating buttons, and buttons to try them. */
 export default function Fun() {
 	const { Page } = components
 	const { ScrollView } = ReactNative
 	const { Stack, TableRowGroup, TableRow, TableSwitchRow, TableRadioGroup, TableRadioRow, Slider, Text } = Design as any
 
-	const { useNavigation } = ReactNavigationNative
-	const navigation = useNavigation() as { navigate: (route: string) => void }
 	const s = useSettings()
 	const bottom = useBottomPadding()
-	const spells =
-		s.spellMode === "allow"
-			? `Only ${s.spellList.length} chosen`
-			: s.spellList.length
-				? `Everything except ${s.spellList.length}`
-				: "Everything VFX has"
 	const pet = lookOf(s.look)
 	const nyan = false
 	const boss = BOSS_PETS.find(b => b.id === s.look)
@@ -80,23 +70,14 @@ export default function Fun() {
 					</TableRadioGroup>
 
 					<RateSlider
-						title="Magic tricks"
-						description="It casts a spell: VFX shows a random screen filter or effect for a few seconds. Needs VFX."
+						title="Star strike"
+						description="Now and then she calls down a star: a faint constellation, a trail of sparkles, then a lightning strike that bursts it."
 						on={s.magic}
 						rate={s.magicRate}
 						minSeconds={60}
 						maxSeconds={180}
 						onChange={(magic, magicRate) => update({ magic, magicRate })}
 					/>
-					<TableRowGroup hasIcons>
-						<TableRow
-							label="What spells can show"
-							subLabel={spells}
-							icon={rowIcon("FiltersHorizontalIcon", "SettingsIcon", "ic_settings")}
-							arrow
-							onPress={() => navigation.navigate(SPELLS_ROUTE)}
-						/>
-					</TableRowGroup>
 
 					{boss ? (
 						<RateSlider
@@ -179,8 +160,8 @@ export default function Fun() {
 							/>
 						) : null}
 						<TableRow
-							label="Cast a spell now"
-							subLabel={`Needs VFX.${needsShow}`}
+							label="Call the star now"
+							subLabel={`See it without waiting.${needsShow}`}
 							icon={rowIcon("PlayIcon")}
 							disabled={!s.show}
 							onPress={() => call("castMagic")}

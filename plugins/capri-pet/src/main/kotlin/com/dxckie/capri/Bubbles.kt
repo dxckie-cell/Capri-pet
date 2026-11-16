@@ -182,6 +182,7 @@ internal object Bubbles {
 
 	fun clear() {
 		Possess.clear()
+		StarStrike.clear()
 		running = false
 		Choreographer.getInstance().removeFrameCallback(frame)
 		bubbles.clear()

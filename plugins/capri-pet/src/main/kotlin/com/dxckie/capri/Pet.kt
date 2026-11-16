@@ -1772,7 +1772,7 @@ internal object Pet {
 		repeat(4) { spawn(Particle.SPARK) }
 		Sounds.twinkle()
 		say("magic")
-		onMagic()
+		decor?.let { StarStrike.start(it, x + w / 2f, y + h * 0.45f) }
 		schedule(0)
 	}
 
