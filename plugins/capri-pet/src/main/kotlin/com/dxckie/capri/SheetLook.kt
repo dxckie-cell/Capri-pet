@@ -116,6 +116,9 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 		frames(if (revisedSeasonal) seasonalPick(Anim.VARIANT, still).strip else pick(Anim.VARIANT, 0f, still).strip).first
 
 	/** Looks with their own "outro" strip (Capri's teleport) leave and return in place with it. */
+	/** Set while the picker renders preview frames, so a teleporting look shows its bolt in them. */
+	@Volatile var preview = false
+
 	val teleports: Boolean get() = !revisedSeasonal && pet.strips.containsKey("outro")
 
 	override fun duration(anim: Anim): Float {
@@ -172,7 +175,8 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 			revisedSeasonal -> seasonalPick(anim, still)
 			teleports && anim == Anim.OUTRO -> Pick("outro", 8f, loop = false)
 			teleports && anim == Anim.INTRO -> Pick("outro", 8f, loop = false, reverse = true)
-			teleports && anim == Anim.WALK -> Pick("walk", 24f, loop = false)
+			// The live pet draws the bolt itself (BoltView); the picker's preview has no room, so its strip carries a bolt.
+			teleports && anim == Anim.WALK -> Pick(if (preview) "walkfx" else "walk", 24f, loop = false)
 			anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 4f)
 			anim == Anim.JUMP && pet.strips.containsKey("jump") -> Pick("jump", 10f, loop = false)
 			anim == Anim.SHAKE && pet.strips.containsKey("hurt") -> Pick("hurt", 8f, loop = false, over = Over.ALERT)

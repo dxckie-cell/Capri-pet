@@ -412,7 +412,11 @@ val sparklePlugin = plugin {
 			val count = if (anim == Anim.IDLE) (look as? SheetLook)?.idleFrameCount ?: 12
 				else kotlin.math.ceil(look.duration(anim).coerceIn(1f, 6f) * fps).toInt()
 			// Repeated frames carry timing; removing duplicates speeds up held poses.
-			val bitmaps = (0 until count).mapNotNull { look.frame(anim, it / fps, if (anim == Anim.REACTION || anim == Anim.VARIANT) still else -1) }
+			val sheetLook = look as? SheetLook
+			sheetLook?.preview = true
+			val bitmaps = try {
+				(0 until count).mapNotNull { look.frame(anim, it / fps, if (anim == Anim.REACTION || anim == Anim.VARIANT) still else -1) }
+			} finally { sheetLook?.preview = false }
 			if (bitmaps.isEmpty()) return@registerNativeMethod false
 			// One image for the whole animation, the frames in a grid (at most four across: a single long
 			// row can be too wide for some phones to draw). The page slides it from frame to frame instead
