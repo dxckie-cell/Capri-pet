@@ -148,8 +148,9 @@ internal object Possess {
 		private fun drawMouth(canvas: Canvas, w: Float, h: Float, t: Float, fade: Float) {
 			val k = min(((t - 0.8f) / 0.2f).coerceIn(0f, 1f), ((SECONDS - 0.7f - t) / 0.2f).coerceIn(0f, 1f))
 			if (k <= 0f) return
-			val amp = h * 0.018f * (0.8f + 0.2f * sin(t * 30f)) * k
-			val x0 = w * 0.34f; val x1 = w * 0.66f; val y = h * 0.66f
+			val er = w * 0.065f
+			val amp = er * 0.42f * (0.85f + 0.15f * sin(t * 30f)) * k
+			val x0 = w * 0.34f; val x1 = w * 0.66f; val y = h * 0.42f + er * 2.1f
 			val path = Path()
 			val n = 6
 			for (i in 0..n) {
@@ -157,9 +158,9 @@ internal object Possess {
 				if (i == 0) path.moveTo(px, py) else path.lineTo(px, py)
 			}
 			mouth.style = Paint.Style.STROKE; mouth.strokeJoin = Paint.Join.MITER
-			mouth.color = 0xFF14101F.toInt(); mouth.strokeWidth = dp(7f); mouth.alpha = (fade * 255).toInt()
+			mouth.color = 0xFF14101F.toInt(); mouth.strokeWidth = w * 0.022f; mouth.alpha = (fade * 255).toInt()
 			canvas.drawPath(path, mouth)
-			mouth.color = 0xFFFFFFFF.toInt(); mouth.strokeWidth = dp(3.5f); mouth.alpha = (fade * 255).toInt()
+			mouth.color = 0xFFFFFFFF.toInt(); mouth.strokeWidth = w * 0.011f; mouth.alpha = (fade * 255).toInt()
 			canvas.drawPath(path, mouth)
 		}
 
