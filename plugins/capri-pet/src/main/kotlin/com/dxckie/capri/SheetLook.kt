@@ -197,7 +197,6 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 		val boltF = when {
 			!teleports -> -1
 			anim == Anim.WALK && preview -> index
-			anim == Anim.SPIN -> 4 + index % 9
 			else -> -1
 		}
 		if (boltF >= 0) {
