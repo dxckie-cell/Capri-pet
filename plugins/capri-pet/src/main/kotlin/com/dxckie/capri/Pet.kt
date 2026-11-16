@@ -2,6 +2,7 @@ package com.dxckie.capri
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.PointF
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
@@ -887,9 +888,18 @@ internal object Pet {
 			val teleport = (Looks.current as? SheetLook)?.teleports == true
 			val reached: Boolean
 			if (teleport) {
-				if (!tpActive) { tpActive = true; tpStart = t; tpX0 = x; tpY0 = y }
+				if (!tpActive) {
+					tpActive = true; tpStart = t; tpX0 = x; tpY0 = y
+					decor?.let { d ->
+						val from = PointF(x + w / 2f, y + h * 0.55f)
+						val to = PointF(walkTarget + w / 2f, ty + h * 0.55f)
+						val bolt = BoltView(d.context, BoltView.route(from, to, d.width.toFloat(), d.height.toFloat(), d.resources.displayMetrics.density))
+						d.addView(bolt, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+					}
+				}
 				val p = ((t - tpStart) / TELEPORT_SECONDS).coerceIn(0f, 1f)
-				val q = ((p - 0.235f) / 0.53f).coerceIn(0f, 1f)
+				// She is hidden while the bolt runs (strip frames 4-12) and re-forms at the target from frame 13.
+				val q = if (p >= 13f / 17f) 1f else 0f
 				x = tpX0 + (walkTarget - tpX0) * q
 				y = tpY0 + (ty - tpY0) * q
 				reached = p >= 1f
