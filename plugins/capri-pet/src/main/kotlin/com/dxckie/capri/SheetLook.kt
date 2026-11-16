@@ -35,10 +35,10 @@ internal interface SheetPet {
 	val idleFps: Float get() = 8f
 }
 
-internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind) : Look {
+internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOverride: Float? = null) : Look {
 	override val cellW = pet.w + PAD_SIDE * 2
 	override val cellH = pet.h + PAD_TOP + PAD_BOTTOM
-	override val refW = when (kind) {
+	override val refW = refOverride ?: when (kind) {
 		Looks.Kind.DOG -> DOG_REF_W
 		// Each seasonal pet's own width: most are built exactly 48 wide, but a pet scaled by a whole
 		// number to keep its pixels even (build_seasonal.INTEGER_SCALE) can come out a little wider.
@@ -352,7 +352,9 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind) : Look
 		val capri: SheetLook by lazy {
 			SheetLook(
 				PetData.pets.first { it.id == "capri" },
-				Looks.Kind.CAT
+				Looks.Kind.CAT,
+				// A person, not a small animal: measure her like the unicorn so the size slider fits.
+				refOverride = 90f,
 			)
 		}
 	}
