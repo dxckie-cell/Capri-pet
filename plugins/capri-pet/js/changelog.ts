@@ -3,6 +3,14 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.3.4',
+		date: '2026-11-16',
+		title: 'Old edge back',
+		changes: [
+			'Possession brings back the thin red, purple and pink lightning edge. The eyes, mouth and glitch bars keep the pixel bolt look.',
+		],
+	},
+	{
 		version: '2.3.3',
 		date: '2026-11-16',
 		title: 'Possession in bolt style',

@@ -32,8 +32,9 @@ internal object Possess {
 
 	private class Eye(val x: Float, val y: Float, val r: Float, val open: Float, val close: Float)
 
-	private val red = Paint().apply { color = 0xFFFF003D.toInt(); style = Paint.Style.STROKE; strokeWidth = dp(5f); strokeJoin = Paint.Join.MITER; isAntiAlias = false }
-	private val green = Paint().apply { color = 0xFF00F452.toInt(); style = Paint.Style.STROKE; strokeWidth = dp(5f); strokeJoin = Paint.Join.MITER; isAntiAlias = false }
+	private val red = Paint().apply { color = 0xFFFF003D.toInt(); style = Paint.Style.STROKE; strokeWidth = dp(2.2f); isAntiAlias = false }
+	private val purple = Paint().apply { color = 0xFFB44CFF.toInt(); style = Paint.Style.STROKE; strokeWidth = dp(1.6f); isAntiAlias = false }
+	private val pink = Paint().apply { color = 0xFFFF96BE.toInt(); style = Paint.Style.STROKE; strokeWidth = dp(1.2f); isAntiAlias = false }
 	private val fill = Paint().apply { style = Paint.Style.FILL; isAntiAlias = true }
 
 	private var decor: ViewGroup? = null
@@ -116,10 +117,10 @@ internal object Possess {
 			bm.eraseColor(0)
 			bc.save(); bc.scale(1f / pix, 1f / pix)
 			if (Settings.bubbleFx) drawGlitch(bc, w, h, tick, fade)
-			drawFrame(bc, w, h, tick, fade)
 			for ((i, e) in eyes.withIndex()) drawEye(bc, e, i, t, fade)
 			drawMouth(bc, w, h, t, fade)
 			bc.restore()
+			drawFrame(canvas, w, h, tick, fade)
 			val rnd = Random(tick * 17 + 5)
 			var y = 0
 			while (y < bm.height) {
@@ -133,7 +134,7 @@ internal object Possess {
 		/** A jagged bolt running the whole way round the screen edge, redrawn 14 times a second. */
 		private fun drawFrame(canvas: Canvas, w: Float, h: Float, tick: Int, fade: Float) {
 			val rnd = Random(tick * 31 + 7)
-			val inset = dp(6f); val jag = dp(8f); val step = dp(17f)
+			val inset = dp(5f); val jag = dp(5f); val step = dp(15f)
 			val path = Path()
 			var first = true
 			fun pt(x: Float, y: Float, nx: Float, ny: Float) {
@@ -147,18 +148,10 @@ internal object Possess {
 			y = h - inset; while (y > inset) { pt(inset, y, 1f, 0f); y -= step }
 			path.close()
 			val a = (fade * 255).toInt()
-			green.alpha = a; red.alpha = a
-			canvas.save(); canvas.translate(0f, dp(3f)); canvas.drawPath(path, green); canvas.restore()
+			purple.alpha = a; pink.alpha = a; red.alpha = a
+			canvas.save(); canvas.translate(dp(2f), -dp(1f)); canvas.drawPath(path, purple); canvas.restore()
+			canvas.save(); canvas.translate(-dp(2f), dp(1f)); canvas.drawPath(path, pink); canvas.restore()
 			canvas.drawPath(path, red)
-			repeat(22) {
-				val onX = rnd.nextBoolean()
-				val sx = if (onX) rnd.nextFloat() * w else if (rnd.nextBoolean()) inset else w - inset
-				val sy = if (onX) (if (rnd.nextBoolean()) inset else h - inset) else rnd.nextFloat() * h
-				spark.color = when (rnd.nextInt(4)) { 0 -> 0xFF00F452.toInt(); 1 -> 0xFFFFFFFF.toInt(); else -> 0xFFFF96BE.toInt() }
-				spark.alpha = a
-				val ox = (rnd.nextFloat() - 0.5f) * dp(26f); val oy = (rnd.nextFloat() - 0.5f) * dp(26f)
-				canvas.drawRect(sx + ox, sy + oy, sx + ox + dp(2.5f), sy + oy + dp(2.5f), spark)
-			}
 		}
 
 		/** Thin horizontal bars of red, purple and green that jump about, like a torn picture. */
