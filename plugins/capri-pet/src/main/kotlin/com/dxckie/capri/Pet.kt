@@ -54,6 +54,8 @@ private val SLEEP_SECONDS = intArrayOf(60, 180, 600, 0)
 
 /** Walking pace, dp/s; a trot is twice this. */
 private const val WALK_SPEED = 42f
+/** A teleporting look's whole move: 17 strip frames at 24 fps. */
+private const val TELEPORT_SECONDS = 17f / 24f
 
 /**
  * How lively it is between touches, per the Activity slider (Calm, Normal, Lively, Hyper). Calm is
@@ -415,6 +417,10 @@ internal object Pet {
 
 	private var anim = Anim.IDLE
 	private var animStart = 0f
+	private var tpActive = false
+	private var tpStart = 0f
+	private var tpX0 = 0f
+	private var tpY0 = 0f
 
 	// Blowing: how many more bubbles stream out once the first leaves the wand, and how many of the
 	// drawn ones (BlowRelease) have been handed over to Bubbles so far.
@@ -867,6 +873,7 @@ internal object Pet {
 			slideV = 0f
 		}
 
+		if (state != State.WALK) tpActive = false
 		if (state == State.WALK) {
 			// Straight towards the target, sideways only with Gravity on (or with no target height).
 			val ty = if (Settings.gravity || walkTargetY.isNaN()) y else walkTargetY
@@ -875,16 +882,31 @@ internal object Pet {
 			val dist = hypot(dx, dy)
 			val step = dp(walkSpeed) * dt
 			if (abs(dx) > 0.5f) facing = if (dx > 0) 1 else -1
-			val reached = dist <= step
-			if (reached) {
-				x = walkTarget
-				y = ty
+			// Capri doesn't walk: she glitches out, streaks over as a red bolt (strip frames 4-12 of 17 at
+			// 24 fps) and reforms at the target, in TELEPORT_SECONDS whatever the distance.
+			val teleport = (Looks.current as? SheetLook)?.teleports == true
+			val reached: Boolean
+			if (teleport) {
+				if (!tpActive) { tpActive = true; tpStart = t; tpX0 = x; tpY0 = y }
+				val p = ((t - tpStart) / TELEPORT_SECONDS).coerceIn(0f, 1f)
+				val q = ((p - 0.235f) / 0.53f).coerceIn(0f, 1f)
+				x = tpX0 + (walkTarget - tpX0) * q
+				y = tpY0 + (ty - tpY0) * q
+				reached = p >= 1f
+				if (reached) { x = walkTarget; y = ty }
 			} else {
-				x += dx / dist * step
-				y += dy / dist * step
+				reached = dist <= step
+				if (reached) {
+					x = walkTarget
+					y = ty
+				} else {
+					x += dx / dist * step
+					y += dy / dist * step
+				}
 			}
-			val edge = (dx < 0 && x <= minX) || (dx > 0 && x >= maxX)
+			val edge = !teleport && ((dx < 0 && x <= minX) || (dx > 0 && x >= maxX))
 			if (reached || edge) {
+				tpActive = false
 				x = clamp(x, minX, maxX)
 				if (!Settings.gravity) y = clamp(y, minY, maxY)
 				walkTargetY = Float.NaN

@@ -172,6 +172,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind) : Look
 			revisedSeasonal -> seasonalPick(anim, still)
 			teleports && anim == Anim.OUTRO -> Pick("outro", 8f, loop = false)
 			teleports && anim == Anim.INTRO -> Pick("outro", 8f, loop = false, reverse = true)
+			teleports && anim == Anim.WALK -> Pick("walk", 24f, loop = false)
 			anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 4f)
 			anim == Anim.JUMP && pet.strips.containsKey("jump") -> Pick("jump", 10f, loop = false)
 			anim == Anim.SHAKE && pet.strips.containsKey("hurt") -> Pick("hurt", 8f, loop = false, over = Over.ALERT)
