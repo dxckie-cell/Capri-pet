@@ -745,7 +745,6 @@ internal object Pet {
 			lastInteraction = t
 			if (greet) {
 				greet = false
-				Intro.playOnce(root)
 				hop(dp(420f), quiet = true)
 				appearFx(); Sounds.appear()
 				say(if (love() < LONELY) "missed" else "hello")
