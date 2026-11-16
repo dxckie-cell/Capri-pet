@@ -1,7 +1,10 @@
 package com.dxckie.capri
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Rect
+import android.graphics.RectF
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PointF
@@ -21,21 +24,69 @@ import kotlin.random.Random
  */
 internal class BoltView(context: Context, private val route: List<PointF>) : View(context) {
 	private val started = System.nanoTime()
-	private val fill = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFF003D.toInt(); style = Paint.Style.FILL }
+	private val seed = Random.nextInt()
+	private val density = resources.displayMetrics.density
+	/** Screen pixels per bolt pixel: the slash is drawn small and scaled up unsmoothed, so it reads as pixel art. */
+	private val pix = density * 2.2f
+	private val red = Paint().apply { color = 0xFFFF003D.toInt(); style = Paint.Style.FILL }
+	private val green = Paint().apply { color = 0xFF00F452.toInt(); style = Paint.Style.FILL }
+	private val spark = Paint().apply { style = Paint.Style.FILL }
+	private val fork = Paint().apply { color = 0xFFFF003D.toInt(); style = Paint.Style.STROKE; strokeWidth = 1.7f }
+	private val blit = Paint().apply { isFilterBitmap = false }
 	private val cum = FloatArray(route.size).also { for (i in 1 until route.size) it[i] = it[i - 1] + hypot(route[i].x - route[i - 1].x, route[i].y - route[i - 1].y) }
 	private val total = cum.last().coerceAtLeast(1f)
-	private val radius = resources.displayMetrics.density * 7f
+	private val radius = density * 7f
+	private var bmp: Bitmap? = null
+	private var bmpCanvas: Canvas? = null
+
+	override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+		bmp?.recycle()
+		bmp = Bitmap.createBitmap(max(1, (w / pix).toInt() + 1), max(1, (h / pix).toInt() + 1), Bitmap.Config.ARGB_8888).also { bmpCanvas = Canvas(it) }
+	}
 
 	override fun onDraw(canvas: Canvas) {
 		val f = ((System.nanoTime() - started) / 1e9f * FPS).toInt()
 		if (f >= FRAMES) { (parent as? ViewGroup)?.post { (parent as? ViewGroup)?.removeView(this) }; return }
+		val bm = bmp ?: return
+		val bc = bmpCanvas ?: return
+		val rnd = Random(seed + f * 7919)
 		val (a, b) = when {
 			f < 3 -> 0f to 0f
 			f == 3 -> 0f to 0.05f
 			f <= 12 -> 0f to HEAD[f - 4]
 			else -> (1f - REACH[f - 13]) to 1f
 		}
-		if (b > a) canvas.drawPath(ribbon(a, b), fill)
+		bm.eraseColor(0)
+		if (b > a) {
+			val path = ribbon(a, b)
+			bc.save()
+			bc.scale(1f / pix, 1f / pix)
+			// Green offset layer under the red slash, like the old bolt.
+			bc.translate(0f, radius * 0.45f); bc.drawPath(path, green); bc.translate(0f, -radius * 0.45f)
+			bc.drawPath(path, red)
+			// Thin forks off the bolt and a scatter of sparks.
+			repeat(3) {
+				val p = at(a + (b - a) * rnd.nextFloat())
+				val ang = rnd.nextFloat() * 6.2832f; val len = radius * (1.5f + rnd.nextFloat() * 2.5f)
+				bc.drawLine(p.x, p.y, p.x + kotlin.math.cos(ang) * len, p.y + sin(ang) * len, fork)
+			}
+			repeat(16) {
+				val p = at(a + (b - a) * rnd.nextFloat())
+				spark.color = when (rnd.nextInt(4)) { 0 -> 0xFF00F452.toInt(); 1 -> 0xFFFFFFFF.toInt(); else -> 0xFFFF96BE.toInt() }
+				val x = p.x + (rnd.nextFloat() - 0.5f) * radius * 6f; val y = p.y + (rnd.nextFloat() - 0.5f) * radius * 6f
+				bc.drawRect(x, y, x + pix * 1.1f, y + pix * 1.1f, spark)
+			}
+			bc.restore()
+		}
+		// Glitch: blit in horizontal bands, a few of them slid sideways.
+		val band = 4
+		var y = 0
+		while (y < bm.height) {
+			val bh = min(band, bm.height - y)
+			val dx = if (rnd.nextFloat() < 0.1f) (rnd.nextInt(-6, 7)) * pix else 0f
+			canvas.drawBitmap(bm, Rect(0, y, bm.width, y + bh), RectF(dx, y * pix, dx + bm.width * pix, (y + bh) * pix), blit)
+			y += bh
+		}
 		postInvalidateOnAnimation()
 	}
 

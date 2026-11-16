@@ -3,6 +3,14 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.2.1',
+		date: '2026-11-16',
+		title: 'Pixel lightning',
+		changes: [
+			'The lightning slash is pixelated with a green offset edge, sparks, forks and glitching bands again.',
+		],
+	},
+	{
 		version: '2.2.0',
 		date: '2026-11-16',
 		title: 'Lightning slash',
