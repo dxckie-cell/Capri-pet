@@ -1,6 +1,9 @@
 package com.dxckie.capri
 
+import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Rect
+import android.graphics.RectF
 import android.graphics.ColorFilter
 import android.graphics.Paint
 import android.graphics.Path
@@ -28,8 +31,8 @@ internal object StarStrike {
 	private const val PURPLE = 0xFF7A3DFF.toInt()
 	private const val LAVENDER = 0xFFC9B8FF.toInt()
 
-	private val fill = Paint().apply { style = Paint.Style.FILL; isAntiAlias = true }
-	private val line = Paint().apply { style = Paint.Style.STROKE; isAntiAlias = true; strokeJoin = Paint.Join.MITER; strokeCap = Paint.Cap.SQUARE }
+	private val fill = Paint().apply { style = Paint.Style.FILL; isAntiAlias = false }
+	private val line = Paint().apply { style = Paint.Style.STROKE; isAntiAlias = false; strokeJoin = Paint.Join.MITER; strokeCap = Paint.Cap.SQUARE }
 
 	private var decor: ViewGroup? = null
 	private var layer: Layer? = null
@@ -120,11 +123,38 @@ internal object StarStrike {
 	}
 
 	private class Layer : Drawable() {
+		private var bmp: Bitmap? = null
+		private var bmpCanvas: Canvas? = null
+		private val blit = Paint().apply { isFilterBitmap = false }
+
+		/** Drawn small, scaled up unsmoothed and blitted in bands, some slid sideways: pixelated and glitchy like her bolt. */
 		override fun draw(canvas: Canvas) {
 			val root = decor ?: return
 			if (bounds.width() != root.width || bounds.height() != root.height) setBounds(0, 0, root.width, root.height)
 			val w = root.width.toFloat(); val h = root.height.toFloat()
 			val t = now() - startedAt
+			val pix = dp(2.2f)
+			val bw = maxOf(1, (w / pix).toInt() + 1); val bh = maxOf(1, (h / pix).toInt() + 1)
+			if (bmp?.width != bw || bmp?.height != bh) { bmp?.recycle(); bmp = Bitmap.createBitmap(bw, bh, Bitmap.Config.ARGB_8888); bmpCanvas = Canvas(bmp!!) }
+			val bm = bmp ?: return; val bc = bmpCanvas ?: return
+			bm.eraseColor(0)
+			bc.save(); bc.scale(1f / pix, 1f / pix)
+			scene(bc, w, h, t)
+			bc.restore()
+			val tick = (t * 24f).toInt()
+			val rnd = Random(tick * 53 + 9)
+			// Torn hardest right at the strike.
+			val chance = if (t in BOLT_AT..(BOLT_AT + 0.5f)) 0.4f else 0.1f
+			var y = 0
+			while (y < bm.height) {
+				val bandH = min(4, bm.height - y)
+				val dx = if (rnd.nextFloat() < chance) rnd.nextInt(-8, 9) * pix * 0.7f else 0f
+				canvas.drawBitmap(bm, Rect(0, y, bm.width, y + bandH), RectF(dx, y * pix, dx + bm.width * pix, (y + bandH) * pix), blit)
+				y += bandH
+			}
+		}
+
+		private fun scene(canvas: Canvas, w: Float, h: Float, t: Float) {
 			val fade = min(1f, (SECONDS - t) / 0.7f).coerceIn(0f, 1f)
 			fun a(v: Float) = (v.coerceIn(0f, 1f) * fade * 255).toInt()
 
