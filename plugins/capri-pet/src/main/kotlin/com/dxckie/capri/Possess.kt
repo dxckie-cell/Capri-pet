@@ -26,7 +26,7 @@ import kotlin.random.Random
  */
 internal object Possess {
 	private const val SECONDS = 3.6f
-	private const val EYES = 9
+	private const val EYES = 8
 
 	private class Eye(val x: Float, val y: Float, val r: Float, val open: Float, val close: Float)
 
@@ -54,11 +54,15 @@ internal object Possess {
 		capriX = x; capriY = y
 		startedAt = now()
 		val w = root.width.toFloat(); val h = root.height.toFloat()
-		eyes = List(EYES) {
-			val open = 0.4f + Random.nextFloat() * 1.1f
+		// Her face in the middle (two big eyes, the mouth below), small eyes scattered round it.
+		val close = SECONDS - 0.7f
+		eyes = listOf(
+			Eye(w * 0.39f, h * 0.42f, w * 0.065f, 0.45f, close),
+			Eye(w * 0.60f, h * 0.42f, w * 0.065f, 0.55f, close),
+		) + List(EYES) {
 			Eye(
-				w * (0.1f + Random.nextFloat() * 0.8f), h * (0.12f + Random.nextFloat() * 0.76f),
-				dp(14f + Random.nextFloat() * 30f), open, SECONDS - 0.9f + Random.nextFloat() * 0.4f,
+				w * (0.08f + Random.nextFloat() * 0.84f), h * (0.1f + Random.nextFloat() * 0.8f),
+				w * (0.018f + Random.nextFloat() * 0.03f), 0.5f + Random.nextFloat() * 1.0f, close - 0.3f + Random.nextFloat() * 0.5f,
 			)
 		}
 		layer = Layer().also { root.overlay.add(it) }
@@ -87,6 +91,7 @@ internal object Possess {
 
 	private class Layer : Drawable() {
 		private val clip = Path()
+		private val mouth = Paint().apply { isAntiAlias = false }
 		private val bar = Paint().apply { style = Paint.Style.FILL }
 
 		override fun draw(canvas: Canvas) {
@@ -100,6 +105,7 @@ internal object Possess {
 			if (Settings.bubbleFx) drawGlitch(canvas, w, h, tick, fade)
 			drawFrame(canvas, w, h, tick, fade)
 			for ((i, e) in eyes.withIndex()) drawEye(canvas, e, i, t, fade)
+			drawMouth(canvas, w, h, t, fade)
 		}
 
 		/** A jagged bolt running the whole way round the screen edge, redrawn 14 times a second. */
@@ -136,6 +142,25 @@ internal object Possess {
 				bar.alpha = (fade * (90 + rnd.nextInt(120))).toInt()
 				canvas.drawRect(x0, y, x0 + len, y + dp(1.5f + rnd.nextFloat() * 2f), bar)
 			}
+		}
+
+		/** Her laugh: a white zigzag with a dark edge under the eyes, shaking as she laughs. */
+		private fun drawMouth(canvas: Canvas, w: Float, h: Float, t: Float, fade: Float) {
+			val k = min(((t - 0.8f) / 0.2f).coerceIn(0f, 1f), ((SECONDS - 0.7f - t) / 0.2f).coerceIn(0f, 1f))
+			if (k <= 0f) return
+			val amp = h * 0.018f * (0.8f + 0.2f * sin(t * 30f)) * k
+			val x0 = w * 0.34f; val x1 = w * 0.66f; val y = h * 0.66f
+			val path = Path()
+			val n = 6
+			for (i in 0..n) {
+				val px = x0 + (x1 - x0) * i / n; val py = y + if (i % 2 == 0) amp else -amp
+				if (i == 0) path.moveTo(px, py) else path.lineTo(px, py)
+			}
+			mouth.style = Paint.Style.STROKE; mouth.strokeJoin = Paint.Join.MITER
+			mouth.color = 0xFF14101F.toInt(); mouth.strokeWidth = dp(7f); mouth.alpha = (fade * 255).toInt()
+			canvas.drawPath(path, mouth)
+			mouth.color = 0xFFFFFFFF.toInt(); mouth.strokeWidth = dp(3.5f); mouth.alpha = (fade * 255).toInt()
+			canvas.drawPath(path, mouth)
 		}
 
 		/** One eye: green ring, blue iris and a white pupil turned toward Capri; opens, blinks, shuts. */
