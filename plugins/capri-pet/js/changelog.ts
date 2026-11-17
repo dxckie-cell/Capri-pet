@@ -3,6 +3,14 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.3',
+		date: '2026-11-17',
+		title: 'Dizzy: back to 2.10.0',
+		changes: [
+			'Dizzy pose is back to the 2.10.0 version.',
+		],
+	},
+	{
 		version: '2.10.2',
 		date: '2026-11-17',
 		title: 'Dizzy: traced from the footage',
