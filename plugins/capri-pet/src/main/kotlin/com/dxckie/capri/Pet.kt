@@ -87,6 +87,7 @@ private val activity get() = ACTIVITY[Settings.activity.coerceIn(0, ACTIVITY.siz
 private const val PEEK_AFTER = 45f
 /** Turns of the drag path that wind Sparkle up for a fling to the top. */
 private const val WIND_TURNS = 2.5f
+private const val SPIN_RATE = 900f
 /** How far below the top it has to be dragged before it lets go of the status bar. */
 private const val UNSTICK_DP = 56f
 /** Below this much happiness (0..100) it gets lonely and asks for attention. */
@@ -357,7 +358,7 @@ internal object Pet {
 			voiceWasRestricted = true
 			state = State.IDLE
 			mood = null
-			stuck = false; wound = false; rocket = false
+			stuck = false; wound = false; rocket = false; spinRate = 0f
 			peekSide = 0; peekPending = 0
 			hopActive = false; hopOff = 0f; hopVy = 0f; slideV = 0f
 			vx = 0f; vy = 0f
@@ -459,6 +460,10 @@ internal object Pet {
 	private var windY = 0f
 	private var windAt = 0f
 	private var wound = false
+	/** Spin after release: degrees a second, slowing to a stop, then she gets dizzy. [spinAngle] is her turn so far. */
+	private var spinRate = 0f
+	private var spinAngle = 0f
+	private var spinAt = 0f
 	private var rocket = false
 	private var stuck = false
 	private var nextStuckTalk = 0f
@@ -670,7 +675,7 @@ internal object Pet {
 		if (away) return 250
 		val t = now()
 		return when {
-			state in setOf(State.PRESS, State.DRAG, State.PET, State.FLY, State.WALK, State.LEAVING, State.SEEK) -> 16
+			state in setOf(State.PRESS, State.DRAG, State.PET, State.FLY, State.WALK, State.LEAVING, State.SEEK) || spinRate > 0f -> 16
 			hopActive || walkIn || slideV != 0f || peekMoving || (treat != null && !treatLanded) -> 16
 			strip != null || Boss.busy -> 33
 			mood != null && t < moodUntil -> 33
@@ -1277,6 +1282,7 @@ internal object Pet {
 			state == State.LEAVING -> Anim.OUTRO
 			stuck && state in setOf(State.STUCK, State.PRESS, State.PET) &&
 				Looks.current.hasMotionPoses -> Anim.HANG
+			spinRate > 0f && !rocket && state != State.DRAG && state != State.PRESS -> Anim.SPIN
 			state == State.DRAG && teleportLook -> Anim.SPIN
 			state == State.DRAG && wound &&
 				Looks.current.hasMotionPoses -> Anim.SPIN
@@ -1296,7 +1302,30 @@ internal object Pet {
 		}
 	}
 
+	/** Wound up and being held: full speed. Let go: it slows, finishes the turn she is in, and she goes dizzy. */
+	private fun stepSpin(t: Float) {
+		if (state == State.DRAG && wound) {
+			val dt = (t - spinAt).coerceIn(0f, 0.1f)
+			spinRate = SPIN_RATE; spinAt = t
+			spinAngle = (spinAngle + SPIN_RATE * dt) % 360f
+			return
+		}
+		if (spinRate <= 0f) return
+		if (rocket) { spinRate = 0f; return }
+		val dt = (t - spinAt).coerceIn(0f, 0.1f); spinAt = t
+		spinRate = maxOf(spinRate * exp(-1.3f * dt), 110f)
+		val before = spinAngle
+		spinAngle = (spinAngle + spinRate * dt) % 360f
+		if (spinRate <= 110.5f && spinAngle < before) {
+			spinRate = 0f; spinAngle = 0f
+			setMood(Anim.DIZZY, 2.6f)
+			Sounds.dizzy()
+			say("dizzy")
+		}
+	}
+
 	private fun render(t: Float, v: PetView) {
+		stepSpin(t)
 		val next = compose(t)
 		setAnim(next)
 		val still = if (next == mood) moodStill else -1
@@ -1321,7 +1350,7 @@ internal object Pet {
 			motion != null && next == Anim.HANG -> 0f
 			// Upside down on the status bar, swaying a little; also while tapped or petted up there.
 			stuck && state in setOf(State.STUCK, State.PRESS, State.PET) -> 180f + sin((t - hangStart) * 2.2f) * 5f
-			state == State.DRAG && wound -> (t * 900f) % 360f
+			spinRate > 0f && !rocket && state != State.PRESS -> spinAngle
 			state == State.FLY && rocket -> (t * 1100f) % 360f
 			state == State.FLY -> clamp(vx / dp(70f), -25f, 25f)
 			state == State.HANG -> sin((t - hangStart) * 3f) * 6f
@@ -1357,7 +1386,7 @@ internal object Pet {
 				touchX0 = rx; touchY0 = ry; touchT0 = t
 				touchOx = rx - x; touchOy = ry - y
 				petAnchor = rx; petDir = 0; dragVx = 0f
-				windAngle = 0f; windHeading = Float.NaN; windX = rx; windY = ry; windAt = t; wound = false; rocket = false
+				windAngle = 0f; windHeading = Float.NaN; windX = rx; windY = ry; windAt = t; wound = false; rocket = false; spinRate = 0f
 				history.clear()
 				history.addLast(floatArrayOf(t, rx, ry))
 				hopActive = false; hopOff = 0f; hopVy = 0f
@@ -1490,7 +1519,7 @@ internal object Pet {
 			say("rocket")
 			return
 		}
-		if (wound) setMood(Anim.DIZZY, 2.6f)
+		if (wound) { spinRate = SPIN_RATE; spinAt = t }
 		when {
 			speed <= dp(700f) && y <= minY + dp(8f) -> startHang(t, minY)
 			speed > dp(700f) || Settings.gravity -> {

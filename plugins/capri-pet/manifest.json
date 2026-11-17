@@ -8,7 +8,7 @@
 		"bleelblep (https://github.com/bleelblep \"GitHub\")"
 	],
 	"icon": "ReactionIcon",
-	"version": "2.10.3",
+	"version": "2.10.4",
 	"dependencies": {
 		"valenced.api": {
 			"version": ">=1.0 <2"
