@@ -1142,7 +1142,7 @@ internal object Pet {
 			return false
 		}
 		if (abs(slideV) < dp(60f)) return false
-		if (state == State.SLEEP) setMood(Anim.SURPRISED, 0.8f)
+		if (state == State.SLEEP) { setMood(Anim.SURPRISED, 0.8f); playStrip("wake", 14f, 1f) }
 		state = State.IDLE
 		peekPending = 0
 		facing = if (slideV > 0) 1 else -1
@@ -1467,7 +1467,7 @@ internal object Pet {
 				peekSide = 0; peekPending = 0
 				if (state == State.SEEK) treatClaimed = false
 				state = State.PRESS
-				if (wasSleeping) { setMood(Anim.SURPRISED, 0.9f); Sounds.wake(); say("wake") }
+				if (wasSleeping) { setMood(Anim.SURPRISED, 0.9f); playStrip("wake", 14f, 1f); Sounds.wake(); say("wake") }
 				else if (wasPeeking) { nextPeek = t + 90f; setMood(Anim.SURPRISED, 0.7f); Sounds.wake(); say("found") }
 				schedule(0)
 				return true
@@ -2540,7 +2540,7 @@ internal object Pet {
 		haptic(HapticFeedbackConstants.KEYBOARD_TAP)
 		treatClaimed = true
 		if (!stuck && state in setOf(State.IDLE, State.WALK, State.SLEEP, State.PEEK)) {
-			if (state == State.SLEEP) { Sounds.wake(); setMood(Anim.SURPRISED, 0.6f) }
+			if (state == State.SLEEP) { Sounds.wake(); setMood(Anim.SURPRISED, 0.6f); playStrip("wake", 14f, 1f) }
 			peekSide = 0; peekPending = 0; peekMoving = false
 			state = State.SEEK
 		} else flyTreatToMouth()
