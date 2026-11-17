@@ -134,7 +134,7 @@ export const DEFAULTS: CapriStorage = {
 	showWhen: 0,
 	treats: true,
 	name: "Capri",
-	look: 0,
+	look: 14,
 	hiddenPacks: [],
 	outline: 1,
 	grudges: false,
@@ -160,22 +160,7 @@ export function sizeLabel(dp: number): string {
 
 /** Every pet, by id (native's Looks: 0 unicorn, 2-13 cats and dogs, 14 Capri, 16-19 seasonal and boss pets). */
 export const LOOKS = [
-	{ id: 0, label: "Unicorn", kind: "unicorn", defaultName: "Capri", bubbles: "bubbles", leaves: "flies off on its rainbow" },
-	{ id: 14, label: "Capri", pack: "classic", kind: "cat", defaultName: "Capri", bubbles: "bubbles", leaves: "teleports away" },
-	...SEASONAL_PETS,
-	...BOSS_PETS,
-	{ id: 2, label: "Ginger cat", kind: "cat", defaultName: "Ginger", bubbles: "bubbles", leaves: "trots off" },
-	{ id: 3, label: "Black cat", kind: "cat", defaultName: "Shadow", bubbles: "bubbles", leaves: "trots off" },
-	{ id: 4, label: "Siamese cat", kind: "cat", defaultName: "Miso", bubbles: "bubbles", leaves: "trots off" },
-	{ id: 5, label: "Sphynx cat", kind: "cat", defaultName: "Noodle", bubbles: "bubbles", leaves: "trots off" },
-	{ id: 6, label: "Ragdoll cat", kind: "cat", defaultName: "Cloud", bubbles: "bubbles", leaves: "trots off" },
-	{ id: 7, label: "Grey tabby", kind: "cat", defaultName: "Tiger", bubbles: "bubbles", leaves: "trots off" },
-	{ id: 8, label: "Golden Retriever", kind: "dog", defaultName: "Sunny", bubbles: "bubbles", leaves: "runs off" },
-	{ id: 9, label: "Akita", kind: "dog", defaultName: "Kiko", bubbles: "bubbles", leaves: "runs off" },
-	{ id: 10, label: "Great Dane", kind: "dog", defaultName: "Duke", bubbles: "bubbles", leaves: "runs off" },
-	{ id: 11, label: "Schnauzer", kind: "dog", defaultName: "Pepper", bubbles: "bubbles", leaves: "runs off" },
-	{ id: 12, label: "Saint Bernard", kind: "dog", defaultName: "Bernie", bubbles: "bubbles", leaves: "runs off" },
-	{ id: 13, label: "Siberian Husky", kind: "dog", defaultName: "Blizzard", bubbles: "bubbles", leaves: "runs off" },
+	{ id: 14, label: "Capri", pack: "classic", kind: "unicorn", defaultName: "Capri", bubbles: "bubbles", leaves: "teleports away" },
 ] as const
 
 export function lookOf(id: number) {

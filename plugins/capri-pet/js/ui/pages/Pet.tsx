@@ -413,28 +413,15 @@ function NameField({ value, placeholder }: { value: string; placeholder: string 
 	)
 }
 
-const PACKS_HINT = "Choose which collections appear in the picker. Your active pet stays."
-
 /** Which pet, how big, what it's called and its outline; then the packs and the tester. */
 export default function Pet() {
 	const { Page } = components
 	const { ScrollView, View } = ReactNative
-	const { Stack, TableRowGroup, TableRow, TableSwitchRow } = Design as any
-	Boundary ??= withFallback()
-	const Picker = Boundary
+	const { Stack, TableRowGroup } = Design as any
 
 	const s = useSettings()
 	const bottom = useBottomPadding()
 	const pet = lookOf(s.look)
-	const [managePacks, setManagePacks] = React.useState(false)
-
-	/** Switching pets also switches a default name, but never one the user chose. */
-	const choose = (look: number) => {
-		const next = lookOf(look)
-		const name = s.name?.trim() ?? ""
-		const isDefault = !name || LOOKS.some(l => l.defaultName === name)
-		update(isDefault ? { look, name: next.defaultName } : { look })
-	}
 
 	return (
 		<Page>
@@ -448,8 +435,6 @@ export default function Pet() {
 						</FieldRow>
 					</TableRowGroup>
 
-					<Picker current={s.look} onChoose={choose} />
-
 					<SizeSlider value={s.sizeDp} kind={pet.kind} />
 
 					<TableRowGroup title="Name">
@@ -457,18 +442,6 @@ export default function Pet() {
 					</TableRowGroup>
 
 					{pet.kind === "cat" || pet.kind === "dog" || pet.kind === "seasonal" ? <OutlinePicker value={s.outline} /> : null}
-
-					<TableRowGroup title="Pet packs">
-						<TableRow label={managePacks ? "Close pack settings" : "Show or hide packs"}
-							subLabel={GROUPS.every(g => s.hiddenPacks.includes(g.id)) ? "All packs hidden. Open to show a pack." : PACKS_HINT}
-							onPress={() => setManagePacks(!managePacks)} />
-						{managePacks ? GROUPS.map((g, i) => (
-							<TableSwitchRow key={g.id} label={g.label}
-								subLabel={`${LOOKS.filter(l => inGroup(l, i)).length} pets`}
-								value={!s.hiddenPacks.includes(g.id)}
-								onValueChange={(show: boolean) => update({ hiddenPacks: show ? s.hiddenPacks.filter(id => id !== g.id) : [...new Set([...s.hiddenPacks, g.id])] })} />
-						)) : null}
-					</TableRowGroup>
 
 					<AnimationTester look={s.look} />
 				</Stack>

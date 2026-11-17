@@ -3,6 +3,15 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.13',
+		date: '2026-11-17',
+		title: 'Only Capri',
+		changes: [
+			'Capri is the only pet: the picker and pack settings are gone, and a saved choice of another pet turns back into her.',
+			'Star-calling pose has 24 frames: a slower raise, a long hold with flutter and twinkling.',
+		],
+	},
+	{
 		version: '2.10.12',
 		date: '2026-11-17',
 		title: 'Star pose, more detail',

@@ -52,7 +52,9 @@ internal object Settings {
 	/** What it calls itself. */
 	@Volatile var name = "Capri"
 	/** Which character (see Looks). */
-	@Volatile var look = 0
+	/** Capri is the only pet: whatever is saved or sent, the look stays her. */
+	@Volatile var look = Looks.CAPRI
+		set(_) { field = Looks.CAPRI }
 	/** Cats and dogs: 0 no outline, 1 automatic (contrasts with the theme), 2 light, 3 dark. */
 	@Volatile var outline = 1
 	/** Now and then casts a spell: VFX shows a random filter or effect for a few seconds. */
