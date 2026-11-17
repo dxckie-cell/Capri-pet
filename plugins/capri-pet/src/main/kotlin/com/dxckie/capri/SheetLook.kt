@@ -79,7 +79,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 	private enum class Over { NONE, ZS, HEART, ALERT, MAIL, MUSIC, BOLT, BATTERY, DIZZY, SPARKLES }
 
 	/** Which strip, how fast, whether it loops (else holds the last frame), and what goes on top. */
-	private class Pick(val strip: String, val fps: Float, val loop: Boolean = true, val over: Over = Over.NONE, val still: Int = -1, val reverse: Boolean = false)
+	private class Pick(val strip: String, val fps: Float, val loop: Boolean = true, val over: Over = Over.NONE, val still: Int = -1, val reverse: Boolean = false, val loopFrom: Int = 0)
 	/** Purchased packs use their own poses rather than the original cats' grooming names. */
 	private fun seasonalPick(anim: Anim, still: Int): Pick = when (anim) {
 		Anim.IDLE -> Pick("idle", idleFps)
@@ -177,7 +177,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 			teleports && anim == Anim.OUTRO -> Pick("outro", 22f, loop = false)
 			teleports && anim == Anim.INTRO -> Pick("outro", 22f, loop = false, reverse = true)
 			teleports && anim == Anim.WALK -> Pick("walk", 24f, loop = false)
-			anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 4f)
+			anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 10f, loopFrom = 10)  // breaks up once, then her face floats
 			anim == Anim.JUMP && pet.strips.containsKey("jump") -> Pick("jump", 10f, loop = false)
 			anim == Anim.DIZZY && pet.strips.containsKey("dizzy") -> Pick("dizzy", 8f)
 			anim == Anim.SHAKE && pet.strips.containsKey("hurt") -> Pick("hurt", 8f, loop = false, over = Over.ALERT)
@@ -187,6 +187,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 		if (list.isEmpty()) return null
 		val index = when {
 			p.fps <= 0f -> 0
+			p.loop && p.loopFrom > 0 -> (seconds * p.fps).toInt().let { if (it < p.loopFrom) it else p.loopFrom + (it - p.loopFrom).mod(list.size - p.loopFrom) }
 			p.loop -> (seconds * p.fps).toInt().mod(list.size)
 			else -> (seconds * p.fps).toInt().coerceIn(0, list.size - 1)
 		}.let { if (p.reverse) list.size - 1 - it else it }

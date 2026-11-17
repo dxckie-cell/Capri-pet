@@ -175,7 +175,7 @@ internal object PetData {
 		    "jump" to (6 to CapriStrips.jump),
 		    "hurt" to (4 to CapriStrips.hurt),
 		    "itch" to (8 to CapriStrips.itch),
-		    "sleep" to (8 to CapriStrips.sleep),
+		    "sleep" to (34 to CapriStrips.sleep),
 		    "sit" to (6 to CapriStrips.sit),
 		    "lay" to (6 to CapriStrips.lay),
 		    "voice" to (6 to CapriStrips.voice),
