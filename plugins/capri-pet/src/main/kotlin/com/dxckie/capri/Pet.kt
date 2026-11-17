@@ -1874,6 +1874,13 @@ internal object Pet {
 		Sounds.twinkle()
 		say("magic")
 		decor?.let { StarStrike.start(it, x + w / 2f, y + h * 0.45f) }
+		// She points up at the star, which hangs on the side of the screen farther from her.
+		if (teleportLook) {
+			val half = (decor?.width ?: 0) / 2f
+			facing = if (x + w / 2f < half) 1 else -1
+			playStrip("cast", 14f, 3.8f)
+			hold(3.8f)
+		}
 		schedule(0)
 	}
 
