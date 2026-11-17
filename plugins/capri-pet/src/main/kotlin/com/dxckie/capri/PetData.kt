@@ -182,7 +182,7 @@ internal object PetData {
 		    "stretch" to (8 to CapriStrips.stretch),
 		    "lick1" to (8 to CapriStrips.lick1),
 		    "lick2" to (8 to CapriStrips.lick2),
-		    "outro" to (7 to CapriStrips.outro)
+		    "outro" to (19 to CapriStrips.outro)
 		)),
 	)
 }

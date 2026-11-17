@@ -123,7 +123,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 	val teleports: Boolean get() = !revisedSeasonal && pet.strips.containsKey("outro")
 
 	override fun duration(anim: Anim): Float {
-		if (teleports && (anim == Anim.OUTRO || anim == Anim.INTRO)) return pet.strips.getValue("outro").first / 8f
+		if (teleports && (anim == Anim.OUTRO || anim == Anim.INTRO)) return pet.strips.getValue("outro").first / 22f
 		if (!revisedSeasonal) return super<Look>.duration(anim)
 		val p = seasonalPick(anim, -1)
 		return (pet.strips[p.strip]?.first ?: 1) / p.fps.coerceAtLeast(1f)
@@ -174,8 +174,8 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 	override fun frame(anim: Anim, seconds: Float, still: Int): Bitmap? = runCatching {
 		val p = when {
 			revisedSeasonal -> seasonalPick(anim, still)
-			teleports && anim == Anim.OUTRO -> Pick("outro", 8f, loop = false)
-			teleports && anim == Anim.INTRO -> Pick("outro", 8f, loop = false, reverse = true)
+			teleports && anim == Anim.OUTRO -> Pick("outro", 22f, loop = false)
+			teleports && anim == Anim.INTRO -> Pick("outro", 22f, loop = false, reverse = true)
 			teleports && anim == Anim.WALK -> Pick("walk", 24f, loop = false)
 			anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 4f)
 			anim == Anim.JUMP && pet.strips.containsKey("jump") -> Pick("jump", 10f, loop = false)
