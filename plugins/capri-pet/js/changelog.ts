@@ -3,6 +3,14 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.14',
+		date: '2026-11-17',
+		title: 'Outline setting back',
+		changes: [
+			'The outline setting is back on the Pet page.',
+		],
+	},
+	{
 		version: '2.10.13',
 		date: '2026-11-17',
 		title: 'Only Capri',

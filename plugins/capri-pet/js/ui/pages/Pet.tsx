@@ -441,7 +441,7 @@ export default function Pet() {
 						<NameField value={s.name} placeholder={pet.defaultName} />
 					</TableRowGroup>
 
-					{pet.kind === "cat" || pet.kind === "dog" || pet.kind === "seasonal" ? <OutlinePicker value={s.outline} /> : null}
+					<OutlinePicker value={s.outline} />
 
 					<AnimationTester look={s.look} />
 				</Stack>
