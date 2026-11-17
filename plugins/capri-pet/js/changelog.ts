@@ -3,6 +3,14 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.15',
+		date: '2026-11-18',
+		title: 'No freeze in the star pose',
+		changes: [
+			'The star pose raises her arm once, then the hold frames loop, so she no longer freezes on the last frame.',
+		],
+	},
+	{
 		version: '2.10.14',
 		date: '2026-11-17',
 		title: 'Outline setting back',

@@ -164,10 +164,11 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 	 * frame: the boss pets' own moves (attack, throw, horn, pull, ride) and the horse, which are not
 	 * [Anim]s. Composed like any other frame (padding, outline), nothing drawn on top.
 	 */
-	fun stripFrame(name: String, seconds: Float, fps: Float, loop: Boolean): Bitmap? = runCatching {
+	fun stripFrame(name: String, seconds: Float, fps: Float, loop: Boolean, loopFrom: Int = 0): Bitmap? = runCatching {
 		val (n, list) = frames(name)
 		if (list.isEmpty()) return null
-		val index = if (loop) (seconds * fps).toInt().mod(list.size) else (seconds * fps).toInt().coerceIn(0, list.size - 1)
+		val step = (seconds * fps).toInt()
+		val index = if (loopFrom in 1 until list.size) { if (step < loopFrom) step else loopFrom + (step - loopFrom).mod(list.size - loopFrom) } else if (loop) step.mod(list.size) else (seconds * fps).toInt().coerceIn(0, list.size - 1)
 		cache.getOrPut("$n:$index:NONE:0:$outlineColour") { compose(list[index], Over.NONE, 0) }
 	}.getOrNull()
 

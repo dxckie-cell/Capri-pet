@@ -1878,7 +1878,7 @@ internal object Pet {
 		if (teleportLook) {
 			val half = (decor?.width ?: 0) / 2f
 			facing = if (x + w / 2f < half) 1 else -1
-			playStrip("cast", 18f, 3.8f)
+			playStrip("cast", 18f, 3.8f, loopFrom = 10)  // raises once, then the hold frames loop
 			hold(3.8f)
 		}
 		schedule(0)
@@ -2378,16 +2378,16 @@ internal object Pet {
 		if (state != State.LEAVING) state = State.IDLE
 	}
 
-	private class StripPlay(val name: String, val start: Float, val fps: Float, val loop: Boolean, val until: Float)
+	private class StripPlay(val name: String, val start: Float, val fps: Float, val loop: Boolean, val until: Float, val loopFrom: Int = 0)
 	private var strip: StripPlay? = null
 	private var holdUntil = 0f
 
 	/** Plays one of the current sheet pet's own strips for [seconds], in place of the mood animation. */
-	fun playStrip(name: String, fps: Float, seconds: Float, loop: Boolean = false) {
+	fun playStrip(name: String, fps: Float, seconds: Float, loop: Boolean = false, loopFrom: Int = 0) {
 		val look = Looks.current as? SheetLook ?: return
 		if (!look.has(name)) return
 		val t = now()
-		strip = StripPlay(name, t, fps, loop, t + seconds)
+		strip = StripPlay(name, t, fps, loop, t + seconds, loopFrom)
 		schedule(0)
 	}
 
@@ -2400,7 +2400,7 @@ internal object Pet {
 	private fun playingFrame(t: Float): Bitmap? {
 		val s = strip ?: return null
 		if (t >= s.until) { strip = null; return null }
-		return (Looks.current as? SheetLook)?.stripFrame(s.name, t - s.start, s.fps, s.loop)
+		return (Looks.current as? SheetLook)?.stripFrame(s.name, t - s.start, s.fps, s.loop, s.loopFrom)
 	}
 
 	fun rescheduleTimers() {
