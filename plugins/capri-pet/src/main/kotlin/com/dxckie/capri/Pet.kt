@@ -1335,6 +1335,7 @@ internal object Pet {
 	}
 
 	private fun setMood(next: Anim, seconds: Float, still: Int = -1) {
+		if (next == Anim.HAPPY && Settings.look == Looks.CAPRI && !StarStrike.active && !Possess.active) decor?.let { Victory.start(it, x + w / 2f, y + h * 0.4f) }
 		mood = next
 		moodStill = still
 		moodUntil = now() + seconds
@@ -1395,6 +1396,7 @@ internal object Pet {
 
 	private fun render(t: Float, v: PetView) {
 		stepSpin(t)
+		if (Victory.active) Victory.follow(x + w / 2f, y + h * 0.4f)
 		val next = compose(t)
 		setAnim(next)
 		val still = if (next == mood) moodStill else -1
