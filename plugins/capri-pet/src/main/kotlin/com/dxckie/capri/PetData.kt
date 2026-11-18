@@ -186,8 +186,7 @@ internal object PetData {
 		    "stretch" to (24 to CapriStrips.stretch),
 		    "lick1" to (24 to CapriStrips.lick1),
 		    "lick2" to (24 to CapriStrips.lick2),
-		    "outro" to (19 to CapriStrips.outro),
-		    "dizzy" to (36 to CapriStrips.dizzy)
+		    "outro" to (19 to CapriStrips.outro)
 		)),
 	)
 }

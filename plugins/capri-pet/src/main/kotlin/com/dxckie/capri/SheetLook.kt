@@ -182,7 +182,6 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 			teleports && (anim == Anim.IDLE || anim == Anim.HANG) -> Pick("idle", 24f)
 			anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 24f, loopFrom = 24)  // breaks up once, then her face floats
 			anim == Anim.JUMP && pet.strips.containsKey("jump") -> Pick("jump", 10f, loop = false)
-			anim == Anim.DIZZY && pet.strips.containsKey("dizzy") -> Pick("dizzy", 8f)
 			anim == Anim.SHAKE && pet.strips.containsKey("hurt") -> Pick("hurt", 8f, loop = false, over = Over.ALERT)
 			else -> pick(anim, seconds, still)
 		}
