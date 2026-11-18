@@ -120,11 +120,10 @@ function useFidgets(look: number, enabled: boolean): Array<{ variant: number; la
 }
 
 const POSES = [
-	["IDLE", "Idle"], ["WALK", "Walk"], ["JUMP", "Jump"], ["HANG", "Hang"],
+	["IDLE", "Idle"], ["WALK", "Walk"],
 	["SPIN", "Spin"], ["HAPPY", "Happy"], ["SLEEP", "Sleep"], ["SAD", "Sad"],
 	["SURPRISED", "Surprised"], ["DIZZY", "Dizzy"], ["SHAKE", "Shake"],
-	["CHARGING", "Charging"], ["LOW_BATTERY", "Low battery"], ["REACTION", "Reaction"],
-	["VARIANT", "Fidget"], ["LOOK", "Look around"], ["BLOW", "Bubbles"], ["OUTRO", "Exit"],
+	["REACTION", "Reaction"], ["OUTRO", "Exit"],
 ] as const
 
 function AnimationTester({ look }: { look: number }) {
