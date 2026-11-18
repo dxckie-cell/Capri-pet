@@ -22,12 +22,12 @@ internal object Victory {
 	private const val SECONDS = 1.0f
 	private const val BURST = 0.8f
 	private const val FPS = 24f
-	private const val RED = 0xFFFF003D.toInt()
-	private const val PURPLE = 0xFF7A3DFF.toInt()
-	private const val WHITE = 0xFFFFFFFF.toInt()
+	private const val RED = 0xFFFE0C4A.toInt()
+	private const val PURPLE = 0xFF793CA6.toInt()
+	private const val WHITE = 0xFFFFC8E1.toInt()
 	private const val GREEN = 0xFF00F452.toInt()
 
-	private val fill = Paint().apply { style = Paint.Style.FILL; isAntiAlias = true }
+	private val fill = Paint().apply { style = Paint.Style.FILL; isAntiAlias = false }
 
 	private var decor: ViewGroup? = null
 	private var layer: Layer? = null
@@ -50,9 +50,9 @@ internal object Victory {
 		decor = root
 		capriX = x; capriY = y
 		// Rays: angle, length, half-width at the outer end (radians), colour.
-		rays = List(34) {
+		rays = List(12) {
 			floatArrayOf(Random.nextFloat() * 6.2832f, dp(180f + Random.nextFloat() * 520f), 0.012f + Random.nextFloat() * 0.03f,
-				when (Random.nextInt(10)) { 0, 1 -> RED.toFloat(); 2, 3 -> PURPLE.toFloat(); else -> WHITE.toFloat() })
+				when (Random.nextInt(10)) { 0, 1, 2, 3, 4 -> RED.toFloat(); 5, 6, 7 -> PURPLE.toFloat(); 8 -> GREEN.toFloat(); else -> WHITE.toFloat() })
 		}
 		shards = List(22) {
 			floatArrayOf(Random.nextFloat() * 6.2832f, dp(70f + Random.nextFloat() * 230f), dp(2.5f + Random.nextFloat() * 4.5f), (Random.nextFloat() - 0.5f) * 14f,
@@ -97,19 +97,28 @@ internal object Victory {
 			drawShards(canvas, t)
 		}
 
-		/** Thin wedges flying out from behind her: they shoot out in a fifth of a second, hold, then fade. */
+		/** Few jagged wedges in her colours: they shoot out in a fifth of a second, hold and fade, while glitching: kinks, flicker and sideways tears every tick. */
 		private fun drawRays(canvas: Canvas, t: Float, rnd: Random) {
 			val out = min(t / 0.2f, 1f).let { 1f - (1f - it) * (1f - it) }
 			val alpha = ((BURST - t) / 0.35f).coerceIn(0f, 1f)
-			for (r in rays) {
+			for ((i, r) in rays.withIndex()) {
+				if (rnd.nextFloat() < 0.25f) continue                       // flickers out for a tick
 				val inner = dp(26f) + dp(34f) * out
 				val outer = inner + r[1] * out
 				val a = r[0]
 				val hw = r[2]
+				val kink = (rnd.nextFloat() - 0.5f) * dp(14f)                 // the ray snaps sideways partway out
+				val tear = if (rnd.nextFloat() < 0.3f) (rnd.nextFloat() - 0.5f) * dp(22f) else 0f
+				val cut = 0.35f + rnd.nextFloat() * 0.3f
+				val nx = -sin(a); val ny = cos(a)
+				val mi = inner + (outer - inner) * cut
+				val ox = capriX + tear * (if (i % 2 == 0) 1f else 0f)
 				path.reset()
-				path.moveTo(capriX + cos(a) * inner, capriY + sin(a) * inner)
-				path.lineTo(capriX + cos(a - hw) * outer, capriY + sin(a - hw) * outer)
-				path.lineTo(capriX + cos(a + hw) * outer, capriY + sin(a + hw) * outer)
+				path.moveTo(ox + cos(a) * inner, capriY + sin(a) * inner)
+				path.lineTo(ox + cos(a - hw) * mi + nx * kink, capriY + sin(a - hw) * mi + ny * kink)
+				path.lineTo(ox + cos(a - hw) * outer + nx * kink * 2f, capriY + sin(a - hw) * outer + ny * kink * 2f)
+				path.lineTo(ox + cos(a + hw) * outer + nx * kink * 2f, capriY + sin(a + hw) * outer + ny * kink * 2f)
+				path.lineTo(ox + cos(a + hw) * mi + nx * kink, capriY + sin(a + hw) * mi + ny * kink)
 				path.close()
 				fill.color = r[3].toInt(); fill.alpha = (alpha * 255).toInt()
 				canvas.drawPath(path, fill)
