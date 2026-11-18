@@ -107,7 +107,6 @@ internal object Companion {
 		v.translationX = x
 		v.translationY = y
 		view = v
-		Sounds.appear()
 	}
 
 	/** Puts the horse where the ride ended and walks it off. */
@@ -150,7 +149,6 @@ internal object Companion {
 	private fun tapped() {
 		if (view == null || state == S.LEAVE || state == S.ENTER) return
 		if (onTap()) return
-		Sounds.boing()
 		enter(S.REAR, stateAt, 0.9f)
 		stateAt = now()
 	}
@@ -171,7 +169,7 @@ internal object Companion {
 			}
 			S.IDLE, S.GRAZE -> {
 				if (t - stateAt >= stateFor) {
-					if (!neighed && Random.nextFloat() < 0.5f) { neighed = true; enter(S.NEIGH, t, 0.75f); Sounds.swoosh(0.3f) }
+					if (!neighed && Random.nextFloat() < 0.5f) { neighed = true; enter(S.NEIGH, t, 0.75f) }
 					else enter(if (state == S.IDLE) S.GRAZE else S.IDLE, t, 2f + Random.nextFloat() * 3f)
 				}
 			}

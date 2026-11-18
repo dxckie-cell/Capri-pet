@@ -27,19 +27,6 @@ export default function License() {
 							subLabel="Flappy Dragon (bevouliin.com), OpenGameArt. CC0, public domain. Snowman Character by pechvogel, CC-BY 3.0."
 						/>
 					</TableRowGroup>
-					<TableRowGroup title="Sounds">
-						<TableRow
-							label="Juhani Junkala"
-							subLabel="The Essential Retro Video Game Sound Effects Collection. CC0, public domain."
-						/>
-						<TableRow label="Kenney" subLabel="Interface Sounds, Impact Sounds and Digital Audio. CC0, public domain." />
-						<TableRow label="Mixkit" subLabel="The throw swoosh. Mixkit Sound Effects Free License." />
-						<TableRow
-							label="Kerzoven, AntumDeluge"
-							subLabel="The cats' purrs and meows: Cat Purr & Meow and Kitten Mew, OpenGameArt. CC0, public domain."
-						/>
-						<TableRow label="Brandon Morris" subLabel="The dogs' barks: Dog barking mono, OpenGameArt. CC0, public domain." />
-					</TableRowGroup>
 					<TableRowGroup title="Credits">
 						<TableRow
 							label="Inspiration"

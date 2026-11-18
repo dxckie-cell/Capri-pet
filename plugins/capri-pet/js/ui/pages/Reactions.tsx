@@ -41,7 +41,7 @@ export default function Reactions() {
 					{!s.discord ? (
 						<View style={{ paddingHorizontal: 16 }}>
 							<Text variant="text-sm/medium" color="text-feedback-warning">
-								Reacting to Discord is off, so none of these play. Turn it on in Sounds & reactions.
+								Reacting to Discord is off, so none of these play. Turn it on in Reactions.
 							</Text>
 						</View>
 					) : null}

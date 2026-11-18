@@ -32,7 +32,7 @@ const PAGES: [route: string, title: string, component: () => any][] = [
 	[PET_ROUTE, "Pet", Pet],
 	[MOOD_ROUTE, "How it's doing", Mood],
 	[MOVEMENT_ROUTE, "Movement", Movement],
-	[SOUNDS_ROUTE, "Sounds & reactions", SoundsReactions],
+	[SOUNDS_ROUTE, "Reactions", SoundsReactions],
 	[FUN_ROUTE, "Fun", Fun],
 	[SPELLS_ROUTE, "Spells", Spells],
 	[REACTIONS_ROUTE, "Message reactions", Reactions],

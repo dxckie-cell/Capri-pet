@@ -113,7 +113,7 @@ export default function Settings() {
 							onPress={() => navigation.navigate(MOVEMENT_ROUTE)}
 						/>
 						<TableRow
-							label="Sounds & reactions"
+							label="Reactions"
 							subLabel={reactsTo.length ? `reacts to ${reactsTo.join(", ")}` : "reacts to nothing"}
 							icon={rowIcon("SoundboardIcon", "MusicIcon")}
 							arrow
@@ -131,7 +131,7 @@ export default function Settings() {
 					<TableRowGroup hasIcons>
 						<TableRow
 							label="Licence"
-							subLabel="CC0-1.0, with credits for the art and sounds"
+							subLabel="CC0-1.0, with credits for the art"
 							icon={rowIcon("BookCheckIcon", "ic_info")}
 							arrow
 							onPress={() => navigation.navigate(LICENSE_ROUTE)}

@@ -30,21 +30,12 @@ internal object Settings {
 	@Volatile var eat = true
 	@Volatile var shake = true
 	@Volatile var discord = true
-	/** In voice: 0 normal, 1 sound cooldown, 2 idle only, 3 pet off. */
-	@Volatile var voiceMode = 0
-	@Volatile var voiceCooldown = 30
 	@Volatile var battery = true
 	@Volatile var haptics = true
 	/** Blows bubbles now and then, and when happy. */
 	@Volatile var bubbles = true
 	/** Android 13+: while bubbles are out, a swirling soap-film screen, and pops that ripple it. */
 	@Volatile var bubbleFx = true
-	/** Sound effects, on the media volume. */
-	@Volatile var sounds = true
-	/** 0..100, on top of the media volume. */
-	@Volatile var volume = 70
-	/** Stays quiet while the phone is on silent or vibrate. */
-	@Volatile var quietOnSilent = true
 	/** 0: always on screen. 1: only while the keyboard is up (typing), leaving a few seconds after. */
 	@Volatile var showWhen = 0
 	/** Now and then a treat drops in; tap it to feed it. */
@@ -112,14 +103,10 @@ private fun settingsMap() = mapOf(
 	"eat" to Settings.eat,
 	"shake" to Settings.shake,
 	"discord" to Settings.discord,
-	"voiceMode" to Settings.voiceMode,
-	"voiceCooldown" to Settings.voiceCooldown,
 	"battery" to Settings.battery,
 	"haptics" to Settings.haptics,
 	"bubbles" to Settings.bubbles,
 	"bubbleFx" to Settings.bubbleFx,
-	"sounds" to Settings.sounds,
-	"volume" to Settings.volume,
 	"magic" to Settings.magic,
 	"magicRate" to Settings.magicRate,
 	"activity" to Settings.activity,
@@ -132,7 +119,6 @@ private fun settingsMap() = mapOf(
 	"companion" to Settings.companion,
 	"companionRate" to Settings.companionRate,
 	"rideMinutes" to Settings.rideMinutes,
-	"quietOnSilent" to Settings.quietOnSilent,
 	"showWhen" to Settings.showWhen,
 	"treats" to Settings.treats,
 	"name" to Settings.name,
@@ -183,14 +169,10 @@ val sparklePlugin = plugin {
 				Settings.eat = json.optBoolean("eat", true)
 				Settings.shake = json.optBoolean("shake", true)
 				Settings.discord = json.optBoolean("discord", true)
-				Settings.voiceMode = json.optInt("voiceMode", 0).coerceIn(0, 3)
-				Settings.voiceCooldown = json.optInt("voiceCooldown", 30).coerceIn(5, 300)
 				Settings.battery = json.optBoolean("battery", true)
 				Settings.haptics = json.optBoolean("haptics", true)
 				Settings.bubbles = json.optBoolean("bubbles", true)
 				Settings.bubbleFx = json.optBoolean("bubbleFx", true)
-				Settings.sounds = json.optBoolean("sounds", true)
-				Settings.volume = json.optInt("volume", 70).coerceIn(0, 100)
 				Settings.magic = json.optBoolean("magic", false)
 				Settings.magicRate = validRate(json.optInt("magicRate", 2)) ?: 2
 				Settings.activity = json.optInt("activity", 1).coerceIn(0, 3)
@@ -207,7 +189,6 @@ val sparklePlugin = plugin {
 				Settings.posY = json.optInt("posY", 720).coerceIn(0, 1000)
 				Settings.pets = json.optInt("pets", 0).coerceAtLeast(0)
 				Settings.eaten = json.optInt("eaten", 0).coerceAtLeast(0)
-				Settings.quietOnSilent = json.optBoolean("quietOnSilent", true)
 				Settings.showWhen = json.optInt("showWhen", 0).coerceIn(0, 1)
 				Settings.treats = json.optBoolean("treats", true)
 				Settings.name = cleanName(json.optString("name", "Capri"))
@@ -235,14 +216,10 @@ val sparklePlugin = plugin {
 					.put("eat", Settings.eat)
 					.put("shake", Settings.shake)
 					.put("discord", Settings.discord)
-					.put("voiceMode", Settings.voiceMode)
-					.put("voiceCooldown", Settings.voiceCooldown)
 					.put("battery", Settings.battery)
 					.put("haptics", Settings.haptics)
 					.put("bubbles", Settings.bubbles)
 					.put("bubbleFx", Settings.bubbleFx)
-					.put("sounds", Settings.sounds)
-					.put("volume", Settings.volume)
 					.put("magic", Settings.magic)
 					.put("magicRate", Settings.magicRate)
 					.put("activity", Settings.activity)
@@ -259,7 +236,6 @@ val sparklePlugin = plugin {
 					.put("posY", Settings.posY)
 					.put("pets", Settings.pets)
 					.put("eaten", Settings.eaten)
-					.put("quietOnSilent", Settings.quietOnSilent)
 					.put("showWhen", Settings.showWhen)
 					.put("treats", Settings.treats)
 					.put("name", Settings.name)
@@ -282,7 +258,6 @@ val sparklePlugin = plugin {
 			mainHandler.postDelayed(persist, 1000)
 		}
 
-		Sounds.init(storageDir) { log.w(it) }
 		// A spell is cast in native (the pose, sparkles, a line) and shown by VFX, which only JS can
 		// reach: its methods are another plugin's. JS answers `magic` by asking VFX for a surprise.
 		val host = this
@@ -303,11 +278,6 @@ val sparklePlugin = plugin {
 			true
 		}
 		registerNativeMethod("${manifest.id}.getSettings") { _ -> settingsMap() }
-		registerNativeMethod("${manifest.id}.voiceState") { args ->
-			val connected = args.firstOrNull() as? Boolean ?: return@registerNativeMethod false
-			mainHandler.post { Pet.setVoiceConnected(connected) }
-			true
-		}
 		registerNativeMethod("${manifest.id}.setSettings") { args ->
 			val patch = args.firstOrNull() as? Map<*, *> ?: emptyMap<Any, Any>()
 			val showBefore = Settings.show
@@ -330,14 +300,10 @@ val sparklePlugin = plugin {
 			(patch["eat"] as? Boolean)?.let { Settings.eat = it }
 			(patch["shake"] as? Boolean)?.let { Settings.shake = it }
 			(patch["discord"] as? Boolean)?.let { Settings.discord = it }
-			(patch["voiceMode"] as? Number)?.let { Settings.voiceMode = it.toInt().coerceIn(0, 3) }
-			(patch["voiceCooldown"] as? Number)?.let { Settings.voiceCooldown = it.toInt().coerceIn(5, 300) }
 			(patch["battery"] as? Boolean)?.let { Settings.battery = it }
 			(patch["haptics"] as? Boolean)?.let { Settings.haptics = it }
 			(patch["bubbles"] as? Boolean)?.let { Settings.bubbles = it }
 			(patch["bubbleFx"] as? Boolean)?.let { Settings.bubbleFx = it }
-			(patch["sounds"] as? Boolean)?.let { Settings.sounds = it }
-			(patch["volume"] as? Number)?.let { Settings.volume = it.toInt().coerceIn(0, 100) }
 			(patch["magic"] as? Boolean)?.let { Settings.magic = it }
 			val ratesBefore = listOf(Settings.magicRate, Settings.treatRate, Settings.partyRate, Settings.eatRate, Settings.attackRate, Settings.companionRate)
 			validRate(patch["magicRate"])?.let { Settings.magicRate = it }
@@ -352,7 +318,6 @@ val sparklePlugin = plugin {
 			validRate(patch["companionRate"])?.let { Settings.companionRate = it }
 			(patch["rideMinutes"] as? Number)?.let { Settings.rideMinutes = it.toInt().coerceIn(1, 5) }
 			val ratesChanged = ratesBefore != listOf(Settings.magicRate, Settings.treatRate, Settings.partyRate, Settings.eatRate, Settings.attackRate, Settings.companionRate)
-			(patch["quietOnSilent"] as? Boolean)?.let { Settings.quietOnSilent = it }
 			(patch["showWhen"] as? Number)?.let { Settings.showWhen = it.toInt().coerceIn(0, 1) }
 			(patch["treats"] as? Boolean)?.let { Settings.treats = it }
 			(patch["name"] as? String)?.let { Settings.name = cleanName(it) }
@@ -372,7 +337,6 @@ val sparklePlugin = plugin {
 					// A new rate starts a fresh wait, so going from Rare to Very often doesn't sit out the old one.
 					if (ratesChanged) Pet.rescheduleTimers()
 					Phone.sync()
-					Pet.syncVoiceMode()
 				}.onFailure { log.e("applying settings failed: ${it.message}") }
 			}
 			settingsMap()
@@ -460,12 +424,6 @@ val sparklePlugin = plugin {
 			mainHandler.post { runCatching { Pet.castMagic(force = true) } }
 			true
 		}
-		// "Play a sound" on the settings page, to hear the volume. Ignores silent mode, so the button
-		// always answers; returns false when the phone is on silent, so the page can say why.
-		registerNativeMethod("${manifest.id}.testSound") { _ ->
-			Sounds.appear(force = true)
-			!Sounds.silenced()
-		}
 		// "Drop a treat now" on the settings page.
 		registerNativeMethod("${manifest.id}.dropTreat") { _ ->
 			mainHandler.post { runCatching { Pet.dropTreat(force = true) } }
@@ -496,6 +454,5 @@ val sparklePlugin = plugin {
 
 	stop {
 		mainHandler.post { runCatching { Pet.stopNow() } }
-		Sounds.release()
 	}
 }

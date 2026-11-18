@@ -409,43 +409,6 @@ internal object Pet {
 		private set
 	private var running = false
 	private var paused = false
-	@Volatile var voiceConnected = false
-		private set
-	val voiceRestricted get() = voiceConnected && Settings.voiceMode >= 2
-	private var voiceWasRestricted = false
-	fun setVoiceConnected(connected: Boolean) {
-		voiceConnected = connected
-		syncVoiceMode()
-	}
-	fun syncVoiceMode() {
-		if (voiceConnected && Settings.voiceMode != 0) {
-			ScreenFx.cancel()
-			partying = false
-			Sounds.quietNow()
-		}
-		if (voiceRestricted) {
-			voiceWasRestricted = true
-			state = State.IDLE
-			mood = null
-			stuck = false; wound = false; rocket = false; spinRate = 0f
-			peekSide = 0; peekPending = 0
-			hopActive = false; hopOff = 0f; hopVy = 0f; slideV = 0f
-			vx = 0f; vy = 0f
-			Bubbles.clear(); clearTreat(); Eater.restoreAll()
-			for (p in particles.toList()) remove(p)
-			particles.clear()
-			bubble?.visibility = View.GONE
-			trail?.visibility = View.INVISIBLE
-			Phone.stop()
-		} else if (voiceWasRestricted) {
-			voiceWasRestricted = false
-			lastInteraction = now()
-			nextAction = now() + 3f
-			rescheduleTimers()
-		}
-		view?.visibility = if (away || (voiceRestricted && Settings.voiceMode == 3)) View.INVISIBLE else View.VISIBLE
-		if (running) schedule(0)
-	}
 	/** The Nyan party is on: the pet is hidden and still until it ends (NyanParty.kt). */
 	private var partying = false
 	private var nextParty = 0f
@@ -601,7 +564,6 @@ internal object Pet {
 		hideBubble()
 		state = State.LEAVING
 		setAnim(Anim.OUTRO)
-		Sounds.leave()
 		afterLeave = {
 			stopNow()
 			then()
@@ -649,9 +611,9 @@ internal object Pet {
 		vx = 0f; vy = 0f; slideV = 0f; peekSide = 0; peekPending = 0
 		stuck = false; rocket = false
 		lastInteraction = now()
-		hop(dp(500f), quiet = true)
+		hop(dp(500f))
 		repeat(3) { spawn(Particle.SPARK) }
-		appearFx(); Sounds.appear()
+		appearFx()
 		say("hello")
 		savePosition()
 		schedule(0)
@@ -784,26 +746,8 @@ internal object Pet {
 		}
 		if (partying || Boss.riding) return
 		val b = bounds(t)
-		if (voiceRestricted && Settings.show) {
-			if (!posReady) {
-				x = b[0] + (b[1] - b[0]) * (Settings.posX / 1000f)
-				y = b[2] + (b[3] - b[2]) * (Settings.posY / 1000f)
-				posReady = true
-			}
-			greet = false
-			Phone.stop()
-			v.visibility = if (Settings.voiceMode == 3 || (Settings.showWhen == 1 && keyboard <= 0)) View.INVISIBLE else View.VISIBLE
-			v.frame = Looks.current.frame(Anim.IDLE, t)
-			v.flip = facing < 0
-			v.rotation = 0f
-			v.layoutParams = v.layoutParams.apply { width = w.toInt(); height = h.toInt() }
-			v.translationX = clamp(x, b[0], b[1]); v.translationY = clamp(y, b[2], b[3])
-			v.invalidate()
-			return
-		}
 		if (stepTyping(t, b, v)) return
 		Phone.start(root.context)
-		Sounds.attach(root.context)
 
 		if (!posReady) {
 			x = b[0] + (b[1] - b[0]) * (Settings.posX / 1000f)
@@ -812,8 +756,8 @@ internal object Pet {
 			lastInteraction = t
 			if (greet) {
 				greet = false
-				hop(dp(420f), quiet = true)
-				appearFx(); Sounds.appear()
+				hop(dp(420f))
+				appearFx()
 				say(if (love() < LONELY) "missed" else "hello")
 			}
 		}
@@ -829,7 +773,6 @@ internal object Pet {
 			State.PET -> if (t >= nextHeart) {
 				nextHeart = t + 0.45f
 				spawn(Particle.HEART)
-				Sounds.heart(petHearts++)
 				haptic(HapticFeedbackConstants.CLOCK_TICK)
 				addLove(2)
 			}
@@ -928,7 +871,6 @@ internal object Pet {
 			}
 			if (!hopActive && liftAccel() > gravityAccel()) {
 				// The top of the phone dipped far enough that "down" is now up the screen.
-				if (state == State.SLEEP) Sounds.wake()
 				fall(0f)
 				vy = -dp(160f)
 				if (Random.nextFloat() < 0.3f) say("float")
@@ -1012,7 +954,6 @@ internal object Pet {
 			state = State.SLEEP
 			napUntil = t + activity.nap.pick()
 			hideBubble()
-			Sounds.sleep()
 			return
 		}
 		if (t < nextAction || hopActive || walkIn || (mood != null && t < moodUntil)) return
@@ -1101,7 +1042,6 @@ internal object Pet {
 	private fun wakeUp(t: Float) {
 		state = State.IDLE
 		wokeAt = t
-		Sounds.wake()
 		setMood(Anim.HAPPY, 1.2f)
 		nextAction = t + 1f + Random.nextFloat()
 	}
@@ -1183,11 +1123,9 @@ internal object Pet {
 				if (Settings.gravity) vx *= 0.75f
 			}
 		}
-		if (impact > dp(400f)) Sounds.thud(impact / dp(3000f))
 		if (impact > dp(1500f)) crumbs(3)
 		if (impact > dp(2300f)) {
 			setMood(Anim.DIZZY, 2.6f)
-			Sounds.dizzy()
 			say("dizzy")
 			haptic(HapticFeedbackConstants.LONG_PRESS)
 		} else if (impact > dp(900f)) haptic(HapticFeedbackConstants.KEYBOARD_TAP)
@@ -1204,7 +1142,6 @@ internal object Pet {
 		if (shakeDizzy) {
 			shakeDizzy = false
 			setMood(Anim.DIZZY, 3f)
-			Sounds.dizzy()
 			say("dizzy")
 		}
 		savePosition()
@@ -1218,7 +1155,6 @@ internal object Pet {
 		hangStart = t
 		hangUntil = t + Random.nextFloat() * 1.5f + 2f
 		haptic(HapticFeedbackConstants.KEYBOARD_TAP)
-		Sounds.grab()
 		if (Random.nextFloat() < 0.7f) say("hang")
 	}
 
@@ -1235,8 +1171,6 @@ internal object Pet {
 		hangStart = t
 		nextStuckTalk = t + 1.2f
 		haptic(HapticFeedbackConstants.LONG_PRESS)
-		Sounds.grab()
-		Sounds.thud(0.6f)
 		repeat(2) { spawn(Particle.SPARK) }
 		savePosition()
 	}
@@ -1259,7 +1193,6 @@ internal object Pet {
 		vx = 0f
 		vy = if (Settings.gravity) dp(150f) else dp(700f)
 		setMood(Anim.SURPRISED, 0.8f)
-		Sounds.slip()
 		if (Random.nextFloat() < 0.6f) say("hang_fall")
 	}
 
@@ -1394,7 +1327,6 @@ internal object Pet {
 		if (spinRate <= 110.5f && spinAngle < before) {
 			spinRate = 0f; spinAngle = 0f
 			setMood(Anim.DIZZY, 2.6f)
-			Sounds.dizzy()
 			say("dizzy")
 		}
 	}
@@ -1454,7 +1386,6 @@ internal object Pet {
 	// ---------------------------------------------------------------- touch
 
 	fun onTouch(event: MotionEvent): Boolean {
-		if (voiceRestricted) return false
 		val t = now()
 		val rx = event.rawX
 		val ry = event.rawY
@@ -1474,8 +1405,8 @@ internal object Pet {
 				peekSide = 0; peekPending = 0
 				if (state == State.SEEK) treatClaimed = false
 				state = State.PRESS
-				if (wasSleeping) { setMood(Anim.SURPRISED, 0.9f); playStrip("wake", 24f, 1f); Sounds.wake(); say("wake") }
-				else if (wasPeeking) { nextPeek = t + 90f; setMood(Anim.SURPRISED, 0.7f); Sounds.wake(); say("found") }
+				if (wasSleeping) { setMood(Anim.SURPRISED, 0.9f); playStrip("wake", 24f, 1f); say("wake") }
+				else if (wasPeeking) { nextPeek = t + 90f; setMood(Anim.SURPRISED, 0.7f); say("found") }
 				schedule(0)
 				return true
 			}
@@ -1485,7 +1416,6 @@ internal object Pet {
 				if (state == State.PRESS && hypot(rx - touchX0, ry - touchY0) > dp(8f)) {
 					state = State.DRAG
 					haptic(HapticFeedbackConstants.KEYBOARD_TAP)
-					Sounds.pickup()
 					if (Random.nextFloat() < 0.25f) say("drag")
 				}
 				if (state == State.DRAG) {
@@ -1507,7 +1437,6 @@ internal object Pet {
 						if (petDir != 0 && dir != petDir) {
 							spawn(Particle.HEART)
 							crumbs(1)
-							Sounds.heart(petHearts++)
 							haptic(HapticFeedbackConstants.CLOCK_TICK)
 							addLove(1)
 						}
@@ -1560,7 +1489,6 @@ internal object Pet {
 		if (!wound && abs(windAngle) >= WIND_TURNS * 2f * PI.toFloat()) {
 			wound = true
 			haptic(HapticFeedbackConstants.LONG_PRESS)
-			Sounds.twinkle()
 			repeat(3) { spawn(Particle.SPARK) }
 			say("wound")
 		}
@@ -1586,7 +1514,6 @@ internal object Pet {
 			// Still near the top: it grabs back on. Pulled down far enough: it lets go.
 			if (y <= stuckY() + dp(UNSTICK_DP)) { stick(t); return }
 			stuck = false
-			Sounds.slip()
 			say("unstuck")
 		}
 		if (wound && fvy < -dp(900f)) {
@@ -1595,7 +1522,6 @@ internal object Pet {
 			rocket = true
 			vx = fvx * 0.5f
 			vy = minOf(fvy, -dp(2600f))
-			Sounds.swoosh(1f)
 			say("rocket")
 			return
 		}
@@ -1606,7 +1532,6 @@ internal object Pet {
 				state = State.FLY
 				vx = fvx
 				vy = fvy
-				if (speed > dp(1200f)) Sounds.swoosh(speed / limit)
 				if (speed > dp(2600f)) {
 					say("throw")
 					addRep(-4)
@@ -1627,7 +1552,6 @@ internal object Pet {
 			setMood(Anim.SURPRISED, 0.9f)
 			hop(dp(300f))
 			haptic(HapticFeedbackConstants.LONG_PRESS)
-			Sounds.spit()
 			say("spit")
 			val m = mouth()
 			Eater.spitAll(t, m[0], m[1])
@@ -1648,7 +1572,6 @@ internal object Pet {
 		if (recentTaps.size >= 6) {
 			recentTaps.clear()
 			setMood(Anim.SAD, 2.5f)
-			Sounds.sad()
 			addLove(-5)
 			say("annoyed", force = true)
 			addRep(-6)
@@ -1656,8 +1579,7 @@ internal object Pet {
 			return
 		}
 		setMood(Anim.SURPRISED, 0.45f)
-		hop(dp(330f), quiet = true)
-		Sounds.tap()
+		hop(dp(330f))
 		haptic(HapticFeedbackConstants.KEYBOARD_TAP)
 		addLove(2)
 		if (Random.nextFloat() < 0.35f) say(if (love() < LONELY) "lonely" else "tap")
@@ -1673,7 +1595,6 @@ internal object Pet {
 	private fun endPet(t: Float) {
 		state = if (stuck) State.STUCK else State.IDLE
 		setMood(Anim.HAPPY, 2.2f)
-		Sounds.happy()
 		nextAction = t + Random.nextFloat() * 3f + 3f
 		Settings.pets++
 		addLove(6)
@@ -1684,7 +1605,7 @@ internal object Pet {
 
 	// ---------------------------------------------------------------- reactions
 
-	private fun canReact() = running && !voiceRestricted && !paused && !away && view != null && posReady &&
+	private fun canReact() = running && !paused && !away && view != null && posReady &&
 		state in setOf(State.IDLE, State.WALK, State.SLEEP, State.PEEK, State.STUCK)
 
 	private fun wake(t: Float) {
@@ -1704,31 +1625,29 @@ internal object Pet {
 			"love" -> {
 				setMood(Anim.REACTION, 2.2f, Bubble.HEART)
 				repeat(3) { spawn(Particle.HEART) }
-				Sounds.twinkle()
 				if (Settings.bubbles) mainHandler.postDelayed({ blow() }, 2300)
 			}
 			"laugh" -> { setMood(Anim.HAPPY, 1.6f); hop(dp(420f)); spawn(Particle.SPARK) }
 			"hi" -> setMood(Anim.VARIANT, 1.8f, 1)
-			"bye" -> { setMood(Anim.SAD, 1.4f); Sounds.sad() }
-			"sleepy" -> { setMood(Anim.SLEEP, 2.4f); Sounds.sleep() }
-			"sad" -> { setMood(Anim.SAD, 2f); Sounds.sad(); spawn(Particle.HEART) }
+			"bye" -> { setMood(Anim.SAD, 1.4f) }
+			"sleepy" -> { setMood(Anim.SLEEP, 2.4f) }
+			"sad" -> { setMood(Anim.SAD, 2f); spawn(Particle.HEART) }
 			"wow" -> { setMood(Anim.SURPRISED, 1.6f); hop(dp(380f)) }
 			"party" -> {
 				setMood(Anim.HAPPY, 2f)
 				hop(dp(480f))
 				repeat(4) { spawn(Particle.SPARK) }
-				Sounds.chime()
 				if (Settings.bubbles) mainHandler.postDelayed({ blow() }, 2100)
 			}
-			"cool" -> { setMood(Anim.VARIANT, 2f, 3); repeat(2) { spawn(Particle.SPARK) }; Sounds.twinkle() }
-			"food" -> { setMood(Anim.HAPPY, 1.6f); hop(dp(300f), quiet = true); Sounds.gulp() }
-			"music" -> { setMood(Anim.REACTION, 2.2f, Bubble.MUSIC); Sounds.chime() }
+			"cool" -> { setMood(Anim.VARIANT, 2f, 3); repeat(2) { spawn(Particle.SPARK) } }
+			"food" -> { setMood(Anim.HAPPY, 1.6f); hop(dp(300f)) }
+			"music" -> { setMood(Anim.REACTION, 2.2f, Bubble.MUSIC) }
 			"thanks" -> { setMood(Anim.VARIANT, 1.8f, 1); spawn(Particle.HEART) }
-			"mention" -> { setMood(Anim.REACTION, 2.2f, Bubble.ALERT); hop(dp(360f), quiet = true); Sounds.alert(); haptic(HapticFeedbackConstants.KEYBOARD_TAP) }
-			"mail" -> { setMood(Anim.REACTION, 2f, Bubble.MAIL); hop(dp(300f), quiet = true); Sounds.ding() }
+			"mention" -> { setMood(Anim.REACTION, 2.2f, Bubble.ALERT); hop(dp(360f)); haptic(HapticFeedbackConstants.KEYBOARD_TAP) }
+			"mail" -> { setMood(Anim.REACTION, 2f, Bubble.MAIL); hop(dp(300f)) }
 			"sent", "essay" -> { setMood(Anim.HAPPY, 1.2f); hop(dp(520f)); repeat(2) { spawn(Particle.SPARK) } }
-			"voice_join" -> { setMood(Anim.REACTION, 2.5f, Bubble.MUSIC); Sounds.chime() }
-			"voice_leave" -> { setMood(Anim.SAD, 1.5f); Sounds.sad() }
+			"voice_join" -> { setMood(Anim.REACTION, 2.5f, Bubble.MUSIC) }
+			"voice_leave" -> { setMood(Anim.SAD, 1.5f) }
 			"channel_new", "channel_again" -> setMood(Anim.VARIANT, 1.4f, 2)
 		}
 		val talk = when (kind) {
@@ -1742,7 +1661,6 @@ internal object Pet {
 	}
 
 	fun onShake(power: Float) {
-		if (voiceRestricted) return
 		if (!running || paused || away || view == null || stuck || state in setOf(State.PRESS, State.DRAG, State.PET, State.LEAVING)) return
 		val t = now()
 		val wasSleeping = state == State.SLEEP
@@ -1761,7 +1679,6 @@ internal object Pet {
 		lastInteraction = t
 		addRep(-2)
 		haptic(HapticFeedbackConstants.LONG_PRESS)
-		Sounds.swoosh(1f)
 		say(if (wasSleeping) "wake" else "shake")
 		schedule(0)
 	}
@@ -1771,7 +1688,6 @@ internal object Pet {
 		val t = now()
 		wake(t)
 		setMood(Anim.CHARGING, Looks.current.duration(Anim.CHARGING) + 1.5f)
-		Sounds.charge()
 		say("charging")
 		nextAction = maxOf(nextAction, t + 4f)
 		schedule(0)
@@ -1782,7 +1698,6 @@ internal object Pet {
 		val t = now()
 		wake(t)
 		setMood(Anim.LOW_BATTERY, Looks.current.duration(Anim.LOW_BATTERY) + 4f)
-		Sounds.lowBattery()
 		say("low_battery")
 		nextAction = maxOf(nextAction, t + 6f)
 		schedule(0)
@@ -1798,7 +1713,6 @@ internal object Pet {
 	fun onSwallowed() {
 		setMood(Anim.HAPPY, 1.6f)
 		haptic(HapticFeedbackConstants.KEYBOARD_TAP)
-		Sounds.gulp()
 		Settings.eaten++
 		onPersist()
 		if (Random.nextFloat() < 0.7f) say("eat")
@@ -1809,7 +1723,6 @@ internal object Pet {
 	 * stream follows (Bubbles.kt). [force] ignores the setting, for the test button.
 	 */
 	fun blow(force: Boolean = false) {
-		if (voiceRestricted) return
 		if (!force && !Settings.bubbles) return
 		val root = decor ?: return
 		if (view == null || paused || away || state !in setOf(State.IDLE, State.WALK, State.SLEEP, State.PEEK)) return
@@ -1831,7 +1744,7 @@ internal object Pet {
 		val frame = ((t - animStart) * Anim.BLOW.fps).toInt()
 		if (Settings.look == Looks.CAPRI) {
 			// Capri doesn't blow bubbles: she possesses the screen (Possess.kt) on the first blow frame.
-			if (frame >= 6 && released == 0) { released = 1; Possess.start(root, x + w / 2f, y + h * 0.3f); Sounds.bloop() }
+			if (frame >= 6 && released == 0) { released = 1; Possess.start(root, x + w / 2f, y + h * 0.3f) }
 			if (Possess.active) Possess.follow(x + w / 2f, y + h * 0.3f)
 			return
 		}
@@ -1841,7 +1754,6 @@ internal object Pet {
 			val p = cellPoint(r.x, r.y)
 			if (released == 0) Bubbles.blow(root, p[0], p[1], blowLeft, delay = 0.45f)
 			Bubbles.release(root, p[0], p[1], r.size * scale, r.variant, facing)
-			Sounds.bloop()
 			released++
 		}
 		if (released > 0) {
@@ -1863,7 +1775,6 @@ internal object Pet {
 	 * or effect for a few seconds. Only while it's idle or walking, unless [force]d by the test button.
 	 */
 	fun castMagic(force: Boolean = false) {
-		if (voiceRestricted) return
 		val t = now()
 		val scale = rateScale(Settings.magicRate)
 		if (nextMagic == 0f && !force) { nextMagic = t + (20f + Random.nextFloat() * 40f) * scale; return }
@@ -1878,7 +1789,6 @@ internal object Pet {
 		if (state == State.WALK || state == State.SLEEP) state = State.IDLE
 		setMood(Anim.HAPPY, 1.8f)
 		repeat(4) { spawn(Particle.SPARK) }
-		Sounds.twinkle()
 		say("magic")
 		decor?.let { StarStrike.start(it, x + w / 2f, y + h * 0.45f) }
 		// She points up at the star, which hangs on the side of the screen farther from her.
@@ -1980,7 +1890,6 @@ internal object Pet {
 	/** It adores you: whatever it took comes back without being asked. */
 	private fun giveBackKindly(t: Float) {
 		setMood(Anim.HAPPY, 1.2f)
-		Sounds.spit()
 		say("give_back")
 		val m = mouth()
 		Eater.spitAll(t, m[0], m[1])
@@ -1997,7 +1906,6 @@ internal object Pet {
 	/** Lonely: a sad look, a line asking for attention, and now and then a shuffle towards the middle. */
 	private fun askForAttention(minX: Float, maxX: Float) {
 		setMood(Anim.SAD, 2.4f)
-		if (Random.nextFloat() < 0.3f) Sounds.sad()
 		say("lonely")
 		if (Settings.wander && Random.nextFloat() < 0.4f) {
 			val middle = (minX + maxX) / 2f
@@ -2056,7 +1964,6 @@ internal object Pet {
 		savePosition()
 		state = State.LEAVING
 		setAnim(Anim.OUTRO)
-		Sounds.leave()
 		afterLeave = { view?.let { goAwayNow(it) } }
 		schedule(0)
 	}
@@ -2086,9 +1993,9 @@ internal object Pet {
 		lastInteraction = t
 		nextAction = t + 2f + Random.nextFloat() * 2f
 		if (quiet) return
-		hop(dp(420f), quiet = true)
+		hop(dp(420f))
 		repeat(2) { spawn(Particle.SPARK) }
-		appearFx(); Sounds.appear()
+		appearFx()
 		if (love() < LONELY) say("missed") else if (Random.nextFloat() < 0.6f) say("typing_hello")
 	}
 
@@ -2426,7 +2333,6 @@ internal object Pet {
 
 	/** Drops a treat from the top somewhere away from Sparkle. [force]: the settings page's button. */
 	fun dropTreat(force: Boolean = false) {
-		if (voiceRestricted) return
 		val root = decor ?: return
 		val pet = view ?: return
 		val t = now()
@@ -2463,7 +2369,6 @@ internal object Pet {
 			iv.translationY = treatY
 			iv.setOnTouchListener { _, e -> runCatching { onTreatTouch(e) }.getOrDefault(false) }
 			treat = iv
-			Sounds.twinkle()
 		}.onFailure { android.util.Log.e("Sparkle", "treat failed", it) }
 		schedule(0)
 	}
@@ -2504,7 +2409,6 @@ internal object Pet {
 				treatY = floor
 				if (treatVy > dp(500f)) {
 					treatVy = -treatVy * 0.35f
-					Sounds.thud(0.1f)
 				} else {
 					treatVy = 0f
 					treatLanded = true
@@ -2554,7 +2458,7 @@ internal object Pet {
 		haptic(HapticFeedbackConstants.KEYBOARD_TAP)
 		treatClaimed = true
 		if (!stuck && state in setOf(State.IDLE, State.WALK, State.SLEEP, State.PEEK)) {
-			if (state == State.SLEEP) { Sounds.wake(); setMood(Anim.SURPRISED, 0.6f); playStrip("wake", 24f, 1f) }
+			if (state == State.SLEEP) { setMood(Anim.SURPRISED, 0.6f); playStrip("wake", 24f, 1f) }
 			peekSide = 0; peekPending = 0; peekMoving = false
 			state = State.SEEK
 		} else flyTreatToMouth()
@@ -2616,7 +2520,6 @@ internal object Pet {
 		if (state in setOf(State.IDLE, State.WALK, State.SEEK)) state = State.IDLE
 		setMood(Anim.HAPPY, 2f)
 		repeat(3) { spawn(Particle.HEART) }
-		Sounds.gulp()
 		haptic(HapticFeedbackConstants.KEYBOARD_TAP)
 		nextAction = t + 3f
 		lastInteraction = t
@@ -2626,12 +2529,9 @@ internal object Pet {
 
 	// ---------------------------------------------------------------- helpers
 
-	/** A hop of [strength] (px/s upward). Big ones boing; [quiet] when the caller plays its own sound. */
-	fun hop(strength: Float, quiet: Boolean = false) {
+	/** A hop of [strength] (px/s upward). */
+	fun hop(strength: Float) {
 		if (state != State.IDLE && state != State.WALK) return
-		if (!quiet) {
-			if (strength >= dp(700f)) Sounds.boing() else if (strength >= dp(400f)) Sounds.hop(strength / dp(700f))
-		}
 		if (!hopActive) hopStart = now()
 		hopActive = true
 		hopVy = -strength
@@ -2651,7 +2551,6 @@ internal object Pet {
 	}
 
 	private fun say(category: String, force: Boolean = false, name: String? = null) {
-		if (voiceRestricted) return
 		val bubbleView = bubble ?: return
 		if (!force && !Settings.talks) return
 		// The lines any pet says, plus the current pet's own for this moment.
@@ -2672,7 +2571,6 @@ internal object Pet {
 		bubbleView.alpha = 0f
 		bubbleView.visibility = View.VISIBLE
 		bubbleView.animate().alpha(1f).setDuration(150).start()
-		Sounds.talk()
 		bubbleUntil = now() + 2f + text.length * 0.05f
 	}
 

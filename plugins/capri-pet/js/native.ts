@@ -17,19 +17,12 @@ export interface CapriStorage {
 	eat: boolean
 	shake: boolean
 	discord: boolean
-	/** In a voice call: 0 normal, 1 sound cooldown, 2 idle only, 3 pet off. */
-	voiceMode: number
-	voiceCooldown: number
 	battery: boolean
 	haptics: boolean
 	/** Blows bubbles now and then, and when happy. */
 	bubbles: boolean
 	/** While bubbles are out, a swirling soap-film screen and pops that ripple it (overlay versions below Android 13). */
 	bubbleFx: boolean
-	/** Sound effects, on the media volume. */
-	sounds: boolean
-	/** 0..100, on top of the media volume. */
-	volume: number
 	/** Now and then casts a spell: VFX shows a random filter or effect for a few seconds. */
 	magic: boolean
 	/** How often magic, treats, the Nyan party and eating happen: 1 Rare, 2 Sometimes, 3 Often, 4 Very often. */
@@ -63,8 +56,6 @@ export interface CapriStorage {
 	moodEffects: boolean
 	/** Reaction ids whose full-screen effect is off. */
 	moodFxOff: string[]
-	/** Stays quiet while the phone is on silent or vibrate. */
-	quietOnSilent: boolean
 	/** 0: always on screen. 1: only while the keyboard is up. */
 	showWhen: number
 	/** Now and then a treat drops in; tap it to feed it. */
@@ -103,14 +94,10 @@ export const DEFAULTS: CapriStorage = {
 	eat: true,
 	shake: true,
 	discord: true,
-	voiceMode: 0,
-	voiceCooldown: 30,
 	battery: true,
 	haptics: true,
 	bubbles: true,
 	bubbleFx: true,
-	sounds: true,
-	volume: 70,
 	magic: false,
 	magicRate: 2,
 	activity: 1,
@@ -130,7 +117,6 @@ export const DEFAULTS: CapriStorage = {
 	moodRemoved: {},
 	moodEffects: false,
 	moodFxOff: [],
-	quietOnSilent: true,
 	showWhen: 0,
 	treats: true,
 	name: "Capri",

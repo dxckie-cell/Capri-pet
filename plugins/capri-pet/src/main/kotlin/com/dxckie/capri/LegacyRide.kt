@@ -60,7 +60,6 @@ internal class LegacyRideView(
 		isClickable = false
 		isFocusable = false
 		importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
-		Sounds.appear(force = false)
 	}
 
 	private fun dp(v: Float) = v * resources.displayMetrics.density
@@ -93,7 +92,7 @@ internal class LegacyRideView(
 		if (jumpOff < 0f || vy != 0f) {
 			vy += dp(2200f) * dt
 			jumpOff += vy * dt
-			if (jumpOff >= 0f) { jumpOff = 0f; vy = 0f; Sounds.thud(0.5f) }
+			if (jumpOff >= 0f) { jumpOff = 0f; vy = 0f }
 		}
 		y = base + jumpOff
 		when (phase) {
@@ -102,7 +101,7 @@ internal class LegacyRideView(
 				val atEdge = (facing > 0 && x + hw >= w) || (facing < 0 && x <= 0f)
 				if (atEdge) {
 					x = if (facing > 0) w - hw else 0f
-					if (Random.nextInt(3) == 0 && jumpOff == 0f) { phase = "rear"; phaseAt = t; Sounds.swoosh(0.4f) }
+					if (Random.nextInt(3) == 0 && jumpOff == 0f) { phase = "rear"; phaseAt = t }
 					else facing = -facing
 				}
 				if (t >= nextJump && jumpOff == 0f) {

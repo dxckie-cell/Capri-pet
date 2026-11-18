@@ -51,24 +51,6 @@ export function watchDiscord(): () => void {
 	let nextSent = 0
 	let nextChannel = 0
 	const visits = new Map<string, number>()
-	let voiceConnected: boolean | undefined
-	let disposed = false
-	function syncVoice(connected?: boolean) {
-		if (disposed) return
-		const s = stores()
-		const channel = s.SelectedChannelStore?.getVoiceChannelId?.()
-		if (connected === undefined && channel === undefined) return
-		const next = connected ?? Boolean(channel)
-		if (next === voiceConnected) return
-		voiceConnected = next
-		callNative("voiceState", [next]).catch(error => {
-			voiceConnected = undefined
-			reportError("[Capri] voice state failed:", error)
-		})
-	}
-	const voiceTimer = setInterval(() => { try { syncVoice() } catch (error) { reportError("[Capri] voice sync failed:", error) } }, 2000)
-	try { syncVoice() } catch (error) { reportError("[Capri] initial voice sync failed:", error) }
-
 	// Patches, not listeners: each MUST return the payload (docs/porting-rules.md rule 2).
 	undo.push(
 		onFluxEventDispatched("MESSAGE_CREATE", (payload: any) => {
@@ -129,7 +111,6 @@ export function watchDiscord(): () => void {
 	undo.push(
 		onFluxEventDispatched("VOICE_CHANNEL_SELECT", (payload: any) => {
 			try {
-				syncVoice(Boolean(payload?.channelId))
 				react(payload?.channelId ? "voice_join" : "voice_leave")
 			} catch (error) {
 				reportError("[Capri] VOICE_CHANNEL_SELECT handler failed:", error)
@@ -139,9 +120,6 @@ export function watchDiscord(): () => void {
 	)
 
 	return () => {
-		disposed = true
-		clearInterval(voiceTimer)
-		callNative("voiceState", [false]).catch(() => {})
 		for (const fn of undo) fn()
 	}
 }

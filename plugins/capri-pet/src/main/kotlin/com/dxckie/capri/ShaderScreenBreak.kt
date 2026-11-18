@@ -397,7 +397,6 @@ internal class ShaderBreakView(
 			if (a >= st && !flurrySparked[i]) {
 				flurrySparked[i] = true
 				sparksAlong(cx, cy, d, a, 12)
-				if (i > 0) Sounds.swoosh(0.8f)
 			}
 		}
 		// The slam back together glows once more.
@@ -419,7 +418,6 @@ internal class ShaderBreakView(
 		val b = a - LOB
 		if (b >= 0f && !landed) {
 			landed = true
-			Sounds.thud(1f)
 			for (i in 0 until 14) {
 				val ang = Random.nextFloat() * 2f * PI.toFloat()
 				val sp = dp(120f) + Random.nextFloat() * dp(260f)
@@ -477,7 +475,6 @@ internal class ShaderBreakView(
 		}
 		if (a >= 1.45f && !flashed) {
 			flashed = true
-			Sounds.swoosh(1f)
 			for (i in 0 until 24) {
 				val ang = Random.nextFloat() * 2f * PI.toFloat()
 				val sp = dp(160f) + Random.nextFloat() * dp(320f)

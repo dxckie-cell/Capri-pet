@@ -94,7 +94,6 @@ internal class ShaderRideView(
 		isClickable = false
 		isFocusable = false
 		importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
-		Sounds.appear(force = false)
 	}
 
 	private fun dp(v: Float) = v * resources.displayMetrics.density
@@ -138,7 +137,6 @@ internal class ShaderRideView(
 			jumpOff += vy * dt
 			if (jumpOff >= 0f) {
 				jumpOff = 0f; vy = 0f
-				Sounds.thud(0.6f)
 				burst(t, 10, dust = true)
 				burst(t, 14, dust = false)
 			}
@@ -155,12 +153,11 @@ internal class ShaderRideView(
 					x = if (facing > 0) w - hw else 0f
 					phase = "turn"; phaseAt = t
 					turnKind = if (Random.nextInt(3) == 0) "rear" else "skid"
-					if (turnKind == "rear") Sounds.swoosh(0.4f) else burst(t, 8, dust = true)
+					if (turnKind != "rear") burst(t, 8, dust = true)
 				}
 				if (t >= nextJump && jumpOff == 0f && v > maxSpeed * 0.6f && toEdge > w * 0.35f) {
 					vy = -dp(900f); jumpOff = -0.01f
 					nextJump = t + 18f + Random.nextFloat() * 22f
-					Sounds.hop(0.6f)
 				}
 			}
 			"turn" -> {

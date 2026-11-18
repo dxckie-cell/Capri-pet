@@ -84,12 +84,11 @@ internal object Boss {
 		}
 	}
 
-	private fun canAttack() = Pet.freeForEvents && !busy && !Pet.voiceRestricted && !(Pet.keyboardUp && Settings.attackFx)
+	private fun canAttack() = Pet.freeForEvents && !busy && !(Pet.keyboardUp && Settings.attackFx)
 
 	/** An attack now: the weapon is random. [force] from the settings page skips the free-and-idle check. */
 	fun attack(force: Boolean) {
 		val k = kind ?: return
-		if (Pet.voiceRestricted) return
 		if (!force && !canAttack()) return
 		if (busy) return
 		val root = Pet.petDecor ?: return
@@ -117,13 +116,11 @@ internal object Boss {
 						pending = {
 							val hand = Pet.pointInCell(31f, 23f)
 							val px = Pet.petW / Looks.current.cellW
-							Sounds.swoosh(0.9f)
 							Projectile.throwScythe(root, view, hand[0], hand[1], facing, px,
 								top = { Pet.boundsNow(now())[2] }, floor = { Pet.boundsNow(now())[3] + Pet.petH },
-								home = { Pet.pointInCell(31f, 23f) }, onBounce = { Sounds.thud(0.35f) }) {
+								home = { Pet.pointInCell(31f, 23f) }, onBounce = { }) {
 								Pet.playStrip("catch", 10f, 0.4f)
 								Pet.hold(0.5f)
-								Sounds.grab()
 								attacking = false
 							}
 						}
@@ -135,7 +132,6 @@ internal object Boss {
 						fireAt = t + 0.3f
 						pending = {
 							val tip = Pet.pointInCell(52f, 22f)
-							Sounds.swoosh(1f)
 							val ok = ScreenBreak.play(root, view, hide, ScreenBreak.Kind.CUT, tip[0], tip[1], facing, null) { attacking = false }
 							if (!ok) attacking = false
 						}
@@ -147,7 +143,6 @@ internal object Boss {
 						fireAt = t + 0.2f
 						pending = {
 							val tip = Pet.pointInCell(52f, 22f)
-							Sounds.swoosh(1f)
 							val ok = ScreenBreak.play(root, view, hide, ScreenBreak.Kind.FLURRY, tip[0], tip[1], facing, null) { attacking = false }
 							if (!ok) attacking = false
 						}
@@ -159,7 +154,6 @@ internal object Boss {
 						fireAt = t + 0.45f
 						pending = {
 							val hand = Pet.pointInCell(26f, 12f)
-							Sounds.swoosh(0.7f)
 							val ok = ScreenBreak.play(root, view, hide, ScreenBreak.Kind.PUMPKIN, hand[0], hand[1], facing, hand) { attacking = false }
 							if (!ok) attacking = false
 						}
@@ -171,7 +165,6 @@ internal object Boss {
 						fireAt = t + 0.3f
 						pending = {
 							val tip = Pet.pointInCell(52f, 22f)
-							Sounds.appear(force = true)
 							val ok = ScreenBreak.play(root, view, hide, ScreenBreak.Kind.REAP, tip[0], tip[1], facing, null) { attacking = false }
 							if (!ok) attacking = false
 						}
@@ -189,9 +182,8 @@ internal object Boss {
 						fireAt = t + 0.25f
 						pending = {
 							val hand = Pet.pointInCell(18f, 31f)
-							Sounds.swoosh(0.7f)
 							val ok = ScreenBreak.play(root, view, hide, ScreenBreak.Kind.HOOK, hand[0], hand[1], facing, hand,
-								onBite = { Sounds.grab(); Pet.playStrip("pull", 8f, 1.9f) }) { attacking = false }
+								onBite = { Pet.playStrip("pull", 8f, 1.9f) }) { attacking = false }
 							if (!ok) attacking = false
 						}
 						Pet.sayNow("chain")
@@ -203,7 +195,6 @@ internal object Boss {
 						fireAt = t + 0.3f
 						pending = {
 							val claw = Pet.pointInCell(42f, 37f)
-							Sounds.swoosh(1f)
 							val ok = ScreenBreak.play(root, view, hide, ScreenBreak.Kind.CLAWS, claw[0], claw[1], facing, null) { attacking = false }
 							if (!ok) attacking = false
 						}
@@ -216,7 +207,6 @@ internal object Boss {
 						fireAt = t + 0.3f
 						pending = {
 							val horn = Pet.pointInCell(44f, 23f)
-							Sounds.thud(1f)
 							if (fx) {
 								val ok = ScreenBreak.play(root, view, hide, ScreenBreak.Kind.HORN, horn[0], horn[1], facing, null) { attacking = false }
 								if (!ok) attacking = false
@@ -277,7 +267,6 @@ internal object Boss {
 		Pet.petView?.visibility = android.view.View.INVISIBLE
 		Pet.petBubble?.visibility = android.view.View.GONE
 		Pet.sayNow("ride")
-		Sounds.hop(0.8f)
 		Ride.start(root, look, px, startX, facing, Settings.rideMinutes.coerceIn(1, 5), { Pet.boundsNow(now())[3] + Pet.petH }) { x, f ->
 			val t = now()
 			val b = Pet.boundsNow(t)

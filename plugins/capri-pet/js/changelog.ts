@@ -3,6 +3,15 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.37',
+		date: '2026-11-19',
+		title: 'Sounds and voice-call mode removed',
+		changes: [
+			'Removed sound effects, volume and the During voice calls mode completely, in the app and in the plugin code. She is silent and behaves the same in voice calls.',
+			'The Sounds & reactions page is now just Reactions, and the sound credits are gone.',
+		],
+	},
+	{
 		version: '2.10.36',
 		date: '2026-11-18',
 		title: 'Shorter sounds and reactions page',

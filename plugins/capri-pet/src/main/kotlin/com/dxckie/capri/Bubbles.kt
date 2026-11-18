@@ -246,7 +246,6 @@ internal object Bubbles {
 			val atEdge = b.x - r < margin || b.x + r > w - margin || b.y - r < margin || b.y + r > h - margin
 			if (atEdge || age > b.life) {
 				b.poppedAt = t
-				Sounds.pop(b.size / dp(46f))
 			}
 		}
 
