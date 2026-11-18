@@ -3,6 +3,15 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.24',
+		date: '2026-11-18',
+		title: 'Happy pose traced from the art',
+		changes: [
+			'Her happy pose is now the figure from the victory art itself, not her idle model: red hair mass with glitter, thin dark V arms, thin red and green legs.',
+			'She glitches into the pose with a row tear, then holds it with glitter that keeps twinkling.',
+		],
+	},
+	{
 		version: '2.10.23',
 		date: '2026-11-18',
 		title: 'Happy arms like the art',
