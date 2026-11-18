@@ -3,6 +3,14 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.36',
+		date: '2026-11-18',
+		title: 'Shorter sounds and reactions page',
+		changes: [
+			'Removed the Sounds, Volume and During voice calls sections from Sounds & reactions. Only Reacts to is left.',
+		],
+	},
+	{
 		version: '2.10.35',
 		date: '2026-11-18',
 		title: 'Shorter animation tester',

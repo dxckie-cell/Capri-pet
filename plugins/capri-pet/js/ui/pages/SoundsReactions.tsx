@@ -3,17 +3,17 @@ import { lookOf } from "../../native"
 import { rowIcon } from "../icon"
 import { REACTIONS_ROUTE } from "../routes"
 import { useBottomPadding } from "../safeArea"
-import { call, update, useSettings } from "../state"
+import { update, useSettings } from "../state"
 import { ReactNavigationNative } from "@valenced/externals/react-navigation"
 import * as components from "@valenced/components"
 import { Design } from "@valenced/discord/design"
 import * as ReactNative from "react-native"
 
-/** Its sound effects and volume, then what it reacts to, and what it does during voice calls. */
+/** What it reacts to. */
 export default function SoundsReactions() {
 	const { Page } = components
 	const { ScrollView } = ReactNative
-	const { Stack, TableRowGroup, TableRow, TableSwitchRow, TableRadioGroup, TableRadioRow } = Design as any
+	const { Stack, TableRowGroup, TableRow, TableSwitchRow } = Design as any
 
 	const { useNavigation } = ReactNavigationNative
 	const navigation = useNavigation() as { navigate: (route: string) => void }
@@ -21,51 +21,11 @@ export default function SoundsReactions() {
 	const moodsOn = MOODS.filter(mood => !s.moodsOff.includes(mood.id)).length
 	const bottom = useBottomPadding()
 	const name = s.name?.trim() || lookOf(s.look).defaultName
-	const soundsOff = "Turn on Sound effects first."
-	// "Idle only" (2) was folded into Quieter; a pet still set to it keeps behaving that way.
-	const voice = s.voiceMode === 3 ? "3" : s.voiceMode === 0 ? "0" : "1"
 
 	return (
 		<Page>
 			<ScrollView contentContainerStyle={{ paddingBottom: bottom }}>
 				<Stack spacing={24}>
-					<TableRowGroup title="Sounds" hasIcons>
-						<TableSwitchRow
-							label="Sound effects"
-							subLabel="Little 8-bit blips, boings and chimes when it hops, gets thrown, blows or reacts. Follows your media volume."
-							icon={rowIcon("SoundboardIcon", "MusicIcon")}
-							value={s.sounds}
-							onValueChange={(sounds: boolean) => update({ sounds })}
-						/>
-						<TableSwitchRow
-							label="Quiet on silent"
-							subLabel={s.sounds ? "No sounds while your phone is on silent or vibrate. Off: it plays anyway, on the media volume." : soundsOff}
-							icon={rowIcon("BellSlashIcon", "BellIcon")}
-							disabled={!s.sounds}
-							value={s.quietOnSilent}
-							onValueChange={(quietOnSilent: boolean) => update({ quietOnSilent })}
-						/>
-						<TableRow
-							label="Play a sound"
-							subLabel={s.sounds ? "Hear how loud it is (plays even on silent)." : soundsOff}
-							icon={rowIcon("PlayIcon")}
-							disabled={!s.sounds}
-							onPress={() => call("testSound")}
-						/>
-					</TableRowGroup>
-
-					<TableRadioGroup
-						key={`volume-${s.volume}`}
-						title="Volume"
-						description={s.sounds ? "On top of your media volume." : soundsOff}
-						defaultValue={String(s.volume <= 40 ? 35 : s.volume <= 80 ? 70 : 100)}
-						onChange={(value: string) => update({ volume: Number(value) })}
-					>
-						<TableRadioRow label="Quiet" value="35" disabled={!s.sounds} />
-						<TableRadioRow label="Normal" value="70" disabled={!s.sounds} />
-						<TableRadioRow label="Loud" value="100" disabled={!s.sounds} />
-					</TableRadioGroup>
-
 					<TableRowGroup title="Reacts to" hasIcons>
 						<TableSwitchRow
 							label="Discord"
@@ -96,12 +56,6 @@ export default function SoundsReactions() {
 							onValueChange={(battery: boolean) => update({ battery })}
 						/>
 					</TableRowGroup>
-
-					<TableRadioGroup key={`voice-${voice}`} title="During voice calls" defaultValue={voice} onChange={(v: string) => update({ voiceMode: Number(v) })}>
-						<TableRadioRow label="As usual" value="0" />
-						<TableRadioRow label="Quieter" subLabel="Sounds spaced out" value="1" />
-						<TableRadioRow label="Hidden" subLabel="Leaves until you hang up" value="3" />
-					</TableRadioGroup>
 				</Stack>
 			</ScrollView>
 		</Page>

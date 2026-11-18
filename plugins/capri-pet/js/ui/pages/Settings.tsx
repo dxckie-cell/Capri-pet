@@ -114,7 +114,7 @@ export default function Settings() {
 						/>
 						<TableRow
 							label="Sounds & reactions"
-							subLabel={[s.sounds ? (s.quietOnSilent ? "sounds, quiet on silent" : "sounds on") : "silent", reactsTo.length ? `reacts to ${reactsTo.join(", ")}` : "reacts to nothing"].join(" · ")}
+							subLabel={reactsTo.length ? `reacts to ${reactsTo.join(", ")}` : "reacts to nothing"}
 							icon={rowIcon("SoundboardIcon", "MusicIcon")}
 							arrow
 							onPress={() => navigation.navigate(SOUNDS_ROUTE)}
