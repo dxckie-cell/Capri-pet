@@ -3,6 +3,14 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.19',
+		date: '2026-11-18',
+		title: 'Star and possession at 30 fps',
+		changes: [
+			'The star strike and the possession redraw their lightning, glitch bars and bolts 30 times a second.',
+		],
+	},
+	{
 		version: '2.10.18',
 		date: '2026-11-18',
 		title: '30 frames',
