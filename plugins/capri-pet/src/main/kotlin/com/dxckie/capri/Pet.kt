@@ -1347,7 +1347,12 @@ internal object Pet {
 	private val teleportLook get() = Looks.current.let { it is SheetLook && it.teleports }
 
 	private fun compose(t: Float): Anim {
-		if (mood != null && t >= moodUntil) mood = null
+		if (mood != null && t >= moodUntil) {
+			// she glitches back out of the happy pose into idle
+			if (mood == Anim.HAPPY && state == State.IDLE && strip == null && Settings.look == Looks.CAPRI && (Looks.current as? SheetLook)?.has("unhappy") == true)
+				strip = StripPlay("unhappy", t, 24f, false, t + 8 / 24f)
+			mood = null
+		}
 		return when {
 			state == State.LEAVING -> Anim.OUTRO
 			stuck && state in setOf(State.STUCK, State.PRESS, State.PET) &&
