@@ -107,7 +107,7 @@ internal object Possess {
 			val t = now() - startedAt
 			// Fades in over the first 0.3 s and out over the last 0.5 s.
 			val fade = min(min(t / 0.3f, (SECONDS - t) / 0.5f), 1f).coerceIn(0f, 1f)
-			val tick = (t * 30f).toInt()
+			val tick = (t * 24f).toInt()
 			// Drawn small and scaled up unsmoothed, then blitted in bands, a few slid sideways: the same
 			// pixelated, glitchy look as her teleport bolt (Bolt.kt).
 			val pix = dp(2.2f)
@@ -131,7 +131,7 @@ internal object Possess {
 			}
 		}
 
-		/** A jagged bolt running the whole way round the screen edge, redrawn 30 times a second. */
+		/** A jagged bolt running the whole way round the screen edge, redrawn 24 times a second. */
 		private fun drawFrame(canvas: Canvas, w: Float, h: Float, tick: Int, fade: Float) {
 			val rnd = Random(tick * 31 + 7)
 			val inset = dp(5f); val jag = dp(5f); val step = dp(15f)
@@ -172,7 +172,7 @@ internal object Possess {
 			val k = min(((t - 0.8f) / 0.2f).coerceIn(0f, 1f), ((SECONDS - 0.7f - t) / 0.2f).coerceIn(0f, 1f))
 			if (k <= 0f) return
 			val er = w * 0.065f
-			val amp = er * 0.42f * (0.85f + 0.15f * sin(t * 30f)) * k
+			val amp = er * 0.42f * (0.85f + 0.15f * sin(t * 24f)) * k
 			val x0 = w * 0.34f; val x1 = w * 0.66f; val y = h * 0.42f + er * 2.1f
 			val path = Path()
 			val n = 6

@@ -141,7 +141,7 @@ internal object StarStrike {
 			bc.save(); bc.scale(1f / pix, 1f / pix)
 			scene(bc, w, h, t)
 			bc.restore()
-			val tick = (t * 30f).toInt()
+			val tick = (t * 24f).toInt()
 			val rnd = Random(tick * 53 + 9)
 			// Torn hardest right at the strike.
 			val chance = if (t in BOLT_AT..(BOLT_AT + 0.5f)) 0.4f else 0.1f
@@ -202,11 +202,11 @@ internal object StarStrike {
 			// 3. The strike: a ring round her, the zigzag bolt, then the burst at the star.
 			if (struck) {
 				val fl = (1f - (t - BOLT_AT) / 0.55f).coerceIn(0f, 1f)
-				if (fl > 0f && Random((t * 30f).toInt() * 31).nextFloat() < 0.85f) {
+				if (fl > 0f && Random((t * 24f).toInt() * 31).nextFloat() < 0.85f) {
 					line.color = RED; line.alpha = a(fl); line.strokeWidth = dp(1.5f)
 					canvas.drawCircle(fromX, fromY, dp(34f) + dp(8f) * (1f - fl), line)
 					val path = Path()
-					val tick = (t * 30f).toInt()
+					val tick = (t * 24f).toInt()
 					zigAt(tick).forEachIndexed { i, (px, py) -> if (i == 0) path.moveTo(px, py) else path.lineTo(px, py) }
 					line.color = PURPLE; line.strokeWidth = dp(7f); line.alpha = a(fl); canvas.drawPath(path, line)
 					line.color = RED; line.strokeWidth = dp(5f); canvas.drawPath(path, line)
