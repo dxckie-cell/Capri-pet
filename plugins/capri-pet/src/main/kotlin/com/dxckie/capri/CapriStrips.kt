@@ -19,4 +19,5 @@ internal object CapriStrips {
     val dizzy get() = arrayOf(CapriStrip_Dizzy_P1.DATA + CapriStrip_Dizzy_P2.DATA)
     val wake get() = arrayOf(CapriStrip_Wake_P1.DATA + CapriStrip_Wake_P2.DATA + CapriStrip_Wake_P3.DATA + CapriStrip_Wake_P4.DATA + CapriStrip_Wake_P5.DATA)
     val cast get() = arrayOf(CapriStrip_Cast_P1.DATA + CapriStrip_Cast_P2.DATA + CapriStrip_Cast_P3.DATA + CapriStrip_Cast_P4.DATA + CapriStrip_Cast_P5.DATA)
+    val happy get() = arrayOf(CapriStrip_Happy_P1.DATA + CapriStrip_Happy_P2.DATA + CapriStrip_Happy_P3.DATA + CapriStrip_Happy_P4.DATA)
 }

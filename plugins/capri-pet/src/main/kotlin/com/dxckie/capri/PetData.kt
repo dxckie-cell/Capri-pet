@@ -178,6 +178,7 @@ internal object PetData {
 		    "sleep" to (72 to CapriStrips.sleep),
 		    "wake" to (24 to CapriStrips.wake),
 		    "cast" to (37 to CapriStrips.cast),
+		    "happy" to (24 to CapriStrips.happy),
 		    "sit" to (30 to CapriStrips.sit),
 		    "lay" to (18 to CapriStrips.lay),
 		    "voice" to (24 to CapriStrips.voice),

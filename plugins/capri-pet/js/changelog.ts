@@ -3,6 +3,14 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.22',
+		date: '2026-11-18',
+		title: 'Happy: hands up, hair shards',
+		changes: [
+			'No more face banner. When she is happy she throws both arms up and out with her hands spread, and shards of her hair fly off with the rays.',
+		],
+	},
+	{
 		version: '2.10.21',
 		date: '2026-11-18',
 		title: 'Happy burst',
