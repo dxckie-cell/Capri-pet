@@ -17,7 +17,6 @@ export interface CapriStorage {
 	eat: boolean
 	shake: boolean
 	discord: boolean
-	battery: boolean
 	haptics: boolean
 	/** Blows bubbles now and then, and when happy. */
 	bubbles: boolean
@@ -94,7 +93,6 @@ export const DEFAULTS: CapriStorage = {
 	eat: true,
 	shake: true,
 	discord: true,
-	battery: true,
 	haptics: true,
 	bubbles: true,
 	bubbleFx: true,

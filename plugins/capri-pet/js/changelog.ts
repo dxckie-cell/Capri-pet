@@ -3,6 +3,15 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.38',
+		date: '2026-11-19',
+		title: 'Old dizzy back, fewer animations',
+		changes: [
+			'Her dizzy form is back to the old flat hair, without the glitter and wave.',
+			'Removed jump, hang, charging, low battery, fidget and look around. She no longer hops or hangs, and the battery reactions and the battery switch are gone.',
+		],
+	},
+	{
 		version: '2.10.37',
 		date: '2026-11-19',
 		title: 'Sounds and voice-call mode removed',

@@ -48,13 +48,6 @@ export default function SoundsReactions() {
 							value={s.shake}
 							onValueChange={(shake: boolean) => update({ shake })}
 						/>
-						<TableSwitchRow
-							label="The battery"
-							subLabel="Cheers when you plug in, and gets sleepy when the battery drops to 15%."
-							icon={rowIcon("FlashIcon", "MobilePhoneIcon")}
-							value={s.battery}
-							onValueChange={(battery: boolean) => update({ battery })}
-						/>
 					</TableRowGroup>
 				</Stack>
 			</ScrollView>

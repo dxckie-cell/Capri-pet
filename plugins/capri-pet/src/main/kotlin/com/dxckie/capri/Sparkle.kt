@@ -30,7 +30,6 @@ internal object Settings {
 	@Volatile var eat = true
 	@Volatile var shake = true
 	@Volatile var discord = true
-	@Volatile var battery = true
 	@Volatile var haptics = true
 	/** Blows bubbles now and then, and when happy. */
 	@Volatile var bubbles = true
@@ -103,7 +102,6 @@ private fun settingsMap() = mapOf(
 	"eat" to Settings.eat,
 	"shake" to Settings.shake,
 	"discord" to Settings.discord,
-	"battery" to Settings.battery,
 	"haptics" to Settings.haptics,
 	"bubbles" to Settings.bubbles,
 	"bubbleFx" to Settings.bubbleFx,
@@ -169,7 +167,6 @@ val sparklePlugin = plugin {
 				Settings.eat = json.optBoolean("eat", true)
 				Settings.shake = json.optBoolean("shake", true)
 				Settings.discord = json.optBoolean("discord", true)
-				Settings.battery = json.optBoolean("battery", true)
 				Settings.haptics = json.optBoolean("haptics", true)
 				Settings.bubbles = json.optBoolean("bubbles", true)
 				Settings.bubbleFx = json.optBoolean("bubbleFx", true)
@@ -216,7 +213,6 @@ val sparklePlugin = plugin {
 					.put("eat", Settings.eat)
 					.put("shake", Settings.shake)
 					.put("discord", Settings.discord)
-					.put("battery", Settings.battery)
 					.put("haptics", Settings.haptics)
 					.put("bubbles", Settings.bubbles)
 					.put("bubbleFx", Settings.bubbleFx)
@@ -300,7 +296,6 @@ val sparklePlugin = plugin {
 			(patch["eat"] as? Boolean)?.let { Settings.eat = it }
 			(patch["shake"] as? Boolean)?.let { Settings.shake = it }
 			(patch["discord"] as? Boolean)?.let { Settings.discord = it }
-			(patch["battery"] as? Boolean)?.let { Settings.battery = it }
 			(patch["haptics"] as? Boolean)?.let { Settings.haptics = it }
 			(patch["bubbles"] as? Boolean)?.let { Settings.bubbles = it }
 			(patch["bubbleFx"] as? Boolean)?.let { Settings.bubbleFx = it }

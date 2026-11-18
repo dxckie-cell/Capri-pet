@@ -595,7 +595,6 @@ internal object Pet {
 		x += (oldW - w) / 2f
 		y += oldH - h
 		v.layoutParams = v.layoutParams.apply { width = w.toInt(); height = h.toInt() }
-		hop(dp(300f))
 	}
 
 	fun recenter() {
@@ -611,7 +610,6 @@ internal object Pet {
 		vx = 0f; vy = 0f; slideV = 0f; peekSide = 0; peekPending = 0
 		stuck = false; rocket = false
 		lastInteraction = now()
-		hop(dp(500f))
 		repeat(3) { spawn(Particle.SPARK) }
 		appearFx()
 		say("hello")
@@ -756,7 +754,6 @@ internal object Pet {
 			lastInteraction = t
 			if (greet) {
 				greet = false
-				hop(dp(420f))
 				appearFx()
 				say(if (love() < LONELY) "missed" else "hello")
 			}
@@ -1002,12 +999,9 @@ internal object Pet {
 		// Everything else keeps its old proportions, squeezed into what the walks leave.
 		val r = 0.38f + (roll - walkShare) / (1f - walkShare) * 0.62f
 		when {
-			r < 0.55f -> facing = -facing
-			r < 0.68f -> say("idle")
-			r < 0.8f -> hop(dp(360f))
-			r < 0.9f && Settings.bubbles -> blow()
-			r < 0.95f -> setMood(Anim.VARIANT, 2.2f, Random.nextInt(4))
-			else -> setMood(Anim.LOOK, Looks.current.duration(Anim.LOOK) + 0.4f)
+			r < 0.7f -> facing = -facing
+			r < 0.85f -> say("idle")
+			Settings.bubbles -> blow()
 		}
 	}
 
@@ -1288,8 +1282,6 @@ internal object Pet {
 		}
 		return when {
 			state == State.LEAVING -> Anim.OUTRO
-			stuck && state in setOf(State.STUCK, State.PRESS, State.PET) &&
-				Looks.current.hasMotionPoses -> Anim.HANG
 			spinRate > 0f && !rocket && state != State.DRAG && state != State.PRESS -> Anim.SPIN
 			state == State.DRAG && teleportLook -> Anim.SPIN
 			state == State.DRAG && wound &&
@@ -1303,7 +1295,6 @@ internal object Pet {
 			state == State.PET -> Anim.HAPPY
 			state == State.SLEEP -> Anim.SLEEP
 			mood != null -> mood!!
-			hopActive -> Anim.JUMP
 			state == State.WALK || walkIn || (state == State.PEEK && peekMoving) -> Anim.WALK
 			abs(slideV) > dp(60f) -> Anim.SURPRISED
 			else -> Anim.IDLE
@@ -1550,7 +1541,6 @@ internal object Pet {
 			lastTap = 0f
 			recentTaps.clear()
 			setMood(Anim.SURPRISED, 0.9f)
-			hop(dp(300f))
 			haptic(HapticFeedbackConstants.LONG_PRESS)
 			say("spit")
 			val m = mouth()
@@ -1559,7 +1549,6 @@ internal object Pet {
 		}
 		if (t - lastTap < 0.32f) {
 			lastTap = 0f
-			hop(dp(720f))
 			repeat(3) { spawn(Particle.SPARK) }
 			haptic(HapticFeedbackConstants.LONG_PRESS)
 			addLove(2)
@@ -1579,7 +1568,6 @@ internal object Pet {
 			return
 		}
 		setMood(Anim.SURPRISED, 0.45f)
-		hop(dp(330f))
 		haptic(HapticFeedbackConstants.KEYBOARD_TAP)
 		addLove(2)
 		if (Random.nextFloat() < 0.35f) say(if (love() < LONELY) "lonely" else "tap")
@@ -1627,28 +1615,25 @@ internal object Pet {
 				repeat(3) { spawn(Particle.HEART) }
 				if (Settings.bubbles) mainHandler.postDelayed({ blow() }, 2300)
 			}
-			"laugh" -> { setMood(Anim.HAPPY, 1.6f); hop(dp(420f)); spawn(Particle.SPARK) }
-			"hi" -> setMood(Anim.VARIANT, 1.8f, 1)
+			"laugh" -> { setMood(Anim.HAPPY, 1.6f); spawn(Particle.SPARK) }
 			"bye" -> { setMood(Anim.SAD, 1.4f) }
 			"sleepy" -> { setMood(Anim.SLEEP, 2.4f) }
 			"sad" -> { setMood(Anim.SAD, 2f); spawn(Particle.HEART) }
-			"wow" -> { setMood(Anim.SURPRISED, 1.6f); hop(dp(380f)) }
+			"wow" -> { setMood(Anim.SURPRISED, 1.6f) }
 			"party" -> {
 				setMood(Anim.HAPPY, 2f)
-				hop(dp(480f))
 				repeat(4) { spawn(Particle.SPARK) }
 				if (Settings.bubbles) mainHandler.postDelayed({ blow() }, 2100)
 			}
-			"cool" -> { setMood(Anim.VARIANT, 2f, 3); repeat(2) { spawn(Particle.SPARK) } }
-			"food" -> { setMood(Anim.HAPPY, 1.6f); hop(dp(300f)) }
+			"cool" -> repeat(2) { spawn(Particle.SPARK) }
+			"food" -> { setMood(Anim.HAPPY, 1.6f) }
 			"music" -> { setMood(Anim.REACTION, 2.2f, Bubble.MUSIC) }
-			"thanks" -> { setMood(Anim.VARIANT, 1.8f, 1); spawn(Particle.HEART) }
-			"mention" -> { setMood(Anim.REACTION, 2.2f, Bubble.ALERT); hop(dp(360f)); haptic(HapticFeedbackConstants.KEYBOARD_TAP) }
-			"mail" -> { setMood(Anim.REACTION, 2f, Bubble.MAIL); hop(dp(300f)) }
-			"sent", "essay" -> { setMood(Anim.HAPPY, 1.2f); hop(dp(520f)); repeat(2) { spawn(Particle.SPARK) } }
+			"thanks" -> spawn(Particle.HEART)
+			"mention" -> { setMood(Anim.REACTION, 2.2f, Bubble.ALERT); haptic(HapticFeedbackConstants.KEYBOARD_TAP) }
+			"mail" -> { setMood(Anim.REACTION, 2f, Bubble.MAIL) }
+			"sent", "essay" -> { setMood(Anim.HAPPY, 1.2f); repeat(2) { spawn(Particle.SPARK) } }
 			"voice_join" -> { setMood(Anim.REACTION, 2.5f, Bubble.MUSIC) }
 			"voice_leave" -> { setMood(Anim.SAD, 1.5f) }
-			"channel_new", "channel_again" -> setMood(Anim.VARIANT, 1.4f, 2)
 		}
 		val talk = when (kind) {
 			"sent" -> Random.nextFloat() < 0.3f
@@ -1680,26 +1665,6 @@ internal object Pet {
 		addRep(-2)
 		haptic(HapticFeedbackConstants.LONG_PRESS)
 		say(if (wasSleeping) "wake" else "shake")
-		schedule(0)
-	}
-
-	fun onCharging() {
-		if (!Settings.battery || !canReact()) return
-		val t = now()
-		wake(t)
-		setMood(Anim.CHARGING, Looks.current.duration(Anim.CHARGING) + 1.5f)
-		say("charging")
-		nextAction = maxOf(nextAction, t + 4f)
-		schedule(0)
-	}
-
-	fun onLowBattery() {
-		if (!Settings.battery || !canReact()) return
-		val t = now()
-		wake(t)
-		setMood(Anim.LOW_BATTERY, Looks.current.duration(Anim.LOW_BATTERY) + 4f)
-		say("low_battery")
-		nextAction = maxOf(nextAction, t + 6f)
 		schedule(0)
 	}
 
@@ -1993,7 +1958,6 @@ internal object Pet {
 		lastInteraction = t
 		nextAction = t + 2f + Random.nextFloat() * 2f
 		if (quiet) return
-		hop(dp(420f))
 		repeat(2) { spawn(Particle.SPARK) }
 		appearFx()
 		if (love() < LONELY) say("missed") else if (Random.nextFloat() < 0.6f) say("typing_hello")
@@ -2528,15 +2492,6 @@ internal object Pet {
 	}
 
 	// ---------------------------------------------------------------- helpers
-
-	/** A hop of [strength] (px/s upward). */
-	fun hop(strength: Float) {
-		if (state != State.IDLE && state != State.WALK) return
-		if (!hopActive) hopStart = now()
-		hopActive = true
-		hopVy = -strength
-		if (hopOff > 0f) hopOff = 0f
-	}
 
 	private fun haptic(kind: Int) {
 		if (!Settings.haptics) return

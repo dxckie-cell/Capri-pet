@@ -37,7 +37,7 @@ export default function Settings() {
 	const pet = lookOf(s.look)
 	const name = s.name?.trim() || pet.defaultName
 	const activity = s.wander ? ["calm", "normal", "lively", "hyper"][Math.min(3, Math.max(0, s.activity))] : "still"
-	const reactsTo = [s.discord && "Discord", s.shake && "shakes", s.battery && "battery"].filter(Boolean)
+	const reactsTo = [s.discord && "Discord", s.shake && "shakes"].filter(Boolean)
 	const fun = [s.bubbles && pet.bubbles, s.treats && "treats", s.magic && "magic", s.eat && "eats buttons"].filter(Boolean)
 
 	return (

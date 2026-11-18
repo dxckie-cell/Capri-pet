@@ -8,7 +8,6 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.os.BatteryManager
 import android.os.SystemClock
 import android.view.Surface
 import android.view.WindowManager
@@ -16,8 +15,7 @@ import kotlin.math.sqrt
 
 /**
  * The phone itself: a shake sends Sparkle tumbling, a tilt makes it slide (with gravity on), tipping
- * the top of the phone down lifts it up the screen and tipping it back pushes it down, and
- * plugging in or running low on battery gets a reaction. Listens only while Sparkle is on screen and
+ * the top of the phone down lifts it up the screen and tipping it back pushes it down. Listens only while Sparkle is on screen and
  * Discord is in front; [Pet] starts and stops it.
  */
 internal object Phone {
@@ -25,7 +23,6 @@ internal object Phone {
 	private const val SHAKE_JERK = 14f
 	private const val SHAKE_HITS = 4
 	private const val SHAKE_WINDOW_MS = 900L
-	private const val LOW_LEVEL = 15
 
 	var running = false
 		private set
@@ -35,9 +32,6 @@ internal object Phone {
 	/** How upright the phone is held, averaged over a few seconds: forward/back tilt is measured from it. */
 	private var restSy = Float.NaN
 	private val hits = ArrayList<Long>()
-	private var batteryRegistered = false
-	private var wasCharging: Boolean? = null
-	private var lowNotified = false
 
 	private val accel = object : SensorEventListener {
 		override fun onSensorChanged(event: SensorEvent) {
@@ -47,34 +41,25 @@ internal object Phone {
 		override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 	}
 
-	private val battery = object : BroadcastReceiver() {
-		override fun onReceive(ctx: Context, intent: Intent) {
-			runCatching { onBattery(intent) }
-		}
-	}
-
 	fun start(ctx: Context) {
 		if (running) return
 		running = true
 		context = ctx.applicationContext
 		if (Settings.shake) startSensor()
-		if (Settings.battery) startBattery()
 	}
 
 	fun stop() {
 		if (!running) return
 		running = false
 		stopSensor()
-		stopBattery()
 		Pet.tilt = 0f
 		Pet.tiltY = 0f
 	}
 
-	/** Re-reads the two switches while running. */
+	/** Re-reads the switch while running. */
 	fun sync() {
 		if (!running) return
 		if (Settings.shake) startSensor() else stopSensor()
-		if (Settings.battery) startBattery() else stopBattery()
 	}
 
 	private fun startSensor() {
@@ -94,40 +79,6 @@ internal object Phone {
 		sensors = null
 		Pet.tilt = 0f
 		Pet.tiltY = 0f
-	}
-
-	private fun startBattery() {
-		if (batteryRegistered) return
-		val ctx = context ?: return
-		// Sticky: registering hands back the current state at once, which only sets the baseline.
-		wasCharging = null
-		runCatching {
-			ctx.registerReceiver(battery, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-			batteryRegistered = true
-		}
-	}
-
-	private fun stopBattery() {
-		if (!batteryRegistered) return
-		runCatching { context?.unregisterReceiver(battery) }
-		batteryRegistered = false
-	}
-
-	private fun onBattery(intent: Intent) {
-		val status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)
-		val charging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
-		val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
-		val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100).coerceAtLeast(1)
-		val percent = if (level < 0) 100 else level * 100 / scale
-		val before = wasCharging
-		wasCharging = charging
-		if (before == false && charging) mainHandler.post { Pet.onCharging() }
-		if (charging || percent > LOW_LEVEL + 5) lowNotified = false
-		// Once per dip below the line, not on every percent after it.
-		if (!charging && percent <= LOW_LEVEL && !lowNotified) {
-			lowNotified = true
-			if (before != null) mainHandler.post { Pet.onLowBattery() }
-		}
 	}
 
 	private fun rotation(): Int = runCatching {
