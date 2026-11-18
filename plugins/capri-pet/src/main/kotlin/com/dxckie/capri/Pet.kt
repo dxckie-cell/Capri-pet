@@ -997,9 +997,11 @@ internal object Pet {
 		// Everything else keeps its old proportions, squeezed into what the walks leave.
 		val r = 0.38f + (roll - walkShare) / (1f - walkShare) * 0.62f
 		when {
-			r < 0.7f -> facing = -facing
-			r < 0.85f -> say("idle")
-			Settings.bubbles -> blow()
+			r < 0.55f -> facing = -facing
+			r < 0.7f -> say("idle")
+			r < 0.85f && Settings.bubbles -> blow()
+			r < 0.93f -> setMood(Anim.VARIANT, 2.2f, Random.nextInt(4))
+			else -> setMood(Anim.LOOK, Looks.current.duration(Anim.LOOK) + 0.4f)
 		}
 	}
 
@@ -1280,6 +1282,8 @@ internal object Pet {
 		}
 		return when {
 			state == State.LEAVING -> Anim.OUTRO
+			stuck && state in setOf(State.STUCK, State.PRESS, State.PET) &&
+				Looks.current.hasMotionPoses -> Anim.HANG
 			spinRate > 0f && !rocket && state != State.DRAG && state != State.PRESS -> Anim.SPIN
 			state == State.DRAG && teleportLook -> Anim.SPIN
 			state == State.DRAG && wound &&
@@ -1611,6 +1615,7 @@ internal object Pet {
 				if (Settings.bubbles) mainHandler.postDelayed({ blow() }, 2300)
 			}
 			"laugh" -> { setMood(Anim.HAPPY, 1.6f); spawn(Particle.SPARK) }
+			"hi" -> setMood(Anim.VARIANT, 1.8f, 1)
 			"bye" -> { setMood(Anim.SAD, 1.4f) }
 			"sleepy" -> { setMood(Anim.SLEEP, 2.4f) }
 			"sad" -> { setMood(Anim.SAD, 2f); spawn(Particle.HEART) }
@@ -1620,15 +1625,16 @@ internal object Pet {
 				repeat(4) { spawn(Particle.SPARK) }
 				if (Settings.bubbles) mainHandler.postDelayed({ blow() }, 2100)
 			}
-			"cool" -> repeat(2) { spawn(Particle.SPARK) }
+			"cool" -> { setMood(Anim.VARIANT, 2f, 3); repeat(2) { spawn(Particle.SPARK) } }
 			"food" -> { setMood(Anim.HAPPY, 1.6f) }
 			"music" -> { setMood(Anim.REACTION, 2.2f, Bubble.MUSIC) }
-			"thanks" -> spawn(Particle.HEART)
+			"thanks" -> { setMood(Anim.VARIANT, 1.8f, 1); spawn(Particle.HEART) }
 			"mention" -> { setMood(Anim.REACTION, 2.2f, Bubble.ALERT); haptic(HapticFeedbackConstants.KEYBOARD_TAP) }
 			"mail" -> { setMood(Anim.REACTION, 2f, Bubble.MAIL) }
 			"sent", "essay" -> { setMood(Anim.HAPPY, 1.2f); repeat(2) { spawn(Particle.SPARK) } }
 			"voice_join" -> { setMood(Anim.REACTION, 2.5f, Bubble.MUSIC) }
 			"voice_leave" -> { setMood(Anim.SAD, 1.5f) }
+			"channel_new", "channel_again" -> setMood(Anim.VARIANT, 1.4f, 2)
 		}
 		val talk = when (kind) {
 			"sent" -> Random.nextFloat() < 0.3f
