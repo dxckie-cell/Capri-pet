@@ -181,7 +181,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 			teleports && anim == Anim.INTRO -> Pick("outro", 22f, loop = false, reverse = true)
 			teleports && anim == Anim.WALK -> Pick("walk", 24f, loop = false)
 			teleports && (anim == Anim.IDLE || anim == Anim.HANG) -> Pick("idle", 8f)
-			anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 20f, loopFrom = 20)  // breaks up once, then her face floats
+			anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 10f, loopFrom = 10)  // breaks up once, then her face floats
 			anim == Anim.JUMP && pet.strips.containsKey("jump") -> Pick("jump", 10f, loop = false)
 			anim == Anim.DIZZY && pet.strips.containsKey("dizzy") -> Pick("dizzy", 8f)
 			anim == Anim.SHAKE && pet.strips.containsKey("hurt") -> Pick("hurt", 8f, loop = false, over = Over.ALERT)
@@ -189,7 +189,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 		}
 		val (name, list) = frames(p.strip)
 		if (list.isEmpty()) return null
-		// Her strips have 60 frames each; the fps above is for the frame count she used to have, so the timing is unchanged.
+		// Her strips have 30 frames each; the fps above is for the frame count she used to have, so the timing is unchanged.
 		val fps = if (teleports) CAPRI_FRAMES[name]?.let { p.fps * list.size / it } ?: p.fps else p.fps
 		val index = when {
 			fps <= 0f -> 0
