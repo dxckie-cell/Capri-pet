@@ -121,11 +121,11 @@ internal object Possess {
 			drawMouth(bc, w, h, t, fade)
 			bc.restore()
 			drawFrame(canvas, w, h, tick, fade)
-			val rnd = Random(tick * 17 + 5)
+			val rnd = Random((tick / 2) * 17 + 5)
 			var y = 0
 			while (y < bm.height) {
 				val bandH = min(4, bm.height - y)
-				val dx = if (rnd.nextFloat() < 0.1f) rnd.nextInt(-6, 7) * pix * 0.6f else 0f
+				val dx = if (rnd.nextFloat() < 0.04f) rnd.nextInt(-3, 4) * pix * 0.6f else 0f
 				canvas.drawBitmap(bm, Rect(0, y, bm.width, y + bandH), RectF(dx, y * pix, dx + bm.width * pix, (y + bandH) * pix), blit)
 				y += bandH
 			}
@@ -133,8 +133,8 @@ internal object Possess {
 
 		/** A jagged bolt running the whole way round the screen edge, redrawn 24 times a second. */
 		private fun drawFrame(canvas: Canvas, w: Float, h: Float, tick: Int, fade: Float) {
-			val rnd = Random(tick * 31 + 7)
-			val inset = dp(5f); val jag = dp(5f); val step = dp(15f)
+			val rnd = Random((tick / 3) * 31 + 7)                      // bolt re-rolls 8 times a second, not 24
+			val inset = dp(5f); val jag = dp(3f); val step = dp(15f)
 			val path = Path()
 			var first = true
 			fun pt(x: Float, y: Float, nx: Float, ny: Float) {
@@ -156,8 +156,8 @@ internal object Possess {
 
 		/** Thin horizontal bars of red, purple and green that jump about, like a torn picture. */
 		private fun drawGlitch(canvas: Canvas, w: Float, h: Float, tick: Int, fade: Float) {
-			val rnd = Random(tick * 131 + 3)
-			repeat(9) {
+			val rnd = Random((tick / 3) * 131 + 3)
+			repeat(5) {
 				val y = rnd.nextFloat() * h
 				val x0 = rnd.nextFloat() * w * 0.7f
 				val len = w * (0.1f + rnd.nextFloat() * 0.5f)
