@@ -57,6 +57,8 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 
 	private val strips = HashMap<String, List<Bitmap>>()
 	private val cache = HashMap<String, Bitmap>()
+	/** How many frames Capri's looping and one-shot strips had before they all became 60. */
+	private val CAPRI_FRAMES = mapOf("idle" to 24, "itch" to 8, "sit" to 6, "voice" to 6, "lay" to 6, "stretch" to 8, "lick1" to 8, "lick2" to 8, "jump" to 6, "hurt" to 4, "run" to 16, "dizzy" to 12)
 
 	private fun strip(name: String): List<Bitmap> = strips.getOrPut(name) {
 		runCatching {
@@ -178,8 +180,8 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 			teleports && anim == Anim.OUTRO -> Pick("outro", 22f, loop = false)
 			teleports && anim == Anim.INTRO -> Pick("outro", 22f, loop = false, reverse = true)
 			teleports && anim == Anim.WALK -> Pick("walk", 24f, loop = false)
-			teleports && (anim == Anim.IDLE || anim == Anim.HANG) -> Pick("idle", 24f)  // 72 frames, a 3 s loop
-			anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 10f, loopFrom = 10)  // breaks up once, then her face floats
+			teleports && (anim == Anim.IDLE || anim == Anim.HANG) -> Pick("idle", 8f)
+			anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 20f, loopFrom = 20)  // breaks up once, then her face floats
 			anim == Anim.JUMP && pet.strips.containsKey("jump") -> Pick("jump", 10f, loop = false)
 			anim == Anim.DIZZY && pet.strips.containsKey("dizzy") -> Pick("dizzy", 8f)
 			anim == Anim.SHAKE && pet.strips.containsKey("hurt") -> Pick("hurt", 8f, loop = false, over = Over.ALERT)
@@ -187,11 +189,13 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 		}
 		val (name, list) = frames(p.strip)
 		if (list.isEmpty()) return null
+		// Her strips have 60 frames each; the fps above is for the frame count she used to have, so the timing is unchanged.
+		val fps = if (teleports) CAPRI_FRAMES[name]?.let { p.fps * list.size / it } ?: p.fps else p.fps
 		val index = when {
-			p.fps <= 0f -> 0
-			p.loop && p.loopFrom > 0 -> (seconds * p.fps).toInt().let { if (it < p.loopFrom) it else p.loopFrom + (it - p.loopFrom).mod(list.size - p.loopFrom) }
-			p.loop -> (seconds * p.fps).toInt().mod(list.size)
-			else -> (seconds * p.fps).toInt().coerceIn(0, list.size - 1)
+			fps <= 0f -> 0
+			p.loop && p.loopFrom > 0 -> (seconds * fps).toInt().let { if (it < p.loopFrom) it else p.loopFrom + (it - p.loopFrom).mod(list.size - p.loopFrom) }
+			p.loop -> (seconds * fps).toInt().mod(list.size)
+			else -> (seconds * fps).toInt().coerceIn(0, list.size - 1)
 		}.let { if (p.reverse) list.size - 1 - it else it }
 		val phase = (seconds * 4f).toInt() % 3
 		val key = "$name:$index:${p.over}:${if (p.over == Over.ZS || p.over == Over.SPARKLES || p.over == Over.DIZZY) phase else 0}:$outlineColour"
