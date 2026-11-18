@@ -3,6 +3,14 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.23',
+		date: '2026-11-18',
+		title: 'Happy arms like the art',
+		changes: [
+			'Her happy arms are redrawn from the victory art: thin dark arms with a purple edge rise from her shoulders in a V, hands with spiky fingers at the sides of her hair.',
+		],
+	},
+	{
 		version: '2.10.22',
 		date: '2026-11-18',
 		title: 'Happy: hands up, hair shards',
