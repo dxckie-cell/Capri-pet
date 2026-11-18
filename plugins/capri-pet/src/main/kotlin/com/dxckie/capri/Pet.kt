@@ -88,6 +88,8 @@ private const val PEEK_AFTER = 45f
 /** Turns of the drag path that wind Sparkle up for a fling to the top. */
 private const val WIND_TURNS = 2.5f
 private const val SPIN_RATE = 900f
+/** Standing she is ~128 px tall; her lying art is ~76 px long. */
+private const val DIZZY_SCALE = 1.6f
 /** How far below the top it has to be dragged before it lets go of the status bar. */
 private const val UNSTICK_DP = 56f
 /** Below this much happiness (0..100) it gets lonely and asks for attention. */
@@ -1359,7 +1361,10 @@ internal object Pet {
 			slideV != 0f -> clamp(-slideV / dp(30f), -12f, 12f)
 			else -> 0f
 		}
+		// Her lying pose is drawn squeezed into the cell: blow it up from the floor to her standing size.
+		val lying = next == Anim.DIZZY && teleportLook
 		v.pivotX = frameW / 2f; v.pivotY = frameH * 0.98f
+		v.scaleX = if (lying) DIZZY_SCALE else 1f; v.scaleY = v.scaleX
 		v.invalidate()
 		stepTrail(next)
 	}
