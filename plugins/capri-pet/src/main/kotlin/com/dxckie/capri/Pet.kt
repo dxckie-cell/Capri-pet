@@ -56,6 +56,11 @@ private val SLEEP_SECONDS = intArrayOf(60, 180, 600, 0, 30)
 /** Walking pace, dp/s; a trot is twice this. */
 private const val WALK_SPEED = 42f
 /** A teleporting look's whole move: 17 strip frames at 24 fps. */
+/** Shows [bmp] with nearest-neighbour scaling: ImageView filters (blurs) by default when it scales or rotates. */
+internal fun ImageView.setCrisp(bmp: Bitmap) {
+	setImageDrawable(android.graphics.drawable.BitmapDrawable(resources, bmp).apply { setFilterBitmap(false); isDither = false })
+}
+
 private const val TELEPORT_SECONDS = 17f / 24f
 
 /**
@@ -639,9 +644,11 @@ internal object Pet {
 		val look = Looks.current
 		val boost = if (Looks.kind == Looks.Kind.CAT || Looks.kind == Looks.Kind.DOG) SMALL_ANIMAL_SCALE else 1f
 		val target = dp(Settings.sizeDp.coerceIn(SIZE_MIN_DP, SIZE_MAX_DP).toFloat()) * boost
-		w = target * look.cellW / look.refW
-		h = target * look.cellH / look.refW
-		pad = (w - target) / 2f
+		// Whole device pixels per art pixel, so every art pixel is the same size and nothing is resampled.
+		val px = maxOf(1f, Math.round(target / look.refW).toFloat())
+		w = px * look.cellW
+		h = px * look.cellH
+		pad = (w - px * look.refW) / 2f
 	}
 
 	private fun mainDecor(): ViewGroup? =
@@ -1346,8 +1353,8 @@ internal object Pet {
 			v.layoutParams = v.layoutParams.apply { width = frameW.toInt(); height = frameH.toInt() }
 		}
 		val offsetX = if (motion == null) 0 else if (v.flip) Looks.current.cellW - motion.dx - motion.w else motion.dx
-		v.translationX = x + offsetX * pixelScale
-		v.translationY = (if (next == Anim.HANG && motion != null) bounds[2] else y + hopOff) + (motion?.dy ?: 0) * pixelScale
+		v.translationX = Math.round(x + offsetX * pixelScale).toFloat()
+		v.translationY = Math.round((if (next == Anim.HANG && motion != null) bounds[2] else y + hopOff) + (motion?.dy ?: 0) * pixelScale).toFloat()
 		v.rotation = when {
 			motion != null && next == Anim.HANG -> 0f
 			// Upside down on the status bar, swaying a little; also while tapped or petted up there.
@@ -2307,7 +2314,7 @@ internal object Pet {
 			treatKind = Random.nextInt(treatList.size)
 			val bmp = treatBitmap(treatList[treatKind])
 			val iv = ImageView(pet.context)
-			iv.setImageBitmap(bmp)
+			iv.setCrisp(bmp)
 			iv.elevation = dp(1f)
 			root.addView(iv, FrameLayout.LayoutParams(bmp.width, bmp.height))
 			val b = bounds(t, force = true)
@@ -2616,7 +2623,7 @@ internal object Pet {
 		runCatching {
 			val bmp = particleBitmap(kind)
 			val p = ImageView(pet.context)
-			p.setImageBitmap(bmp)
+			p.setCrisp(bmp)
 			root.addView(p, FrameLayout.LayoutParams(bmp.width, bmp.height))
 			particles.add(p)
 			val crumb = kind in setOf(Particle.CRUMB_SPRINKLE, Particle.CRUMB_FROSTING, Particle.CRUMB_CRUST)

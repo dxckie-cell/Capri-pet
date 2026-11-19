@@ -40,7 +40,7 @@ internal class CapriBubble(context: Context) : LinearLayout(context) {
 			scaleType = ImageView.ScaleType.FIT_XY
 			runCatching {
 				val bytes = Base64.decode(CapriBubbleData.PORTRAIT, Base64.DEFAULT)
-				setImageBitmap(BitmapFactory.decodeByteArray(bytes, 0, bytes.size))
+				setCrisp(BitmapFactory.decodeByteArray(bytes, 0, bytes.size))
 			}
 			// Keep the pixel art crisp.
 			setLayerType(LAYER_TYPE_NONE, null)

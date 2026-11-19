@@ -3,6 +3,15 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.48',
+		date: '2026-11-19',
+		title: 'Sharper pixels',
+		changes: [
+			'Her size now snaps to whole screen pixels per art pixel and she is placed on whole pixels, so every pixel is the same size instead of uneven or smeared.',
+			'Treats, particles and the chat portrait are drawn without smoothing, so they stay sharp when they wobble, shrink or rotate.',
+		],
+	},
+	{
 		version: '2.10.47',
 		date: '2026-11-19',
 		title: 'Capri bolts to the treat',
