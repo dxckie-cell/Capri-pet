@@ -279,10 +279,10 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 		when (over) {
 			Over.NONE -> {}
 			Over.ZS -> for (k in 0..phase) stamp(c, x - 1 + k * 2, y + 2 - k * 2, listOf("www", ".w.", "www"))
-			Over.HEART -> stamp(c, x - 1, y, listOf(".r.r.", "rrrrr", "rrrrr", ".rrr.", "..r.."))
-			Over.ALERT -> stamp(c, x, y, listOf("kyk", "kyk", "kyk", ".k.", "kyk"))
-			Over.MAIL -> stamp(c, x - 2, y, listOf("kkkkkkk", "kwkwkwk", "kwwkwwk", "kwwwwwk", "kkkkkkk"))
-			Over.MUSIC -> stamp(c, x, y, listOf(".www", ".w.w", ".w.w", "ww.w", "wwww"))
+			Over.HEART -> stamp(c, x - 4, 0, listOf(".r.r.", "rrrrr", "rrrrr", ".rrr.", "..r.."), 2)
+			Over.ALERT -> stamp(c, x - 2, 0, listOf("kyk", "kyk", "kyk", ".k.", "kyk"), 2)
+			Over.MAIL -> stamp(c, x - 6, 0, listOf("kkkkkkk", "kwkwkwk", "kwwkwwk", "kwwwwwk", "kkkkkkk"), 2)
+			Over.MUSIC -> stamp(c, x - 2, 0, listOf(".www", ".w.w", ".w.w", "ww.w", "wwww"), 2)
 			Over.BOLT -> stamp(c, x, y, listOf("..yy", ".yy.", "yyyy", ".yy.", "yy.."))
 			Over.BATTERY -> stamp(c, x - 2, y + 1, listOf("wwwwww.", "wrkkkww", "wrkkkww", "wwwwww."))
 			Over.DIZZY -> {
@@ -318,14 +318,15 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 		bmp.setPixels(px, 0, w, 0, 0, w, h)
 	}
 
-	private fun stamp(c: Canvas, x: Int, y: Int, rows: List<String>) {
+	/** Draws [rows] as art pixels, each [k] pixels square. */
+	private fun stamp(c: Canvas, x: Int, y: Int, rows: List<String>, k: Int = 1) {
 		for ((j, row) in rows.withIndex()) for ((i, ch) in row.withIndex()) {
 			val colour = COLOURS[ch] ?: continue
 			paint.color = colour
-			val px = (x + i).toFloat()
-			val py = (y + j).toFloat()
+			val px = (x + i * k).toFloat()
+			val py = (y + j * k).toFloat()
 			if (px < 0 || py < 0 || px >= cellW || py >= cellH) continue
-			c.drawRect(px, py, px + 1f, py + 1f, paint)
+			c.drawRect(px, py, px + k, py + k, paint)
 		}
 	}
 
