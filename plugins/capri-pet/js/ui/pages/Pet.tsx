@@ -121,7 +121,7 @@ function useFidgets(look: number, enabled: boolean): Array<{ variant: number; la
 
 const POSES = [
 	["IDLE", "Idle"], ["WALK", "Walk"], ["HANG", "Hang"],
-	["SPIN", "Spin"], ["HAPPY", "Happy"], ["SLEEP", "Sleep"], ["SAD", "Sad"],
+	["SPIN", "Spin"], ["HAPPY", "Happy"], ["SLEEP", "Sleep"],
 	["SURPRISED", "Surprised"], ["DIZZY", "Dizzy"], ["SHAKE", "Shake"],
 	["REACTION", "Reaction"],
 	["LOOK", "Look around"], ["OUTRO", "Exit"],

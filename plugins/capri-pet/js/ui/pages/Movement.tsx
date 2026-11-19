@@ -112,6 +112,7 @@ export default function Movement() {
 						defaultValue={String(s.sleepAfter)}
 						onChange={(value: string) => update({ sleepAfter: Number(value) })}
 					>
+						<TableRadioRow label="After 30 seconds" value="4" />
 						<TableRadioRow label="After 1 minute" value="0" />
 						<TableRadioRow label="After 3 minutes" value="1" />
 						<TableRadioRow label="After 10 minutes" value="2" />

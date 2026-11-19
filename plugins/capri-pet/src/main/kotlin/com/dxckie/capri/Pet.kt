@@ -51,7 +51,7 @@ internal const val SIZE_MAX_DP = 110
  * they're shown this much bigger at every size.
  */
 private const val SMALL_ANIMAL_SCALE = 1.7f
-private val SLEEP_SECONDS = intArrayOf(60, 180, 600, 0)
+private val SLEEP_SECONDS = intArrayOf(60, 180, 600, 0, 30)
 
 /** Walking pace, dp/s; a trot is twice this. */
 private const val WALK_SPEED = 42f
@@ -1563,7 +1563,6 @@ internal object Pet {
 		recentTaps.add(t)
 		if (recentTaps.size >= 6) {
 			recentTaps.clear()
-			setMood(Anim.SAD, 2.5f)
 			addLove(-5)
 			say("annoyed", force = true)
 			addRep(-6)
@@ -1619,9 +1618,8 @@ internal object Pet {
 				if (Settings.bubbles) mainHandler.postDelayed({ blow() }, 2300)
 			}
 			"laugh" -> { setMood(Anim.HAPPY, 1.6f); spawn(Particle.SPARK) }
-			"bye" -> { setMood(Anim.SAD, 1.4f) }
 			"sleepy" -> { setMood(Anim.SLEEP, 2.4f) }
-			"sad" -> { setMood(Anim.SAD, 2f); spawn(Particle.HEART) }
+			"sad" -> spawn(Particle.HEART)
 			"wow" -> { setMood(Anim.SURPRISED, 1.6f) }
 			"party" -> {
 				setMood(Anim.HAPPY, 2f)
@@ -1636,7 +1634,6 @@ internal object Pet {
 			"mail" -> { setMood(Anim.REACTION, 2f, Bubble.MAIL) }
 			"sent", "essay" -> { setMood(Anim.HAPPY, 1.2f); repeat(2) { spawn(Particle.SPARK) } }
 			"voice_join" -> { setMood(Anim.REACTION, 2.5f, Bubble.MUSIC) }
-			"voice_leave" -> { setMood(Anim.SAD, 1.5f) }
 		}
 		val talk = when (kind) {
 			"sent" -> Random.nextFloat() < 0.3f
@@ -1873,7 +1870,6 @@ internal object Pet {
 
 	/** Lonely: a sad look, a line asking for attention, and now and then a shuffle towards the middle. */
 	private fun askForAttention(minX: Float, maxX: Float) {
-		setMood(Anim.SAD, 2.4f)
 		say("lonely")
 		if (Settings.wander && Random.nextFloat() < 0.4f) {
 			val middle = (minX + maxX) / 2f
@@ -2392,7 +2388,6 @@ internal object Pet {
 			treat = null
 			iv.animate().alpha(0f).scaleX(0.4f).scaleY(0.4f).setDuration(400).withEndAction { remove(iv) }.start()
 			if (canReact() && state != State.SLEEP && Random.nextFloat() < 0.6f) {
-				setMood(Anim.SAD, 1.6f)
 				say("treat_gone", name = treatList[treatKind].name)
 			}
 			addRep(-4)

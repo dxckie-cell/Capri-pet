@@ -3,6 +3,15 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.46',
+		date: '2026-11-19',
+		title: 'Sad removed, 30 second nap',
+		changes: [
+			'Removed the sad animation and its tester button. Annoyed, lonely, goodbye and similar moments no longer switch her to a sad pose.',
+			'New "After 30 seconds" option under Falls asleep.',
+		],
+	},
+	{
 		version: '2.10.45',
 		date: '2026-11-19',
 		title: 'Fidget removed',
