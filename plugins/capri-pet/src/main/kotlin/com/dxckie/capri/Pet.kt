@@ -2422,6 +2422,7 @@ internal object Pet {
 		if (!stuck && state in setOf(State.IDLE, State.WALK, State.SLEEP, State.PEEK)) {
 			if (state == State.SLEEP) { setMood(Anim.SURPRISED, 0.6f); playStrip("wake", 24f, 1f) }
 			peekSide = 0; peekPending = 0; peekMoving = false
+			tpActive = false
 			state = State.SEEK
 		} else flyTreatToMouth()
 		schedule(0)
@@ -2437,6 +2438,24 @@ internal object Pet {
 		val dx = targetX - x
 		val dy = targetY - y
 		val dist = hypot(dx, dy)
+		if (abs(dx) > dp(2f)) facing = if (dx > 0) 1 else -1
+		if (teleportLook) {
+			// Same move as her walk: glitch out, red bolt, re-form at the treat.
+			if (!tpActive) {
+				if (dist < dp(5f)) { flyTreatToMouth(); return }
+				tpActive = true; tpStart = t; tpX0 = x; tpY0 = y
+				decor?.let { d ->
+					val from = PointF(x + w / 2f, y + h * 0.55f)
+					val to = PointF(targetX + w / 2f, targetY + h * 0.55f)
+					val bolt = BoltView(d.context, BoltView.route(from, to, d.width.toFloat(), d.height.toFloat(), d.resources.displayMetrics.density))
+					d.addView(bolt, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+				}
+			}
+			val p = ((t - tpStart) / TELEPORT_SECONDS).coerceIn(0f, 1f)
+			if (p >= 13f / 17f) { x = targetX; y = targetY } else { x = tpX0; y = tpY0 }
+			if (p >= 1f) { tpActive = false; flyTreatToMouth() }
+			return
+		}
 		if (dist < dp(5f)) {
 			x = targetX
 			y = targetY
@@ -2447,7 +2466,6 @@ internal object Pet {
 		val step = minOf(dist, dp(170f) * dt)
 		x += dx / dist * step
 		y += dy / dist * step
-		if (abs(dx) > dp(2f)) facing = if (dx > 0) 1 else -1
 	}
 
 	/** The last bit: the treat shrinks into Sparkle's mouth, then it's eaten. */
