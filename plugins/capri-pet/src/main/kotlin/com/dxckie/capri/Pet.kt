@@ -58,7 +58,7 @@ private const val WALK_SPEED = 42f
 /** A teleporting look's whole move: 17 strip frames at 24 fps. */
 /** Shows [bmp] with nearest-neighbour scaling: ImageView filters (blurs) by default when it scales or rotates. */
 internal fun ImageView.setCrisp(bmp: Bitmap) {
-	setImageDrawable(android.graphics.drawable.BitmapDrawable(resources, bmp).apply { setFilterBitmap(false); isDither = false })
+	setImageDrawable(android.graphics.drawable.BitmapDrawable(resources, bmp).apply { setFilterBitmap(false); setDither(false) })
 }
 
 private const val TELEPORT_SECONDS = 17f / 24f
