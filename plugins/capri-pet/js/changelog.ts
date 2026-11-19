@@ -3,6 +3,15 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.50',
+		date: '2026-11-19',
+		title: 'Trimmed to Capri',
+		changes: [
+			'Removed everything that was not Capri: the other pets, the pet picker, the boss attacks and horse, the soap-bubble code and the unused animation data. The plugin is much smaller.',
+			'Capri behaves as before.',
+		],
+	},
+	{
 		version: '2.10.49',
 		date: '2026-11-19',
 		title: 'Renamed to Capri-Pet',

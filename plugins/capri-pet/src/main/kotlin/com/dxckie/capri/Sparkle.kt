@@ -41,11 +41,7 @@ internal object Settings {
 	@Volatile var treats = true
 	/** What it calls itself. */
 	@Volatile var name = "Capri"
-	/** Which character (see Looks). */
-	/** Capri is the only pet: whatever is saved or sent, the look stays her. */
-	@Volatile var look = Looks.CAPRI
-		set(_) { field = Looks.CAPRI }
-	/** Cats and dogs: 0 no outline, 1 automatic (contrasts with the theme), 2 light, 3 dark. */
+	/** 0 no outline, 1 automatic (contrasts with the theme), 2 light, 3 dark. */
 	@Volatile var outline = 1
 	/** Now and then casts a spell: VFX shows a random filter or effect for a few seconds. */
 	@Volatile var magic = false
@@ -56,15 +52,6 @@ internal object Settings {
 	@Volatile var treatRate = 2
 	@Volatile var partyRate = 2
 	@Volatile var eatRate = 2
-	/** The boss pets (Boss.kt): attacks on the screen, how often, and whether the snapshot effects play. */
-	@Volatile var attacks = true
-	@Volatile var attackRate = 2
-	@Volatile var attackFx = true
-	/** The Horseman's horse visits now and then; tap it to ride. */
-	@Volatile var companion = true
-	@Volatile var companionRate = 2
-	/** How long a ride lasts, 1..5 minutes. */
-	@Volatile var rideMinutes = 5
 
 	/** Where it was last left, as a fraction of the room it can move in (0..1000). */
 	@Volatile var posX = 800
@@ -111,16 +98,9 @@ private fun settingsMap() = mapOf(
 	"treatRate" to Settings.treatRate,
 	"partyRate" to Settings.partyRate,
 	"eatRate" to Settings.eatRate,
-	"attacks" to Settings.attacks,
-	"attackRate" to Settings.attackRate,
-	"attackFx" to Settings.attackFx,
-	"companion" to Settings.companion,
-	"companionRate" to Settings.companionRate,
-	"rideMinutes" to Settings.rideMinutes,
 	"showWhen" to Settings.showWhen,
 	"treats" to Settings.treats,
 	"name" to Settings.name,
-	"look" to Settings.look,
 	"outline" to Settings.outline,
 	"treatsEaten" to Settings.treatsEaten,
 	"love" to Pet.love(),
@@ -176,12 +156,6 @@ val sparklePlugin = plugin {
 				Settings.treatRate = validRate(json.optInt("treatRate", 2)) ?: 2
 				Settings.partyRate = validRate(json.optInt("partyRate", 2)) ?: 2
 				Settings.eatRate = validRate(json.optInt("eatRate", 2)) ?: 2
-				Settings.attacks = json.optBoolean("attacks", true)
-				Settings.attackRate = validRate(json.optInt("attackRate", 2)) ?: 2
-				Settings.attackFx = json.optBoolean("attackFx", true)
-				Settings.companion = json.optBoolean("companion", true)
-				Settings.companionRate = validRate(json.optInt("companionRate", 2)) ?: 2
-				Settings.rideMinutes = json.optInt("rideMinutes", 5).coerceIn(1, 5)
 				Settings.posX = json.optInt("posX", 800).coerceIn(0, 1000)
 				Settings.posY = json.optInt("posY", 720).coerceIn(0, 1000)
 				Settings.pets = json.optInt("pets", 0).coerceAtLeast(0)
@@ -189,7 +163,6 @@ val sparklePlugin = plugin {
 				Settings.showWhen = json.optInt("showWhen", 0).coerceIn(0, 1)
 				Settings.treats = json.optBoolean("treats", true)
 				Settings.name = cleanName(json.optString("name", "Capri"))
-				Settings.look = json.optInt("look", 0).coerceIn(0, Looks.LAST)
 				Settings.outline = json.optInt("outline", 1).coerceIn(0, 3)
 				Settings.treatsEaten = json.optInt("treatsEaten", 0).coerceAtLeast(0)
 				Settings.love = json.optInt("love", 80).coerceIn(0, 100)
@@ -222,12 +195,6 @@ val sparklePlugin = plugin {
 					.put("treatRate", Settings.treatRate)
 					.put("partyRate", Settings.partyRate)
 					.put("eatRate", Settings.eatRate)
-					.put("attacks", Settings.attacks)
-					.put("attackRate", Settings.attackRate)
-					.put("attackFx", Settings.attackFx)
-					.put("companion", Settings.companion)
-					.put("companionRate", Settings.companionRate)
-					.put("rideMinutes", Settings.rideMinutes)
 					.put("posX", Settings.posX)
 					.put("posY", Settings.posY)
 					.put("pets", Settings.pets)
@@ -235,7 +202,6 @@ val sparklePlugin = plugin {
 					.put("showWhen", Settings.showWhen)
 					.put("treats", Settings.treats)
 					.put("name", Settings.name)
-					.put("look", Settings.look)
 					.put("outline", Settings.outline)
 					.put("treatsEaten", Settings.treatsEaten)
 					.put("love", Settings.love)
@@ -278,7 +244,6 @@ val sparklePlugin = plugin {
 			val patch = args.firstOrNull() as? Map<*, *> ?: emptyMap<Any, Any>()
 			val showBefore = Settings.show
 			val sizeBefore = Settings.sizeDp
-			val lookBefore = Settings.look
 			(patch["show"] as? Boolean)?.let { Settings.show = it }
 			(patch["size"] as? Number)?.let {
 				// The old three-way size (Quick Toggles still sends it): jump to that stop.
@@ -300,23 +265,16 @@ val sparklePlugin = plugin {
 			(patch["bubbles"] as? Boolean)?.let { Settings.bubbles = it }
 			(patch["bubbleFx"] as? Boolean)?.let { Settings.bubbleFx = it }
 			(patch["magic"] as? Boolean)?.let { Settings.magic = it }
-			val ratesBefore = listOf(Settings.magicRate, Settings.treatRate, Settings.partyRate, Settings.eatRate, Settings.attackRate, Settings.companionRate)
+			val ratesBefore = listOf(Settings.magicRate, Settings.treatRate, Settings.partyRate, Settings.eatRate)
 			validRate(patch["magicRate"])?.let { Settings.magicRate = it }
 			(patch["activity"] as? Number)?.let { Settings.activity = it.toInt().coerceIn(0, 3) }
 			validRate(patch["treatRate"])?.let { Settings.treatRate = it }
 			validRate(patch["partyRate"])?.let { Settings.partyRate = it }
 			validRate(patch["eatRate"])?.let { Settings.eatRate = it }
-			(patch["attacks"] as? Boolean)?.let { Settings.attacks = it }
-			validRate(patch["attackRate"])?.let { Settings.attackRate = it }
-			(patch["attackFx"] as? Boolean)?.let { Settings.attackFx = it }
-			(patch["companion"] as? Boolean)?.let { Settings.companion = it }
-			validRate(patch["companionRate"])?.let { Settings.companionRate = it }
-			(patch["rideMinutes"] as? Number)?.let { Settings.rideMinutes = it.toInt().coerceIn(1, 5) }
-			val ratesChanged = ratesBefore != listOf(Settings.magicRate, Settings.treatRate, Settings.partyRate, Settings.eatRate, Settings.attackRate, Settings.companionRate)
+			val ratesChanged = ratesBefore != listOf(Settings.magicRate, Settings.treatRate, Settings.partyRate, Settings.eatRate)
 			(patch["showWhen"] as? Number)?.let { Settings.showWhen = it.toInt().coerceIn(0, 1) }
 			(patch["treats"] as? Boolean)?.let { Settings.treats = it }
 			(patch["name"] as? String)?.let { Settings.name = cleanName(it) }
-			(patch["look"] as? Number)?.let { Settings.look = it.toInt().coerceIn(0, Looks.LAST) }
 			(patch["outline"] as? Number)?.let { Settings.outline = it.toInt().coerceIn(0, 3) }
 			(patch["grudges"] as? Boolean)?.let { Settings.grudges = it }
 			save()
@@ -325,9 +283,8 @@ val sparklePlugin = plugin {
 					if (Settings.show != showBefore) {
 						if (Settings.show) Pet.start(sayHello = true) else Pet.leave()
 					}
-					if (Settings.sizeDp != sizeBefore || Settings.look != lookBefore) Pet.resize()
+					if (Settings.sizeDp != sizeBefore) Pet.resize()
 					if (!Settings.eat) Eater.restoreAll()
-					if (!Settings.bubbles) Bubbles.clear()
 					if (!Settings.treats) Pet.clearTreat()
 					// A new rate starts a fresh wait, so going from Rare to Very often doesn't sit out the old one.
 					if (ratesChanged) Pet.rescheduleTimers()
@@ -350,25 +307,18 @@ val sparklePlugin = plugin {
 			save()
 			true
 		}
-		// The pet picker's pictures: a look's idle frame as a PNG data URI, scaled up with hard edges.
-		registerNativeMethod("${manifest.id}.preview") { args ->
-			val which = (args.getOrNull(0) as? Number)?.toInt() ?: Settings.look
-			val frame = Looks.of(which).frame(Anim.IDLE, 0.3f) ?: return@registerNativeMethod ""
-			dataUri(frame)
-		}
-		// The pet picker's carousel: a look's idle animation as data URIs, its frame rate, and a name.
+		// The pose tester: an animation as one grid image, its frame rate and size.
 		registerNativeMethod("${manifest.id}.previewFrames") { args ->
-			val which = (args.getOrNull(0) as? Number)?.toInt() ?: Settings.look
 			// Drawing and encoding a pet's frames takes a second or so; the same request again (back to a
 			// pet, reopening the page) is answered from here.
 			val cacheKey = args.joinToString("|")
 			synchronized(previewCache) { previewCache[cacheKey] }?.let { return@registerNativeMethod it }
-			val look = Looks.of(which)
-			val name = args.getOrNull(1) as? String ?: "IDLE"
+			val look = Looks.current
+			val name = args.getOrNull(0) as? String ?: "IDLE"
 			val anim = Anim.entries.firstOrNull { it.name == name } ?: return@registerNativeMethod false
-			val still = ((args.getOrNull(2) as? Number)?.toInt() ?: 0).coerceIn(0, 3)
+			val still = ((args.getOrNull(1) as? Number)?.toInt() ?: 0).coerceIn(0, 3)
 			// The size the page shows it at, in screen pixels (0 = the old default).
-			val targetPx = (args.getOrNull(3) as? Number)?.toInt() ?: 0
+			val targetPx = (args.getOrNull(2) as? Number)?.toInt() ?: 0
 			val fps = if (anim == Anim.IDLE) (look as? SheetLook)?.idleFps ?: 8f else 16f
 			val count = if (anim == Anim.IDLE) (look as? SheetLook)?.idleFrameCount ?: 12
 				else kotlin.math.ceil(look.duration(anim).coerceIn(1f, 6f) * fps).toInt()
@@ -393,21 +343,9 @@ val sparklePlugin = plugin {
 			val result = mapOf(
 				"sheet" to dataUri(grid, scale = scale), "cols" to cols, "n" to bitmaps.size, "fps" to fps,
 				"w" to fw * scale, "h" to fh * scale,
-				// Which animation a fidget plays, so the tester can name its buttons.
-				"strip" to if (anim == Anim.VARIANT) (look as? SheetLook)?.variantStrip(still) else null,
 			)
 			synchronized(previewCache) { previewCache[cacheKey] = result }
 			result
-		}
-		registerNativeMethod("${manifest.id}.looks") { _ ->
-			(0..Looks.LAST).filter { it != Looks.NYAN && it != Looks.GARY }.map { id ->
-				val look = Looks.of(id)
-				mapOf(
-					"id" to id,
-					"kind" to Looks.kindOf(id).name.lowercase(),
-					"label" to when (look) { is SheetLook -> look.name; else -> "Unicorn" },
-				)
-			}
 		}
 		// "Blow bubbles" on the settings page, to see them without waiting.
 		registerNativeMethod("${manifest.id}.blow") { _ ->
@@ -422,23 +360,6 @@ val sparklePlugin = plugin {
 		// "Drop a treat now" on the settings page.
 		registerNativeMethod("${manifest.id}.dropTreat") { _ ->
 			mainHandler.post { runCatching { Pet.dropTreat(force = true) } }
-			true
-		}
-		// The boss pets' tricks, from the settings page.
-		registerNativeMethod("${manifest.id}.attack") { _ ->
-			mainHandler.post { runCatching { Boss.attack(force = true) } }
-			true
-		}
-		registerNativeMethod("${manifest.id}.callHorse") { _ ->
-			mainHandler.post { runCatching { Boss.visit(force = true) } }
-			true
-		}
-		registerNativeMethod("${manifest.id}.ride") { _ ->
-			mainHandler.post { runCatching { Boss.rideNow() } }
-			true
-		}
-		registerNativeMethod("${manifest.id}.stopRide") { _ ->
-			mainHandler.post { runCatching { Boss.endRide() } }
 			true
 		}
 		registerNativeMethod("${manifest.id}.giveBack") { _ ->

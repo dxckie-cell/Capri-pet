@@ -1,4 +1,4 @@
-import { lookOf } from "../../native"
+import { PET } from "../../native"
 import { rowIcon } from "../icon"
 import { useBottomPadding } from "../safeArea"
 import { update, useNativeState, useSettings } from "../state"
@@ -35,7 +35,7 @@ export default function Mood() {
 	const s = useSettings()
 	const live = useNativeState()
 	const bottom = useBottomPadding()
-	const name = s.name?.trim() || lookOf(s.look).defaultName
+	const name = s.name?.trim() || PET.defaultName
 	const love = live?.love ?? 80
 
 	return (

@@ -17,7 +17,7 @@ let pending: ReturnType<typeof setTimeout> | undefined
  * The size slider. Moves freely, catching on the three stops (marked underneath). The pet only
  * resizes once the thumb rests for a moment, so it doesn't hop about while you drag.
  */
-export function SizeSlider({ value, kind }: { value: number; kind: string }) {
+export function SizeSlider({ value }: { value: number }) {
 	const { View } = ReactNative
 	const { TableRowGroup, Text, Slider } = Design as any
 	const [shown, setShown] = React.useState(value)
@@ -30,14 +30,7 @@ export function SizeSlider({ value, kind }: { value: number; kind: string }) {
 	}
 	const span = SIZE.max - SIZE.min
 	return (
-		<TableRowGroup
-			title="Size"
-			description={
-				kind === "cat" || kind === "dog"
-					? "Cats and dogs are drawn low and long, so they're shown bigger at every size."
-					: undefined
-			}
-		>
+		<TableRowGroup title="Size">
 			{/* In a real row, so it sits on the row's surface under any theme (design doc §3.6). */}
 			<FieldRow label={sizeLabel(shown)}>
 				<Slider step={1} value={shown} minimumValue={SIZE.min} maximumValue={SIZE.max} onValueChange={onChange} />

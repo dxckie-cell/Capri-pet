@@ -1,5 +1,5 @@
 import { MOODS, fxOn, wordsOf } from "../../lib/moods"
-import { lookOf } from "../../native"
+import { PET } from "../../native"
 import { rowIcon } from "../icon"
 import { REACTION_ROUTE, setViewingMood } from "../routes"
 import { useBottomPadding } from "../safeArea"
@@ -19,7 +19,7 @@ export default function Reactions() {
 
 	const s = useSettings()
 	const bottom = useBottomPadding()
-	const name = s.name?.trim() || lookOf(s.look).defaultName
+	const name = s.name?.trim() || PET.defaultName
 	const off = new Set(s.moodsOff)
 	const onCount = MOODS.filter(mood => !off.has(mood.id)).length
 	const edited = s.moodFxOff.length > 0 || MOODS.some(mood => s.moodAdded[mood.id]?.length || s.moodRemoved[mood.id]?.length)

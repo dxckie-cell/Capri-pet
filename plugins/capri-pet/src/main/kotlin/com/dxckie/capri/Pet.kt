@@ -46,11 +46,8 @@ internal val SIZE_DP = floatArrayOf(52f, 64f, 80f)
 internal const val SIZE_MIN_DP = 40
 internal const val SIZE_MAX_DP = 110
 
-/**
- * Cats and dogs are drawn side-on, low and long, so at the unicorn's width they read as tiny:
- * they're shown this much bigger at every size.
- */
-private const val SMALL_ANIMAL_SCALE = 1.7f
+/** Capri is shown this much bigger than the size setting's width, at every size. */
+private const val SIZE_SCALE = 1.7f
 private val SLEEP_SECONDS = intArrayOf(60, 180, 600, 0, 30)
 
 /** Walking pace, dp/s; a trot is twice this. */
@@ -246,101 +243,6 @@ internal object Phrases {
 		"float" to listOf("I'm floating! Hehe!", "Whoa, which way is down?", "Wheee, up!"),
 	)
 
-	/** The unicorn's own: horn, mane, hooves, neighs, sparkles and soap bubbles. */
-	val unicorn = mapOf(
-		"party" to listOf("*rainbow confetti*"),
-		"cool" to listOf("*horn sparkles*"),
-		"hello" to listOf("*sparkles*", "*tosses mane*"),
-		"idle" to listOf("*swishes tail*", "Rainbows are free", "*polishes horn*", "*paws the ground*"),
-		"tap" to listOf("*neigh?*"),
-		"annoyed" to listOf("My horn is not a button", "*stamps hoof*"),
-		"pet" to listOf("*happy neigh*", "Brush my mane next?", "*nuzzles*"),
-		"throw" to listOf("Rainbow speed!", "Hooves up!"),
-		"wake" to listOf("*stretches legs*"),
-		"rocket" to listOf("Rainbow rocket!"),
-		"charging" to listOf("Horn fully charged!"),
-		"bubbles" to listOf("Bubbles!", "Pop them all!", "So shiny!"),
-		"magic" to listOf("A little magic~", "*horn glows*"),
-		"lonely" to listOf("*sad little neigh*"),
-		"content" to listOf("*happy prance*"),
-		"float" to listOf("Unicorns can fly, you know"),
-	)
-
-	/** The cats' own: meows, purrs, slow blinks and knocking things off tables. */
-	val cat = mapOf(
-		"sad" to listOf("*gentle headbutt*"),
-		"food" to listOf("Is it tuna?", "*meows at the {name}*"),
-		"sleepy" to listOf("*curls up*"),
-		"hello" to listOf("Meow!", "Mrrp!", "*slow blink*"),
-		"idle" to listOf("*licks paw*", "*stares at nothing*", "*tail flick*", "Is it dinner yet?", "*kneads the air*"),
-		"tap" to listOf("Mrrp?", "Meow?"),
-		"annoyed" to listOf("*hisses*", "Don't touch the tail", "I will knock something over"),
-		"pet" to listOf("*purrs*", "Chin scratches, please", "Behind the ears…", "*slow blink*"),
-		"drag" to listOf("Put me down, human"),
-		"throw" to listOf("Cats land on their feet!", "Meooow!"),
-		"wake" to listOf("*big stretch*", "*yawns*… meow"),
-		"hang" to listOf("Claws in!"),
-		"eat" to listOf("Knocked it off the table, then ate it", "It was in my way"),
-		"laugh" to listOf("*amused meow*"),
-		"bubbles" to listOf("*bats at them*", "Must catch!"),
-		"magic" to listOf("*mysterious cat stare*"),
-		"lonely" to listOf("*sad meow*", "Pay attention to me, human"),
-		"content" to listOf("*happy purring*", "*slow blink*"),
-		"typing" to listOf("*sits on your keyboard*", "*bats at the cursor*"),
-	)
-
-	/** The dogs' own: woofs, tail wags, fetch and belly rubs. */
-	val dog = mapOf(
-		"bye" to listOf("*whines*"),
-		"food" to listOf("FOOD?!", "*drools*", "Share the {name}?"),
-		"party" to listOf("*zoomies*"),
-		"hello" to listOf("Woof!", "Hi hi hi!", "*tail wagging*"),
-		"idle" to listOf("*wags tail*", "Walk? Walk?", "*sniffs around*", "Is that a squirrel?", "*pants happily*"),
-		"tap" to listOf("Boof?", "Woof?"),
-		"annoyed" to listOf("*grr*", "*huff*"),
-		"pet" to listOf("Good dog? Me?", "Belly rubs!", "*tail wagging intensifies*", "*leg kicks*"),
-		"drag" to listOf("Are we going to the park?"),
-		"throw" to listOf("Fetch me!", "Wheee, woof!"),
-		"wake" to listOf("*shakes it off*", "Is it walkies?"),
-		"eat" to listOf("*nom nom*", "Was that food? It's food now"),
-		"laugh" to listOf("*happy bork*"),
-		"bubbles" to listOf("*tries to catch them*", "Snap snap!"),
-		"magic" to listOf("Sit! Stay! Magic!"),
-		"lonely" to listOf("*whimpers*", "*puppy eyes*"),
-		"content" to listOf("Best friend ever!", "*happy tail*"),
-		"typing" to listOf("Is that for me?", "*rests head on your hand*"),
-	)
-
-	/** The Headless Horseman's own (Boss.kt). */
-	val horseman = mapOf(
-		"idle" to listOf("*sharpens the scythe*", "Have you seen my head?", "Nice night for a ride.", "*the pumpkin grins*"),
-		"content" to listOf("*hollow chuckle*", "The pumpkin approves."),
-		"happy" to listOf("*the pumpkin glows*"),
-		"sad" to listOf("Lost my head again."),
-		"wake" to listOf("...who goes there?"),
-		"attack" to listOf("*swings*", "Hold still.", "Just a trim.", "Catch!"),
-		"horse" to listOf("There you are, old friend.", "*whistles*"),
-		"ride" to listOf("Ride!", "To the bridge!", "Yah!"),
-	)
-	/** Krampus's own (Boss.kt). */
-	val krampus = mapOf(
-		"idle" to listOf("*rattles the chain*", "Naughty list?", "Ho ho... no.", "*licks a horn*"),
-		"content" to listOf("*the bell jingles*", "Coal for everyone."),
-		"happy" to listOf("*wags the tongue*"),
-		"sad" to listOf("Nobody was naughty today."),
-		"wake" to listOf("*snort*"),
-		"attack" to listOf("*swipe*", "Scratch that.", "Heads up!", "*snorts*"),
-		"chain" to listOf("Got you.", "*the chain bites*", "Come here."),
-	)
-	/** The seasonal holiday pets' own: a little spooky, a little cosy. */
-	val seasonal = mapOf(
-		"hello" to listOf("Boo!", "Happy holidays!"),
-		"idle" to listOf("*floats about*", "*drifts*", "Is it the season already?", "*bobs*"),
-		"tap" to listOf("Ooh!", "Hehe", "Trick or treat?"),
-		"party" to listOf("Happy holidays!", "Festive!"),
-		"content" to listOf("Season's greetings!", "*festive wiggle*"),
-		"lonely" to listOf("*sad little float*"),
-	)
 }
 
 /** Sparkle's own view: the current frame, scaled with hard pixel edges and mirrored when needed. */
@@ -405,8 +307,6 @@ private const val TURN_SECONDS = 0.22f
 internal object Pet {
 	private var decor: ViewGroup? = null
 	private var view: PetView? = null
-	/** Nyan Cat's rainbow and stars, just behind the pet (Trail.kt). */
-	private var trail: TrailView? = null
 	private var bubble: CapriBubble? = null
 	private val particles = ArrayList<View>()
 
@@ -414,11 +314,8 @@ internal object Pet {
 		private set
 	private var running = false
 	private var paused = false
-	/** The Nyan party is on: the pet is hidden and still until it ends (NyanParty.kt). */
-	private var partying = false
-	private var nextParty = 0f
 
-	/** States a spell or a Nyan party may interrupt; a sleeping pet wakes up for one. */
+	/** States a spell may interrupt; a sleeping pet wakes up for one. */
 	private val FREE_FOR_EVENTS = setOf(State.IDLE, State.WALK, State.SLEEP)
 	/** When one is due but the pet is busy, how long until it tries again. */
 	private const val EVENT_RETRY_SECONDS = 10f
@@ -463,7 +360,6 @@ internal object Pet {
 
 	// Blowing: how many more bubbles stream out once the first leaves the wand, and how many of the
 	// drawn ones (BlowRelease) have been handed over to Bubbles so far.
-	private var blowLeft = 0
 	private var released = 0
 
 	private var walkTarget = 0f
@@ -565,7 +461,6 @@ internal object Pet {
 			return
 		}
 		Eater.giveBackNow()
-		Bubbles.clear()
 		hideBubble()
 		state = State.LEAVING
 		setAnim(Anim.OUTRO)
@@ -577,13 +472,11 @@ internal object Pet {
 	}
 
 	fun stopNow() {
-		Boss.stop()
 		running = false
 		afterLeave = null
 		mainHandler.removeCallbacks(tickRunnable)
 		Phone.stop()
 		Eater.restoreAll()
-		Bubbles.clear()
 		detach()
 		state = State.IDLE
 		stuck = false
@@ -642,8 +535,7 @@ internal object Pet {
 		// The size setting is the width of the character itself (the look's refW in cell pixels), so it
 		// stays the same size however wide the cell grows for frames with things beside it.
 		val look = Looks.current
-		val boost = if (Looks.kind == Looks.Kind.CAT || Looks.kind == Looks.Kind.DOG) SMALL_ANIMAL_SCALE else 1f
-		val target = dp(Settings.sizeDp.coerceIn(SIZE_MIN_DP, SIZE_MAX_DP).toFloat()) * boost
+		val target = dp(Settings.sizeDp.coerceIn(SIZE_MIN_DP, SIZE_MAX_DP).toFloat()) * SIZE_SCALE
 		// Whole device pixels per art pixel, so every art pixel is the same size and nothing is resampled.
 		val px = maxOf(1f, Math.round(target / look.refW).toFloat())
 		w = px * look.cellW
@@ -661,9 +553,6 @@ internal object Pet {
 		decor = root
 		measure()
 		val context = root.context
-		val rainbow = TrailView(context)
-		root.addView(rainbow, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
-		trail = rainbow
 		val pet = PetView(context)
 		if (away) pet.visibility = View.INVISIBLE
 		root.addView(pet, FrameLayout.LayoutParams(w.toInt(), h.toInt()))
@@ -681,12 +570,9 @@ internal object Pet {
 		particles.clear()
 		remove(bubble)
 		remove(view)
-		remove(trail)
 		bubble = null
 		view = null
-		trail = null
 		ScreenFx.cancel()
-		Boss.detach()
 		decor = null
 		Eater.detach()
 	}
@@ -707,13 +593,12 @@ internal object Pet {
 
 	private fun nextDelay(): Long {
 		if (view == null || paused) return 800
-		if (partying || Boss.riding) return 250
 		if (away) return 250
 		val t = now()
 		return when {
 			state in setOf(State.PRESS, State.DRAG, State.PET, State.FLY, State.WALK, State.LEAVING, State.SEEK) || spinRate > 0f -> 16
 			hopActive || walkIn || slideV != 0f || peekMoving || (treat != null && !treatLanded) -> 16
-			strip != null || Boss.busy -> 33
+			strip != null -> 33
 			mood != null && t < moodUntil -> 33
 			state == State.HANG || state == State.PEEK || state == State.STUCK -> 33
 			state == State.SLEEP -> 200
@@ -749,7 +634,6 @@ internal object Pet {
 			paused = false
 			lastTick = SystemClock.uptimeMillis()
 		}
-		if (partying || Boss.riding) return
 		val b = bounds(t)
 		if (stepTyping(t, b, v)) return
 		Phone.start(root.context)
@@ -788,7 +672,6 @@ internal object Pet {
 			State.SEEK -> stepSeek(dt, t, b)
 			else -> {}
 		}
-		Boss.tick(t, dt, b)
 		stepTreat(dt, t, b)
 		if (Settings.treats && treat == null) {
 			if (nextTreat == 0f) nextTreat = t + (60f + Random.nextFloat() * 120f) * rateScale(Settings.treatRate)
@@ -1125,7 +1008,6 @@ internal object Pet {
 				if (Settings.gravity) vx *= 0.75f
 			}
 		}
-		if (impact > dp(1500f)) crumbs(3)
 		if (impact > dp(2300f)) {
 			setMood(Anim.DIZZY, 2.6f)
 			say("dizzy")
@@ -1270,7 +1152,7 @@ internal object Pet {
 	}
 
 	private fun setMood(next: Anim, seconds: Float, still: Int = -1) {
-		if (next == Anim.HAPPY && Settings.look == Looks.CAPRI && !StarStrike.active && !Possess.active) decor?.let { Victory.start(it, x + w / 2f, y + h * 0.22f) }
+		if (next == Anim.HAPPY && !StarStrike.active && !Possess.active) decor?.let { Victory.start(it, x + w / 2f, y + h * 0.22f) }
 		mood = next
 		moodStill = still
 		moodUntil = now() + seconds
@@ -1284,7 +1166,7 @@ internal object Pet {
 	private fun compose(t: Float): Anim {
 		if (mood != null && t >= moodUntil) {
 			// she glitches back out of the happy pose into idle
-			if (mood == Anim.HAPPY && state == State.IDLE && strip == null && Settings.look == Looks.CAPRI && (Looks.current as? SheetLook)?.has("unhappy") == true)
+			if (mood == Anim.HAPPY && state == State.IDLE && strip == null && (Looks.current as? SheetLook)?.has("unhappy") == true)
 				strip = StripPlay("unhappy", t, 24f, false, t + 8 / 24f)
 			mood = null
 		}
@@ -1339,24 +1221,16 @@ internal object Pet {
 		setAnim(next)
 		val still = if (next == mood) moodStill else -1
 		val elapsed = if (next == Anim.JUMP) t - hopStart else t - animStart
-		val motionName = Motion.name(next)
-		val motionFrame = motionName?.let { Motion.frame(it, elapsed) }
-		val motion = if (motionFrame != null) MotionData.strips.getValue(motionName!!) else null
-		v.frame = motionFrame ?: playingFrame(t) ?: Looks.current.frame(next, elapsed, still)
+		v.frame = playingFrame(t) ?: Looks.current.frame(next, elapsed, still)
 		v.flip = (Looks.current.directional(next) || (next == Anim.SPIN && teleportLook)) && facing < 0
-		// Motion cells include room for a full tumble. Keep their native pixel
-		// scale rather than squeezing them into the normal logical pet cell.
-		val pixelScale = w / Looks.current.cellW
-		val frameW = if (motion != null) motion.w * pixelScale else w
-		val frameH = if (motion != null) motion.h * pixelScale else h
+		val frameW = w
+		val frameH = h
 		if (v.layoutParams.width != frameW.toInt() || v.layoutParams.height != frameH.toInt()) {
 			v.layoutParams = v.layoutParams.apply { width = frameW.toInt(); height = frameH.toInt() }
 		}
-		val offsetX = if (motion == null) 0 else if (v.flip) Looks.current.cellW - motion.dx - motion.w else motion.dx
-		v.translationX = Math.round(x + offsetX * pixelScale).toFloat()
-		v.translationY = Math.round((if (next == Anim.HANG && motion != null) bounds[2] else y + hopOff) + (motion?.dy ?: 0) * pixelScale).toFloat()
+		v.translationX = Math.round(x).toFloat()
+		v.translationY = Math.round(y + hopOff).toFloat()
 		v.rotation = when {
-			motion != null && next == Anim.HANG -> 0f
 			// Upside down on the status bar, swaying a little; also while tapped or petted up there.
 			stuck && state in setOf(State.STUCK, State.PRESS, State.PET) -> 180f + sin((t - hangStart) * 2.2f) * 5f
 			spinRate > 0f && !rocket && state != State.PRESS -> spinAngle
@@ -1372,16 +1246,6 @@ internal object Pet {
 		v.pivotX = frameW / 2f; v.pivotY = frameH * 0.98f
 		v.scaleX = if (lying) DIZZY_SCALE else 1f; v.scaleY = v.scaleX
 		v.invalidate()
-		stepTrail(next)
-	}
-
-	/** The rainbow trail belonged to Nyan Cat; nothing feeds it now, so keep it off. */
-	private fun stepTrail(@Suppress("UNUSED_PARAMETER") anim: Anim) {
-		val tr = trail ?: return
-		if (!tr.off) {
-			tr.off = true
-			tr.clear()
-		}
 	}
 
 	// ---------------------------------------------------------------- touch
@@ -1437,7 +1301,6 @@ internal object Pet {
 						val dir = if (dx > 0) 1 else -1
 						if (petDir != 0 && dir != petDir) {
 							spawn(Particle.HEART)
-							crumbs(1)
 							haptic(HapticFeedbackConstants.CLOCK_TICK)
 							addLove(1)
 						}
@@ -1661,7 +1524,6 @@ internal object Pet {
 		hopActive = false; hopOff = 0f; hopVy = 0f; slideV = 0f
 		// A beat of the shake-burst pose, then off it goes.
 		setMood(Anim.SHAKE, if (Looks.current.timedShake) Looks.current.duration(Anim.SHAKE) else 0.25f)
-		crumbs(5)
 		state = State.FLY
 		val speed = dp(900f + minOf(power, 40f) * 55f)
 		val angle = Random.nextFloat() * 6.2831855f
@@ -1702,7 +1564,6 @@ internal object Pet {
 		wake(t)
 		if (state == State.WALK) state = State.IDLE
 		setMood(Anim.BLOW, Looks.current.duration(Anim.BLOW) + 0.2f)
-		blowLeft = 6 + Random.nextInt(5)
 		released = 0
 		if (Random.nextFloat() < 0.4f) say("bubbles")
 		nextAction = maxOf(nextAction, t + Looks.current.duration(Anim.BLOW) + 1f)
@@ -1714,25 +1575,9 @@ internal object Pet {
 		if (mood != Anim.BLOW || t >= moodUntil) return
 		val root = decor ?: return
 		val frame = ((t - animStart) * Anim.BLOW.fps).toInt()
-		if (Settings.look == Looks.CAPRI) {
-			// Capri doesn't blow bubbles: she possesses the screen (Possess.kt) on the first blow frame.
-			if (frame >= 6 && released == 0) { released = 1; Possess.start(root, x + w / 2f, y + h * 0.3f) }
-			if (Possess.active) Possess.follow(x + w / 2f, y + h * 0.3f)
-			return
-		}
-		val scale = w / Looks.current.cellW
-		while (released < Looks.current.blowReleases.size && frame >= Looks.current.blowReleases[released].frame) {
-			val r = Looks.current.blowReleases[released]
-			val p = cellPoint(r.x, r.y)
-			if (released == 0) Bubbles.blow(root, p[0], p[1], blowLeft, delay = 0.45f)
-			Bubbles.release(root, p[0], p[1], r.size * scale, r.variant, facing)
-			released++
-		}
-		if (released > 0) {
-			val first = Looks.current.blowReleases[0]
-			val p = cellPoint(first.x, first.y)
-			Bubbles.follow(p[0], p[1])
-		}
+		// Capri doesn't blow bubbles: she possesses the screen (Possess.kt) on the first blow frame.
+		if (frame >= 6 && released == 0) { released = 1; Possess.start(root, x + w / 2f, y + h * 0.3f) }
+		if (Possess.active) Possess.follow(x + w / 2f, y + h * 0.3f)
 	}
 
 	/** A point in the sprite cell, in decor coordinates, mirrored with the frame when facing left. */
@@ -1752,7 +1597,7 @@ internal object Pet {
 		if (nextMagic == 0f && !force) { nextMagic = t + (20f + Random.nextFloat() * 40f) * scale; return }
 		// Busy (held, petted, hanging, hidden...): try again shortly. Skipping to a whole new wait
 		// meant a pet that dozes off between spells (most of the time) almost never cast one.
-		if (!force && (paused || away || view == null || state !in FREE_FOR_EVENTS || Boss.busy)) {
+		if (!force && (paused || away || view == null || state !in FREE_FOR_EVENTS)) {
 			nextMagic = t + EVENT_RETRY_SECONDS
 			return
 		}
@@ -1927,7 +1772,6 @@ internal object Pet {
 
 	private fun goAway() {
 		Eater.giveBackNow()
-		Bubbles.clear()
 		hideBubble()
 		clearTreat()
 		stuck = false; rocket = false; peekSide = 0; peekPending = 0
@@ -1941,7 +1785,6 @@ internal object Pet {
 
 	private fun goAwayNow(v: PetView) {
 		away = true
-		Boss.cancel()
 		afterLeave = null
 		state = State.IDLE
 		mood = null
@@ -1974,142 +1817,7 @@ internal object Pet {
 	/** A pixel treat: its name for the speech bubbles, and its rows (each letter a colour in [colours]). */
 	private class Treat(val name: String, val rows: List<String>, val colours: Map<Char, Int>)
 
-	private val treats = listOf(
-		Treat(
-			"cupcake",
-			listOf(
-				".....R.....",
-				"....RR.....",
-				"..PPPPPPP..",
-				".PPWPPPBPP.",
-				"PPPPPPPPPPP",
-				"PBPPPWPPPWP",
-				".YYYYYYYYY.",
-				".YoYoYoYoY.",
-				"..YoYoYoY..",
-				"..YYYYYYY..",
-			),
-			mapOf('R' to 0xFFE8344E.toInt(), 'P' to 0xFFFF9CCB.toInt(), 'W' to 0xFFFFFFFF.toInt(), 'B' to 0xFF6EC8FF.toInt(), 'Y' to 0xFF7FE0C9.toInt(), 'o' to 0xFF45B39C.toInt()),
-		),
-		Treat(
-			"cookie",
-			listOf(
-				"..TTTTT..",
-				".TTDTTTT.",
-				"TTTTTTDTT",
-				"TDTTTTTTT",
-				"TTTTDTTTT",
-				"TTTTTTTDT",
-				"TDTTTTTTT",
-				".TTTTDTT.",
-				"..TTTTT..",
-			),
-			mapOf('T' to 0xFFE0A35E.toInt(), 'D' to 0xFF5B3520.toInt()),
-		),
-		Treat(
-			"strawberry",
-			listOf(
-				"...GGG...",
-				"..GGGGG..",
-				".RRRRRRR.",
-				"RRYRRRYRR",
-				"RRRRRRRRR",
-				"RRRYRRRYR",
-				".RRRRRRR.",
-				"..RRYRR..",
-				"...RRR...",
-				"....R....",
-			),
-			mapOf('G' to 0xFF4CC26A.toInt(), 'R' to 0xFFF0384A.toInt(), 'Y' to 0xFFFFE27A.toInt()),
-		),
-		Treat(
-			"candy",
-			listOf(
-				"LL..CCCCC..LL",
-				"LLLCCWCCCCLLL",
-				".LLCCCCWCCLL.",
-				"LLLCCCCCCCLLL",
-				"LL..CCCCC..LL",
-			),
-			mapOf('L' to 0xFFD9B8FF.toInt(), 'C' to 0xFF9B5CFF.toInt(), 'W' to 0xFFFFFFFF.toInt()),
-		),
-		Treat(
-			"carrot",
-			listOf(
-				"......G.G",
-				".....GGG.",
-				"....OOG..",
-				"...OOOO..",
-				"..OOdOO..",
-				"..OOOO...",
-				".OdOO....",
-				".OOO.....",
-				"OO.......",
-			),
-			mapOf('G' to 0xFF4CC26A.toInt(), 'O' to 0xFFFF8A2A.toInt(), 'd' to 0xFFC85A10.toInt()),
-		),
-	)
-
-	/** Nyan Cat's treats: pop-tarts and party food, plus a cat's favourites. */
-	private val nyanTreats = listOf(
-		Treat(
-			"pop-tart",
-			listOf(
-				"CCCCCCCCCC",
-				"CFFFFFFFFC",
-				"CFsFFFsFFC",
-				"CFFFsFFFFC",
-				"CFsFFFFsFC",
-				"CFFFFsFFFC",
-				"CFFsFFFsFC",
-				"CFFFFFFFFC",
-				"CCCCCCCCCC",
-			),
-			mapOf('C' to 0xFFFFCC99.toInt(), 'F' to 0xFFFF99FF.toInt(), 's' to 0xFFFF3399.toInt()),
-		),
-		Treat(
-			"slice of cake",
-			listOf(
-				"....r.....",
-				"...WWW....",
-				"..WWWWWW..",
-				".SSSSSSSSS",
-				".WWWWWWWWW",
-				".SSSSSSSSS",
-				".PPPPPPPPP",
-				".SSSSSSSSS",
-			),
-			mapOf('r' to 0xFFE8344E.toInt(), 'W' to 0xFFFFF6E8.toInt(), 'S' to 0xFFF2C48A.toInt(), 'P' to 0xFFFF9CCB.toInt()),
-		),
-		Treat(
-			"donut",
-			listOf(
-				"..PPPPP..",
-				".PsPPPwP.",
-				"PPPDDDPPP",
-				"PwPD.DPsP",
-				"PPPDDDPPP",
-				".DPPsPPD.",
-				"..DDDDD..",
-			),
-			mapOf('P' to 0xFFFF9CCB.toInt(), 'D' to 0xFFD9944F.toInt(), 's' to 0xFF6EC8FF.toInt(), 'w' to 0xFFFFFFFF.toInt()),
-		),
-		Treat(
-			"ice cream",
-			listOf(
-				"...PPP...",
-				"..PPwPP..",
-				"..PPPPP..",
-				".MMMMMMM.",
-				".MMwMMMM.",
-				"..WWWWW..",
-				"..WwWwW..",
-				"...WWW...",
-				"...WwW...",
-				"....W....",
-			),
-			mapOf('P' to 0xFFFF9CCB.toInt(), 'M' to 0xFFFFF0C8.toInt(), 'w' to 0xFFFFFFFF.toInt(), 'W' to 0xFFD9944F.toInt()),
-		),
+	private val fishAndMilk = listOf(
 		Treat(
 			"fish",
 			listOf(
@@ -2138,36 +1846,8 @@ internal object Pet {
 		),
 	)
 
-	/** A cat's favourites: fish, milk, and a drumstick. */
-	private val catTreats by lazy { nyanTreats.filter { it.name == "fish" || it.name == "milk" } + drumstick }
-	/** A dog's: a bone, a sausage, a drumstick. */
-	private val dogTreats by lazy {
-		listOf(
-			Treat(
-				"bone",
-				listOf(
-					"WW.......WW",
-					"WWWWWWWWWWW",
-					".WWWWWWWWW.",
-					"WWWWWWWWWWW",
-					"WW.......WW",
-				),
-				mapOf('W' to 0xFFF6EEDC.toInt()),
-			),
-			Treat(
-				"sausage",
-				listOf(
-					"..SSSSSSS..",
-					".SSsSSSsSSS",
-					"SSSSSSSSSSS",
-					".SSSSSSSSS.",
-					"..SSSSSSS..",
-				),
-				mapOf('S' to 0xFFC8553D.toInt(), 's' to 0xFFE88A6E.toInt()),
-			),
-			drumstick,
-		)
-	}
+	/** Her treats: fish, milk and a drumstick. */
+	private val capriTreats by lazy { fishAndMilk + drumstick }
 	private val drumstick = Treat(
 		"drumstick",
 		listOf(
@@ -2183,15 +1863,9 @@ internal object Pet {
 		mapOf('B' to 0xFFC27A3A.toInt(), 'b' to 0xFFE0A35E.toInt(), 'W' to 0xFFF6EEDC.toInt()),
 	)
 
-	/** The current pet's treats. */
-	private val currentTreats get() = when (Looks.kind) {
-		Looks.Kind.CAT -> catTreats
-		Looks.Kind.DOG -> dogTreats
-		Looks.Kind.SEASONAL -> treats
-		Looks.Kind.UNICORN -> treats
-	}
+	private val currentTreats get() = capriTreats
 	/** Which list [treatKind] came from, kept with the dropped treat so a pet switch can't mismatch it. */
-	private var treatList = treats
+	private var treatList: List<Treat> = emptyList()
 
 	private val treatBitmaps = HashMap<Treat, Bitmap>()
 
@@ -2233,35 +1907,6 @@ internal object Pet {
 	private var nextTreat = 0f
 
 	/** After a how-often change: every wait starts again at the new rate (0 means "schedule next frame"). */
-	// ---------------------------------------------------------------- the boss pets (Boss.kt)
-
-	val petX get() = x
-	val petY get() = y
-	val petW get() = w
-	val petH get() = h
-	val petFacing get() = facing
-	val petView: View? get() = view
-	val petDecor: ViewGroup? get() = decor
-	val petBubble: View? get() = bubble
-	val petTrail: View? get() = trail
-	val keyboardUp get() = keyboard > 0
-	/** On screen, idle, walking or asleep, not stuck, hidden or partying: free for an event. */
-	val freeForEvents get() = view != null && !paused && !away && !partying && !stuck && state in FREE_FOR_EVENTS
-	fun boundsNow(t: Float) = bounds(t)
-	fun pointInCell(cx: Float, cy: Float) = cellPoint(cx, cy)
-	fun mood(next: Anim, seconds: Float) = setMood(next, seconds)
-	fun sayNow(category: String) = say(category)
-	fun poke() = schedule(0)
-	fun wakeUpNow() {
-		if (state == State.SLEEP) { state = State.IDLE; wokeAt = now() }
-		if (state == State.WALK) state = State.IDLE
-	}
-	/** Puts the pet down at ([nx], [ny]) standing still: where a ride ended. */
-	fun placeAt(nx: Float, ny: Float) {
-		x = nx; y = ny; hopOff = 0f; hopActive = false; hopVy = 0f
-		if (state != State.LEAVING) state = State.IDLE
-	}
-
 	private class StripPlay(val name: String, val start: Float, val fps: Float, val loop: Boolean, val until: Float, val loopFrom: Int = 0)
 	private var strip: StripPlay? = null
 	private var holdUntil = 0f
@@ -2289,8 +1934,6 @@ internal object Pet {
 
 	fun rescheduleTimers() {
 		nextMagic = 0f
-		nextParty = 0f
-		Boss.reschedule()
 		if (treat == null) nextTreat = 0f
 		Eater.reschedule(now())
 	}
@@ -2308,7 +1951,7 @@ internal object Pet {
 		val t = now()
 		if (!force) scheduleTreat(t)
 		if (treat != null || away || paused) return
-		if (!force && (!Settings.treats || Boss.busy || state !in setOf(State.IDLE, State.WALK, State.SLEEP, State.PEEK))) return
+		if (!force && (!Settings.treats || state !in setOf(State.IDLE, State.WALK, State.SLEEP, State.PEEK))) return
 		runCatching {
 			treatList = currentTreats
 			treatKind = Random.nextInt(treatList.size)
@@ -2531,15 +2174,7 @@ internal object Pet {
 	private fun say(category: String, force: Boolean = false, name: String? = null) {
 		val bubbleView = bubble ?: return
 		if (!force && !Settings.talks) return
-		// The lines any pet says, plus the current pet's own for this moment.
-		val own = when (Looks.kind) {
-			Looks.Kind.CAT -> Phrases.cat
-			Looks.Kind.DOG -> Phrases.dog
-			Looks.Kind.SEASONAL -> Boss.phrases() ?: Phrases.seasonal
-			Looks.Kind.UNICORN -> Phrases.unicorn
-		}
-		var options = (if (Settings.look == Looks.CAPRI) Phrases.capri[category] ?: Phrases.shared[category] else Phrases.shared[category].orEmpty() + own[category].orEmpty())
-			.orEmpty().ifEmpty { return }
+		var options = (Phrases.capri[category] ?: Phrases.shared[category]).orEmpty().ifEmpty { return }
 		if (name.isNullOrBlank()) options = options.filter { "{name}" !in it }.ifEmpty { return }
 		val pick = options.filter { it != lastPhrase }.ifEmpty { options }.random()
 		val text = (if (name.isNullOrBlank()) pick else pick.replace("{name}", name)).replace("{me}", Settings.name)
@@ -2576,15 +2211,8 @@ internal object Pet {
 
 	// ---------------------------------------------------------------- particles
 
-	/** Hearts and sparks float up; Nyan Cat's pop-tart crumbs ([crumbs]) fall. */
-	private enum class Particle { HEART, SPARK, CRUMB_SPRINKLE, CRUMB_FROSTING, CRUMB_CRUST }
-
-	/** Nyan Cat sheds a few bits of its pop-tart: petted, shaken or landing hard. */
-	private fun crumbs(count: Int) {
-		if (Settings.look != Looks.NYAN) return
-		val kinds = listOf(Particle.CRUMB_SPRINKLE, Particle.CRUMB_FROSTING, Particle.CRUMB_CRUST)
-		repeat(count) { spawn(kinds[Random.nextInt(kinds.size)]) }
-	}
+	/** Hearts and sparks float up. */
+	private enum class Particle { HEART, SPARK }
 
 	private val particleBitmaps = HashMap<Particle, Bitmap>()
 
@@ -2593,16 +2221,10 @@ internal object Pet {
 		val rows = when (kind) {
 			Particle.HEART -> listOf(".##.##.", "#######", "#######", ".#####.", "..###..", "...#...")
 			Particle.SPARK -> listOf("...#...", "...#...", "..###..", "#######", "..###..", "...#...", "...#...")
-			Particle.CRUMB_SPRINKLE -> listOf("##")
-			Particle.CRUMB_FROSTING -> listOf("##", "##")
-			Particle.CRUMB_CRUST -> listOf("###", "##.")
 		}
 		val colour = when (kind) {
 			Particle.HEART -> 0xFFFF5C9A.toInt()
 			Particle.SPARK -> 0xFFFFD35C.toInt()
-			Particle.CRUMB_SPRINKLE -> 0xFFFF3399.toInt()
-			Particle.CRUMB_FROSTING -> 0xFFFF99FF.toInt()
-			Particle.CRUMB_CRUST -> 0xFFFFCC99.toInt()
 		}
 		val s = maxOf(2, dp(2.2f).toInt())
 		val bmp = Bitmap.createBitmap(rows[0].length * s, rows.size * s, Bitmap.Config.ARGB_8888)
@@ -2626,25 +2248,6 @@ internal object Pet {
 			p.setCrisp(bmp)
 			root.addView(p, FrameLayout.LayoutParams(bmp.width, bmp.height))
 			particles.add(p)
-			val crumb = kind in setOf(Particle.CRUMB_SPRINKLE, Particle.CRUMB_FROSTING, Particle.CRUMB_CRUST)
-			if (crumb) {
-				// From the pop-tart, falling and tumbling as they fade.
-				p.translationX = x + w * (0.3f + Random.nextFloat() * 0.45f)
-				p.translationY = y + hopOff + along(0.4f + Random.nextFloat() * 0.3f)
-				p.animate()
-					.translationXBy((Random.nextFloat() - 0.5f) * dp(40f))
-					.translationYBy(dp(50f + Random.nextFloat() * 40f))
-					.rotationBy((Random.nextFloat() - 0.5f) * 540f)
-					.alpha(0f)
-					.setInterpolator(android.view.animation.AccelerateInterpolator())
-					.setDuration(800)
-					.withEndAction {
-						particles.remove(p)
-						remove(p)
-					}
-					.start()
-				return@runCatching
-			}
 			p.translationX = x + w / 2f - bmp.width / 2f + (Random.nextFloat() - 0.5f) * w * 0.5f
 			p.translationY = y + hopOff + along(0.2f)
 			p.scaleX = 0.5f

@@ -1,6 +1,4 @@
 import * as native from '@valenced/modules/native'
-import { SEASONAL_PETS } from './seasonalPets'
-import { BOSS_PETS } from './bossPets'
 
 /** Mirrored from native, which owns the real values (Sparkle needs them before JS has loaded). */
 export interface CapriStorage {
@@ -24,20 +22,12 @@ export interface CapriStorage {
 	bubbleFx: boolean
 	/** Now and then casts a spell: VFX shows a random filter or effect for a few seconds. */
 	magic: boolean
-	/** How often magic, treats, the Nyan party and eating happen: 1 Rare, 2 Sometimes, 3 Often, 4 Very often. */
+	/** How often magic, treats and eating happen: 1 Rare, 2 Sometimes, 3 Often, 4 Very often. */
 	magicRate: number
 	/** How lively it is between touches: 0 Calm, 1 Normal, 2 Lively, 3 Hyper. */
 	activity: number
 	treatRate: number
-	partyRate: number
 	eatRate: number
-	/** The boss pets: attacks on the screen (on/off, rate), whether the snapshot effects play, the horse's visits and the ride's length. */
-	attacks: boolean
-	attackRate: number
-	attackFx: boolean
-	companion: boolean
-	companionRate: number
-	rideMinutes: number
 	/**
 	 * What spells may show. JS-only (native never sees it; it goes to VFX with each spell).
 	 * "block": everything except [spellList], so things VFX adds later are in. "allow": only [spellList].
@@ -61,11 +51,7 @@ export interface CapriStorage {
 	treats: boolean
 	/** What it calls itself. */
 	name: string
-	/** Which pet: 0 unicorn, 1 Nyan Cat, 2–13 cats/dogs, 14 Capri, 15 Gary (unused), 16–19 seasonal and boss pets. */
-	look: number
-	/** Picker-only preference; hiding a pack does not dismiss the active pet. */
-	hiddenPacks: string[]
-	/** Cats and dogs: 0 no outline, 1 automatic (contrasts with the theme), 2 light, 3 dark. */
+	/** 0 no outline, 1 automatic (contrasts with the theme), 2 light, 3 dark. */
 	outline: number
 	/** Opt-in reputation: how it treats your buttons follows how you treat it (see Pet.kt, reputation). */
 	grudges: boolean
@@ -100,14 +86,7 @@ export const DEFAULTS: CapriStorage = {
 	magicRate: 2,
 	activity: 1,
 	treatRate: 2,
-	partyRate: 2,
 	eatRate: 2,
-	attacks: true,
-	attackRate: 2,
-	attackFx: true,
-	companion: true,
-	companionRate: 2,
-	rideMinutes: 5,
 	spellMode: "block",
 	spellList: [],
 	moodsOff: [],
@@ -118,8 +97,6 @@ export const DEFAULTS: CapriStorage = {
 	showWhen: 0,
 	treats: true,
 	name: "Capri",
-	look: 14,
-	hiddenPacks: [],
 	outline: 1,
 	grudges: false,
 }
@@ -142,14 +119,8 @@ export function sizeLabel(dp: number): string {
 	return `Between ${SIZE_STOPS[above - 1].label} and ${SIZE_STOPS[above].label}`
 }
 
-/** Every pet, by id (native's Looks: 0 unicorn, 2-13 cats and dogs, 14 Capri, 16-19 seasonal and boss pets). */
-export const LOOKS = [
-	{ id: 14, label: "Capri", pack: "classic", kind: "unicorn", defaultName: "Capri", bubbles: "bubbles", leaves: "teleports away" },
-] as const
-
-export function lookOf(id: number) {
-	return LOOKS.find(l => l.id === id) ?? LOOKS[0]
-}
+/** Capri, the only pet. */
+export const PET = { label: "Capri", defaultName: "Capri", leaves: "teleports away" } as const
 
 const METHOD = "dxckie.capri-pet"
 

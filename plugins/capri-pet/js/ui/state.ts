@@ -98,32 +98,29 @@ export interface PreviewAnimation {
 	/** One frame, in screen pixels: shown at w / PixelRatio dp so nothing is resampled. */
 	w: number
 	h: number
-	strip?: string | null
 }
 
 const animations = new Map<string, PreviewAnimation>()
-/** The pet strip shows every pet (35), plus the big preview and the tester. */
+/** The big preview and the tester. */
 const CACHE_SIZE = 64
 
 /** [targetPx]: how big the page shows it, in screen pixels; native picks the biggest whole-number scale that fits. */
-export function usePreviewFrames(look: number, pose = "IDLE", variant = 0, targetPx = 0): PreviewAnimation | undefined {
-	const key = `${look}:${pose}:${variant}:${targetPx}`
+export function usePreviewFrames(pose = "IDLE", variant = 0, targetPx = 0): PreviewAnimation | undefined {
+	const key = `${pose}:${variant}:${targetPx}`
 	const [value, setValue] = React.useState<PreviewAnimation & { key: string }>()
 	React.useEffect(() => {
 		let active = true
-		// A negative look asks for nothing (a hook that's switched off).
-		if (look < 0) return
 		const cached = animations.get(key)
 		if (cached) {
 			setValue({ key, ...cached })
 			return
 		}
-		callNative("previewFrames", [look, pose, variant, targetPx])
+		callNative("previewFrames", [pose, variant, targetPx])
 			.then((result: Partial<PreviewAnimation>) => {
 				if (!active) return
 				if (typeof result?.sheet !== "string" || !result.n || !result.w || !result.h) return
 				const anim: PreviewAnimation = {
-					sheet: result.sheet, cols: result.cols || 1, n: result.n, fps: result.fps || 8, w: result.w, h: result.h, strip: result.strip,
+					sheet: result.sheet, cols: result.cols || 1, n: result.n, fps: result.fps || 8, w: result.w, h: result.h,
 				}
 				// Keep the page from retaining every pet/pose PNG in memory.
 				if (animations.size >= CACHE_SIZE) animations.delete(animations.keys().next().value!)
@@ -137,6 +134,6 @@ export function usePreviewFrames(look: number, pose = "IDLE", variant = 0, targe
 				}
 			})
 		return () => { active = false }
-	}, [key, look, pose, variant, targetPx])
+	}, [key, pose, variant, targetPx])
 	return value?.key === key ? value : undefined
 }

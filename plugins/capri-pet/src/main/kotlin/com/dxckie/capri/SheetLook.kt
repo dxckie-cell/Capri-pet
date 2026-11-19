@@ -8,21 +8,7 @@ import android.graphics.PointF
 import android.graphics.RectF
 import android.util.Base64
 
-/**
- * The sheet-based pets: LuizMelo's cats and dogs (CC0, built by tools/build_pets.py into PetData.kt)
-	 * and seasonal pets (legacy open assets and purchased ToffeeCraft artwork).
- * Each pet is cropped to one box for all its animations, so it never shifts between poses; here every
- * frame gets a little room round it ([PAD_TOP], [PAD_SIDE]) for the things drawn on top: z's,
- * reaction icons, dizzy stars, sparkles.
- *
- * Shimeji's moods map onto the pack's animations (idle, walk, run, meow/bark, lying down, itch,
- * sleeping, sitting, licking, stretching); a pet missing one falls back along [FALLBACKS].
- *
- * The animals face right and are mirrored walking left. Sizes are kept in proportion within a kind:
- * the size setting measures the ginger cat for cats and the Golden Retriever for dogs, so a Great
- * Dane stays bigger than an Akita.
- */
-/** The data any sheet-based pet needs: the cats, the dogs and the seasonal holiday pets. */
+/** Capri: every animation is a strip of frames cropped to one box, with a little room round it ([PAD_TOP], [PAD_SIDE]) for the things drawn on top: z's, reaction icons, dizzy stars, sparkles. */
 internal interface SheetPet {
 	val id: String
 	val name: String
@@ -36,23 +22,16 @@ internal interface SheetPet {
 	val idleFps: Float get() = 8f
 }
 
-internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOverride: Float? = null) : Look {
+internal class SheetLook(private val pet: SheetPet) : Look {
 	override val cellW = pet.w + PAD_SIDE * 2
 	override val cellH = pet.h + PAD_TOP + PAD_BOTTOM
-	override val refW = refOverride ?: when (kind) {
-		Looks.Kind.DOG -> DOG_REF_W
-		// Each seasonal pet's own width: most are built exactly 48 wide, but a pet scaled by a whole
-		// number to keep its pixels even (build_seasonal.INTEGER_SCALE) can come out a little wider.
-		Looks.Kind.SEASONAL -> pet.refW.toFloat()
-		else -> CAT_REF_W
-	}
+	// A person, not a small animal: measured like a 90 px wide character so the size slider fits.
+	override val refW = 90f
 
 	override fun directional(anim: Anim) = true
 
 	val name get() = pet.name
-	private val revisedSeasonal = kind == Looks.Kind.SEASONAL && pet.strips.containsKey("rest")
-	override val timedShake get() = revisedSeasonal
-	val idleFps: Float get() = if (revisedSeasonal && (pet.id.startsWith("chicken_") || pet.id == "chick")) 3f else pet.idleFps
+	val idleFps: Float get() = pet.idleFps
 	val idleFrameCount: Int get() = pet.strips["idle"]?.first ?: 1
 
 	private val strips = HashMap<String, List<Bitmap>>()
@@ -80,53 +59,19 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 
 	/** Which strip, how fast, whether it loops (else holds the last frame), and what goes on top. */
 	private class Pick(val strip: String, val fps: Float, val loop: Boolean = true, val over: Over = Over.NONE, val still: Int = -1, val reverse: Boolean = false, val loopFrom: Int = 0)
-	/** Purchased packs use their own poses rather than the original cats' grooming names. */
-	private fun seasonalPick(anim: Anim, still: Int): Pick = when (anim) {
-		Anim.IDLE -> Pick("idle", idleFps)
-		Anim.HANG -> Pick("hang", 6f)
-		Anim.WALK -> Pick("walk", 8f)
-		// Pet.kt owns the jump trajectory; source jumps include baked-in travel.
-		Anim.JUMP -> Pick("takeoff", 10f, loop = false)
-		Anim.OUTRO -> Pick("outro", 8f, loop = false)
-		Anim.INTRO -> Pick("outro", 8f, loop = false, reverse = true)
-		Anim.SPIN -> Pick("spin", 10f)
-		Anim.SLEEP -> Pick("rest", 3f, over = if (pet.id.startsWith("christmas_") || pet.id == "cotton_boo") Over.NONE else Over.ZS)
-		Anim.SAD -> Pick("sad", 3f)
-		// A pet with its own low-battery strip (the Mini Ghost fades) uses it; the rest look sad.
-		Anim.LOW_BATTERY -> Pick(if (pet.strips.containsKey("low")) "low" else "sad", 3f, over = Over.BATTERY)
-		Anim.CHARGING -> Pick("charge", 5f, over = Over.BOLT)
-		Anim.HAPPY -> Pick("happy", 8f, over = Over.SPARKLES)
-		Anim.SURPRISED, Anim.SHAKE -> Pick("startle", 10f, loop = false, over = Over.ALERT)
-		Anim.DIZZY -> Pick("dizzy", 8f, over = Over.DIZZY)
-		Anim.REACTION -> Pick("reaction", 6f, over = when (still) {
-			0 -> Over.HEART; 1 -> Over.ALERT; 2 -> Over.MAIL; else -> Over.MUSIC
-		})
-		Anim.BLOW -> Pick("blow", Anim.BLOW.fps, loop = false)
-		Anim.LOOK -> Pick("look", 8f, loop = false)
-		Anim.VARIANT -> when {
-			pet.strips.containsKey("peck") && still == 1 -> Pick("peck", 6f)
-			pet.strips.containsKey("lick1") && still == 1 -> Pick("lick1", 6f)
-			pet.strips.containsKey("lick2") && still == 2 -> Pick("lick2", 6f)
-			pet.strips.containsKey("sit") -> Pick("sit", 4f)
-			else -> Pick("fidget", 6f)
-		}
-	}
-
-	/** The strip a fidget ([Anim.VARIANT]) plays for [still], for the settings page's tester. */
-	fun variantStrip(still: Int): String =
-		frames(if (revisedSeasonal) seasonalPick(Anim.VARIANT, still).strip else pick(Anim.VARIANT, 0f, still).strip).first
-
 	/** Looks with their own "outro" strip (Capri's teleport) leave and return in place with it. */
 	/** Set while the picker renders preview frames, so a teleporting look shows its bolt in them. */
 	@Volatile var preview = false
 
-	val teleports: Boolean get() = !revisedSeasonal && pet.strips.containsKey("outro")
+	val teleports: Boolean get() = pet.strips.containsKey("outro")
 
 	override fun duration(anim: Anim): Float {
-		if (teleports && (anim == Anim.OUTRO || anim == Anim.INTRO)) return pet.strips.getValue("outro").first / 24f
-		if (!revisedSeasonal) return super<Look>.duration(anim)
-		val p = seasonalPick(anim, -1)
-		return (pet.strips[p.strip]?.first ?: 1) / p.fps.coerceAtLeast(1f)
+		if (anim == Anim.OUTRO || anim == Anim.INTRO) return pet.strips.getValue("outro").first / 24f
+		// Her look-around and her blow pose are held frames; these are the lengths they have always had.
+		if (anim == Anim.LOOK) return 2.125f
+		if (anim == Anim.BLOW) return 2.375f
+		val p = choose(anim, 0f, -1)
+		return if (p.fps <= 0f) 0f else (pet.strips[p.strip]?.first ?: 1) / 24f
 	}
 
 	private fun pick(anim: Anim, s: Float, still: Int): Pick = when (anim) {
@@ -161,8 +106,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 
 	/**
 	 * A frame of the strip [name] at [seconds] in, [fps] frames a second, looping or held on the last
-	 * frame: the boss pets' own moves (attack, throw, horn, pull, ride) and the horse, which are not
-	 * [Anim]s. Composed like any other frame (padding, outline), nothing drawn on top.
+	 * frame: her own moves that are not [Anim]s (the spell cast, waking up). Composed like any other frame (padding, outline), nothing drawn on top.
 	 */
 	fun stripFrame(name: String, seconds: Float, fps: Float, loop: Boolean, loopFrom: Int = 0): Bitmap? = runCatching {
 		val (n, list) = frames(name)
@@ -172,24 +116,26 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 		cache.getOrPut("$n:$index:NONE:0:$outlineColour") { compose(list[index], Over.NONE, 0) }
 	}.getOrNull()
 
+	/** The strip, speed and overlay for [anim]. */
+	private fun choose(anim: Anim, seconds: Float, still: Int): Pick = when {
+		anim == Anim.OUTRO -> Pick("outro", 24f, loop = false)
+		anim == Anim.INTRO -> Pick("outro", 24f, loop = false, reverse = true)
+		anim == Anim.WALK -> Pick("walk", 24f, loop = false)
+		anim == Anim.HAPPY && pet.strips.containsKey("happy") -> Pick("happy", 24f, loopFrom = 6)  // arms thrown up, then she bobs
+		anim == Anim.IDLE || anim == Anim.HANG -> Pick("idle", 24f)
+		anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 24f, loopFrom = 24)  // breaks up once, then her face floats
+		anim == Anim.JUMP && pet.strips.containsKey("jump") -> Pick("jump", 10f, loop = false)
+		anim == Anim.DIZZY && pet.strips.containsKey("dizzy") -> Pick("dizzy", 8f)
+		anim == Anim.SHAKE && pet.strips.containsKey("hurt") -> Pick("hurt", 8f, loop = false, over = Over.ALERT)
+		else -> pick(anim, seconds, still)
+	}
+
 	override fun frame(anim: Anim, seconds: Float, still: Int): Bitmap? = runCatching {
-		val p = when {
-			revisedSeasonal -> seasonalPick(anim, still)
-			teleports && anim == Anim.OUTRO -> Pick("outro", 24f, loop = false)
-			teleports && anim == Anim.INTRO -> Pick("outro", 24f, loop = false, reverse = true)
-			teleports && anim == Anim.WALK -> Pick("walk", 24f, loop = false)
-			teleports && anim == Anim.HAPPY && pet.strips.containsKey("happy") -> Pick("happy", 24f, loopFrom = 6)  // arms thrown up, then she bobs
-			teleports && (anim == Anim.IDLE || anim == Anim.HANG) -> Pick("idle", 24f)
-			anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 24f, loopFrom = 24)  // breaks up once, then her face floats
-			anim == Anim.JUMP && pet.strips.containsKey("jump") -> Pick("jump", 10f, loop = false)
-			anim == Anim.DIZZY && pet.strips.containsKey("dizzy") -> Pick("dizzy", 8f)
-			anim == Anim.SHAKE && pet.strips.containsKey("hurt") -> Pick("hurt", 8f, loop = false, over = Over.ALERT)
-			else -> pick(anim, seconds, still)
-		}
+		val p = choose(anim, seconds, still)
 		val (name, list) = frames(p.strip)
 		if (list.isEmpty()) return null
 		// Every one of her strips plays at 24 fps (the still ones, with fps 0, hold their first frame).
-		val fps = if (teleports && p.fps > 0f) 24f else p.fps
+		val fps = if (p.fps > 0f) 24f else p.fps
 		val index = when {
 			fps <= 0f -> 0
 			p.loop && p.loopFrom > 0 -> (seconds * fps).toInt().let { if (it < p.loopFrom) it else p.loopFrom + (it - p.loopFrom).mod(list.size - p.loopFrom) }
@@ -201,16 +147,8 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 		val base = cache.getOrPut(key) { compose(list[index], p.over, phase) }
 		// Her walk and spin strips are blank where the slash goes. Live walk draws it full-screen (BoltView);
 		// the picker preview and Spin draw it over her own cell with the same painter.
-		val boltF = when {
-			!teleports -> -1
-			anim == Anim.WALK && preview -> index
-			else -> -1
-		}
-		if (boltF >= 0) {
-			cache.getOrPut("$key:bolt$boltF") { withBolt(base, boltF) }
-		} else if (revisedSeasonal && anim == Anim.BLOW) {
-			cache.getOrPut("bubble:$index:$outlineColour") { attachedBubble(base, index) }
-		} else base
+		val boltF = if (anim == Anim.WALK && preview) index else -1
+		if (boltF >= 0) cache.getOrPut("$key:bolt$boltF") { withBolt(base, boltF) } else base
 	}.getOrNull()
 
 	private val boltPainters = HashMap<Long, BoltPainter>()
@@ -237,37 +175,7 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 	/** The animal's head: the top-right of its box (they face right), in cell pixels. */
 	private val headX get() = PAD_SIDE + pet.w - 6
 	private val headY = PAD_TOP
-	/** Anchor effects to the idle body's face, not to an animation's widest extent. */
-	override val mouthAt: FloatArray? by lazy {
-		if (!revisedSeasonal) null else if (pet.mouth != null) {
-			floatArrayOf(PAD_SIDE + pet.mouth!![0], PAD_TOP + pet.mouth!![1])
-		} else {
-			val bmp = strip("idle").firstOrNull()
-			if (bmp == null) null else {
-				var left = bmp.width; var right = 0; var top = bmp.height; var bottom = 0
-				for (y in 0 until bmp.height) for (x in 0 until bmp.width) {
-					if ((bmp.getPixel(x, y) ushr 24) > 40) {
-						left = minOf(left, x); right = maxOf(right, x)
-						top = minOf(top, y); bottom = maxOf(bottom, y)
-					}
-				}
-				val front = pet.id == "cotton_boo" || pet.id.startsWith("witch_ghost") || pet.id == "vampire_cat"
-				floatArrayOf(PAD_SIDE + left + (right - left) * (if (front) 0.55f else 0.88f),
-					PAD_TOP + top + (bottom - top) * (if (pet.id.startsWith("witch_ghost")) 0.72f else 0.38f))
-			}
-		}
-	}
-
-	/** Grow at the release centre, then hand off to the live bubble on its release frame. */
-	private fun attachedBubble(base: Bitmap, frame: Int): Bitmap {
-		val next = blowReleases.firstOrNull { frame < it.frame && frame >= it.frame - 2 } ?: return base
-		val out = base.copy(Bitmap.Config.ARGB_8888, true)
-		val c = Canvas(out)
-		val radius = next.size * (if (frame == next.frame - 1) 1f else 0.55f) / 2f
-		val bubble = Bubbles.image("bubble_${next.variant + 1}") ?: return base
-		c.drawBitmap(bubble, null, RectF(next.x-radius, next.y-radius, next.x+radius, next.y+radius), paint)
-		return out
-	}
+	override val mouthAt: FloatArray? get() = null
 
 	private fun compose(sprite: Bitmap, over: Over, phase: Int): Bitmap {
 		val out = Bitmap.createBitmap(cellW, cellH, Bitmap.Config.ARGB_8888)
@@ -330,16 +238,6 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 		}
 	}
 
-	/** From the mouth, at the same frames the unicorn lets its bubbles go. */
-	override val blowReleases: List<BlowRelease> by lazy {
-		val mx = mouthAt?.get(0) ?: (PAD_SIDE + pet.w + 1f)
-		val my = mouthAt?.get(1) ?: (PAD_TOP + pet.h * 0.3f)
-		fun release(frame: Int, size: Float, variant: Int) = BlowRelease(frame,
-			if (revisedSeasonal) (mx + size / 2f).coerceAtMost(cellW - size / 2f - 1f) else mx,
-			my, size, variant)
-		listOf(release(6, 9f, 0), release(10, 8f, 2), release(12, 6f, 5))
-	}
-
 	companion object {
 		private const val PAD_TOP = 9
 		private const val PAD_SIDE = 3
@@ -351,10 +249,6 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 		 * Part of every frame's cache key, so a change shows on the next frame.
 		 */
 		@Volatile var outlineColour = 0
-		/** Cell pixels the size setting measures: the ginger cat's and the Golden Retriever's widths. Seasonal pets use their own. */
-		private const val CAT_REF_W = 30f
-		private const val DOG_REF_W = 45f
-
 		private val FALLBACKS = mapOf(
 			"itch" to listOf("lick1", "voice"),
 			"sleep2" to listOf("sleep1"),
@@ -371,27 +265,6 @@ internal class SheetLook(private val pet: SheetPet, val kind: Looks.Kind, refOve
 			'r' to 0xFFFF3366.toInt(),
 		)
 
-		/** All twelve, in PetData's order: six cats, then six dogs. */
-		val all: List<SheetLook> by lazy { PetData.pets.map { SheetLook(it, if (it.id.startsWith("dog_")) Looks.Kind.DOG else Looks.Kind.CAT) } }
-
-		/** Seasonal holiday pets, in SeasonalData's order, then the boss pets (BossData.kt). */
-		val seasonal: List<SheetLook> by lazy { (SeasonalData.pets + BossData.pets).map { SheetLook(it, Looks.Kind.SEASONAL) } }
-
-		/**
-		 * Capri — Project Capricorn construct from Cyberpunk: Edgerunners 2.
-		 * Fan art, non-commercial. Sprites drawn separately; see HOW_TO_ADD_CAPRI.md.
-		 *
-		 * Uses Kind.CAT so she gets SMALL_ANIMAL_SCALE (1.7×) for screen size.
-		 * Change to Kind.DOG for a larger baseline, or add Kind.CAPRI in Looks for
-		 * custom refW.
-		 */
-		val capri: SheetLook by lazy {
-			SheetLook(
-				PetData.pets.first { it.id == "capri" },
-				Looks.Kind.CAT,
-				// A person, not a small animal: measure her like the unicorn so the size slider fits.
-				refOverride = 90f,
-			)
-		}
+		val capri: SheetLook by lazy { SheetLook(PetData.pets.first { it.id == "capri" }) }
 	}
 }

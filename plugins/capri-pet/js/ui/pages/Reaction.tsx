@@ -1,5 +1,5 @@
 import { fxOn, keyOf, moodById, ownerOf, removedOf, withWord, withoutWord, wordsOf } from "../../lib/moods"
-import { callNative, lookOf } from "../../native"
+import { callNative, PET } from "../../native"
 import { FieldRow } from "../fieldGroup"
 import { rowIcon } from "../icon"
 import { getViewingMood } from "../routes"
@@ -36,7 +36,7 @@ export default function Reaction() {
 
 	if (!mood) return null
 
-	const name = s.name?.trim() || lookOf(s.look).defaultName
+	const name = s.name?.trim() || PET.defaultName
 	const on = !s.moodsOff.includes(mood.id)
 	const words = wordsOf(s, mood.id)
 	const removed = removedOf(s, mood.id)

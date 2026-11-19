@@ -1,5 +1,5 @@
 import { MOODS } from "../../lib/moods"
-import { lookOf } from "../../native"
+import { PET } from "../../native"
 import { rowIcon } from "../icon"
 import { REACTIONS_ROUTE } from "../routes"
 import { useBottomPadding } from "../safeArea"
@@ -20,7 +20,7 @@ export default function SoundsReactions() {
 	const s = useSettings()
 	const moodsOn = MOODS.filter(mood => !s.moodsOff.includes(mood.id)).length
 	const bottom = useBottomPadding()
-	const name = s.name?.trim() || lookOf(s.look).defaultName
+	const name = s.name?.trim() || PET.defaultName
 
 	return (
 		<Page>

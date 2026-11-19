@@ -1,5 +1,5 @@
 import { useChangelog } from "../../../../../shared/changelog"
-import { lookOf, sizeLabel } from "../../native"
+import { PET, sizeLabel } from "../../native"
 import { rowIcon } from "../icon"
 import { FUN_ROUTE, MOOD_ROUTE, MOVEMENT_ROUTE, PET_ROUTE, SOUNDS_ROUTE } from "../routes"
 import { standingWord } from "./Mood"
@@ -34,11 +34,11 @@ export default function Settings() {
 	const live = useNativeState()
 	const bottom = useBottomPadding()
 
-	const pet = lookOf(s.look)
+	const pet = PET
 	const name = s.name?.trim() || pet.defaultName
 	const activity = s.wander ? ["calm", "normal", "lively", "hyper"][Math.min(3, Math.max(0, s.activity))] : "still"
 	const reactsTo = [s.discord && "Discord", s.shake && "shakes"].filter(Boolean)
-	const fun = [s.bubbles && pet.bubbles, s.treats && "treats", s.magic && "magic", s.eat && "eats buttons"].filter(Boolean)
+	const fun = [s.bubbles && "possession", s.treats && "treats", s.magic && "magic", s.eat && "eats buttons"].filter(Boolean)
 
 	return (
 		<Page>
