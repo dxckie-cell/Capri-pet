@@ -1,18 +1,18 @@
 {
   "format": 1,
-  "name": "dxckie-cell Capri Pet",
-  "description": "Capri Pet, a neon cyber-kitten pet plugin for Valenced.",
+  "name": "dxckie-cell Capri-Pet",
+  "description": "Capri-Pet, Capri from Cyberpunk: Edgerunners 2 as a pet plugin for Valenced.",
   "plugins": {
     "dxckie.capri-pet": {
-      "name": "Capri Pet",
-      "description": "A pet that lives on top of Discord: a unicorn, a cat, a dog, seasonal pets and the boss pets. Tap, pet, feed, shake and throw it.",
+      "name": "Capri-Pet",
+      "description": "Capri from Cyberpunk: Edgerunners 2 as a pixel pet that lives on top of Discord. Tap, pet, feed, shake and throw her.",
       "author": "dxckie (https://github.com/dxckie-cell \"GitHub\")",
       "contributors": [
         "bleelblep (https://github.com/bleelblep \"GitHub\")"
       ],
       "icon": "ReactionIcon",
       "channels": {
-        "latest": "2.10.48"
+        "latest": "2.10.49"
       },
       "versions": {
         "1.0.0": {
@@ -929,6 +929,19 @@
           "url": "https://dxckie-cell.github.io/Capri-pet/pool/dxckie.capri-pet@2.10.48.zip",
           "sha256": "3b9c89be6e111731432f49f44c4ec2da148705067a2b449b0f46e66957d533b8",
           "size": 2675454,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1.0 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        },
+        "2.10.49": {
+          "url": "https://dxckie-cell.github.io/Capri-pet/pool/dxckie.capri-pet@2.10.49.zip",
+          "sha256": "4db7f71fdf89417176031a0a001504cd2009f7af704516680071f67026dfe7d9",
+          "size": 2675023,
           "dependencies": {
             "valenced.api": {
               "version": ">=1.0 <2"
