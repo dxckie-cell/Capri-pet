@@ -124,7 +124,7 @@ const POSES = [
 	["SPIN", "Spin"], ["HAPPY", "Happy"], ["SLEEP", "Sleep"], ["SAD", "Sad"],
 	["SURPRISED", "Surprised"], ["DIZZY", "Dizzy"], ["SHAKE", "Shake"],
 	["REACTION", "Reaction"],
-	["VARIANT", "Fidget"], ["LOOK", "Look around"], ["OUTRO", "Exit"],
+	["LOOK", "Look around"], ["OUTRO", "Exit"],
 ] as const
 
 function AnimationTester({ look }: { look: number }) {

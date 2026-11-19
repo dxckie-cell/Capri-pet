@@ -3,6 +3,14 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.45',
+		date: '2026-11-19',
+		title: 'Fidget removed',
+		changes: [
+			'Removed the fidget animations, including the tester button. Hang and look around stay.',
+		],
+	},
+	{
 		version: '2.10.44',
 		date: '2026-11-19',
 		title: 'Reaction: no ripping, bigger icons',
