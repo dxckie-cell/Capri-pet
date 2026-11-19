@@ -60,7 +60,7 @@ export default function Reaction() {
 		const sample = words[0]?.word
 		callNative("react", [mood.id, sample ?? null, fxOn(s, mood.id), true]).catch(error => {
 			reportError("[Capri] react failed:", error)
-			toast("Capri Pet didn't respond. Is it switched on?")
+			toast("Capri-Pet didn't respond. Is it switched on?")
 		})
 	}
 

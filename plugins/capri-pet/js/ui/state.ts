@@ -80,7 +80,7 @@ export function toast(content: string) {
 export function call(name: string) {
 	callNative(name).catch(error => {
 		reportError(`[Capri] ${name} failed:`, error)
-		toast("Capri Pet didn't respond. Is it switched on?")
+		toast("Capri-Pet didn't respond. Is it switched on?")
 	})
 }
 
@@ -133,7 +133,7 @@ export function usePreviewFrames(look: number, pose = "IDLE", variant = 0, targe
 			.catch(error => {
 				if (active) {
 					reportError("[Capri] previewFrames failed:", error)
-					toast("Couldn't load this animation. Update Capri Pet and restart Discord.")
+					toast("Couldn't load this animation. Update Capri-Pet and restart Discord.")
 				}
 			})
 		return () => { active = false }

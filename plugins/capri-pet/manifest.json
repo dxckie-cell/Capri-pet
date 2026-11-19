@@ -1,14 +1,14 @@
 {
 	"format": 1,
 	"id": "dxckie.capri-pet",
-	"name": "Capri Pet",
-	"description": "A pet that lives on top of Discord: a unicorn, a cat, a dog, seasonal pets and the boss pets. Tap, pet, feed, shake and throw it.",
+	"name": "Capri-Pet",
+	"description": "Capri from Cyberpunk: Edgerunners 2 as a pixel pet that lives on top of Discord. Tap, pet, feed, shake and throw her.",
 	"author": "dxckie (https://github.com/dxckie-cell \"GitHub\")",
 	"contributors": [
 		"bleelblep (https://github.com/bleelblep \"GitHub\")"
 	],
 	"icon": "ReactionIcon",
-	"version": "2.10.48",
+	"version": "2.10.49",
 	"dependencies": {
 		"valenced.api": {
 			"version": ">=1.0 <2"

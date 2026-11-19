@@ -1,7 +1,7 @@
 import { useChangelog } from "../../../../../shared/changelog"
 import { lookOf, sizeLabel } from "../../native"
 import { rowIcon } from "../icon"
-import { FUN_ROUTE, LICENSE_ROUTE, MOOD_ROUTE, MOVEMENT_ROUTE, PET_ROUTE, SOUNDS_ROUTE } from "../routes"
+import { FUN_ROUTE, MOOD_ROUTE, MOVEMENT_ROUTE, PET_ROUTE, SOUNDS_ROUTE } from "../routes"
 import { standingWord } from "./Mood"
 import { useBottomPadding } from "../safeArea"
 import { call, update, useNativeState, useSettings } from "../state"
@@ -125,16 +125,6 @@ export default function Settings() {
 							icon={rowIcon("StarIcon", "ReactionIcon")}
 							arrow
 							onPress={() => navigation.navigate(FUN_ROUTE)}
-						/>
-					</TableRowGroup>
-
-					<TableRowGroup hasIcons>
-						<TableRow
-							label="Licence"
-							subLabel="CC0-1.0, with credits for the art"
-							icon={rowIcon("BookCheckIcon", "ic_info")}
-							arrow
-							onPress={() => navigation.navigate(LICENSE_ROUTE)}
 						/>
 					</TableRowGroup>
 				</Stack>

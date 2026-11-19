@@ -1,5 +1,4 @@
 import Fun from "./pages/Fun"
-import License from "./pages/License"
 import Mood from "./pages/Mood"
 import Movement from "./pages/Movement"
 import Pet from "./pages/Pet"
@@ -16,7 +15,6 @@ export const MOOD_ROUTE = `${PREFIX}.mood`
 export const MOVEMENT_ROUTE = `${PREFIX}.movement`
 export const SOUNDS_ROUTE = `${PREFIX}.sounds`
 export const FUN_ROUTE = `${PREFIX}.fun`
-export const LICENSE_ROUTE = `${PREFIX}.license`
 export const SPELLS_ROUTE = `${PREFIX}.spells`
 export const REACTIONS_ROUTE = `${PREFIX}.reactions`
 export const REACTION_ROUTE = `${PREFIX}.reaction`
@@ -37,7 +35,6 @@ const PAGES: [route: string, title: string, component: () => any][] = [
 	[SPELLS_ROUTE, "Spells", Spells],
 	[REACTIONS_ROUTE, "Message reactions", Reactions],
 	[REACTION_ROUTE, "Reaction", Reaction],
-	[LICENSE_ROUTE, "Licence", License],
 ]
 
 function refreshSettingsUI() {

@@ -3,6 +3,15 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.49',
+		date: '2026-11-19',
+		title: 'Renamed to Capri-Pet',
+		changes: [
+			'The plugin is now called Capri-Pet, with a new description.',
+			'Removed the Licence page.',
+		],
+	},
+	{
 		version: '2.10.48',
 		date: '2026-11-19',
 		title: 'Sharper pixels',
