@@ -326,7 +326,7 @@ val sparklePlugin = plugin {
 			val sheetLook = look as? SheetLook
 			sheetLook?.preview = true
 			val bitmaps = try {
-				(0 until count).mapNotNull { look.frame(anim, it / fps, if (anim == Anim.REACTION || anim == Anim.VARIANT) still else -1) }
+				(0 until count).mapNotNull { look.frame(anim, it / fps, if (anim == Anim.REACTION) still else -1) }
 			} finally { sheetLook?.preview = false }
 			if (bitmaps.isEmpty()) return@registerNativeMethod false
 			// One image for the whole animation, the frames in a grid (at most four across: a single long

@@ -3,6 +3,15 @@ import type { ChangelogEntry } from '../../../shared/changelog'
 /** Newest first. Every version users got gets an entry; see shared/changelog.tsx. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		version: '2.10.51',
+		date: '2026-11-19',
+		title: 'Bigger sleep, unused art cut',
+		changes: [
+			'Her sleep animation is a little bigger.',
+			'Cut the animation strips and poses nothing plays any more (jump, itch, lay, stretch, groom, sad, charging, low battery, fidgets).',
+		],
+	},
+	{
 		version: '2.10.50',
 		date: '2026-11-19',
 		title: 'Trimmed to Capri',

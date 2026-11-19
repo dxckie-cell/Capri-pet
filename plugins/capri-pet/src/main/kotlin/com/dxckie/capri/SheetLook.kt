@@ -46,16 +46,9 @@ internal class SheetLook(private val pet: SheetPet) : Look {
 		}.getOrDefault(emptyList())
 	}
 
-	/** [name], or the first fallback this pet has. */
-	private fun frames(name: String): Pair<String, List<Bitmap>> {
-		for (n in listOf(name) + FALLBACKS[name].orEmpty()) {
-			val f = strip(n)
-			if (f.isNotEmpty()) return n to f
-		}
-		return "idle" to strip("idle")
-	}
+	private fun frames(name: String): Pair<String, List<Bitmap>> = name to strip(name)
 
-	private enum class Over { NONE, ZS, HEART, ALERT, MAIL, MUSIC, BOLT, BATTERY, DIZZY, SPARKLES }
+	private enum class Over { NONE, HEART, ALERT, MAIL, MUSIC }
 
 	/** Which strip, how fast, whether it loops (else holds the last frame), and what goes on top. */
 	private class Pick(val strip: String, val fps: Float, val loop: Boolean = true, val over: Over = Over.NONE, val still: Int = -1, val reverse: Boolean = false, val loopFrom: Int = 0)
@@ -70,35 +63,8 @@ internal class SheetLook(private val pet: SheetPet) : Look {
 		// Her look-around and her blow pose are held frames; these are the lengths they have always had.
 		if (anim == Anim.LOOK) return 2.125f
 		if (anim == Anim.BLOW) return 2.375f
-		val p = choose(anim, 0f, -1)
+		val p = choose(anim, -1)
 		return if (p.fps <= 0f) 0f else (pet.strips[p.strip]?.first ?: 1) / 24f
-	}
-
-	private fun pick(anim: Anim, s: Float, still: Int): Pick = when (anim) {
-		Anim.IDLE, Anim.HANG -> Pick("idle", 8f)
-		Anim.WALK -> Pick("walk", 10f)
-		Anim.JUMP, Anim.OUTRO -> Pick("run", 12f)
-		Anim.INTRO -> Pick("idle", 8f)
-		Anim.SPIN -> Pick("run", 14f)
-		Anim.HAPPY -> Pick("itch", 8f, over = Over.SPARKLES)
-		Anim.SLEEP -> Pick(if ((s * 0.8f).toInt() % 2 == 0) "sleep1" else "sleep2", 0f, over = Over.ZS)
-		Anim.SURPRISED, Anim.SHAKE -> Pick("sit", 0f, over = Over.ALERT)
-		Anim.SAD -> Pick("lay", 8f, loop = false)
-		Anim.DIZZY -> Pick("sit", 0f, over = Over.DIZZY)
-		Anim.REACTION -> Pick(
-			"voice", 6f,
-			over = when (still) { 0 -> Over.HEART; 1 -> Over.ALERT; 2 -> Over.MAIL; else -> Over.MUSIC },
-		)
-		Anim.CHARGING -> Pick("stretch", 8f, loop = false, over = if ((s * 2f).toInt() % 2 == 0) Over.BOLT else Over.NONE)
-		Anim.LOW_BATTERY -> Pick("lay", 8f, loop = false, over = Over.BATTERY)
-		Anim.VARIANT -> when (still) {
-			1 -> Pick("lick1", 8f)
-			2 -> Pick("lick2", 8f)
-			3 -> Pick("stretch", 8f, loop = false)
-			else -> Pick("sit", 0f)
-		}
-		Anim.BLOW -> Pick("voice", 6f)
-		Anim.LOOK -> Pick("sit", 0f)
 	}
 
 	/** Whether this pet has a strip called [name] of its own (not through a fallback). */
@@ -113,25 +79,28 @@ internal class SheetLook(private val pet: SheetPet) : Look {
 		if (list.isEmpty()) return null
 		val step = (seconds * fps).toInt()
 		val index = if (loopFrom in 1 until list.size) { if (step < loopFrom) step else loopFrom + (step - loopFrom).mod(list.size - loopFrom) } else if (loop) step.mod(list.size) else (seconds * fps).toInt().coerceIn(0, list.size - 1)
-		cache.getOrPut("$n:$index:NONE:0:$outlineColour") { compose(list[index], Over.NONE, 0) }
+		cache.getOrPut("$n:$index:NONE:$outlineColour") { compose(list[index], Over.NONE) }
 	}.getOrNull()
 
 	/** The strip, speed and overlay for [anim]. */
-	private fun choose(anim: Anim, seconds: Float, still: Int): Pick = when {
-		anim == Anim.OUTRO -> Pick("outro", 24f, loop = false)
-		anim == Anim.INTRO -> Pick("outro", 24f, loop = false, reverse = true)
-		anim == Anim.WALK -> Pick("walk", 24f, loop = false)
-		anim == Anim.HAPPY && pet.strips.containsKey("happy") -> Pick("happy", 24f, loopFrom = 6)  // arms thrown up, then she bobs
-		anim == Anim.IDLE || anim == Anim.HANG -> Pick("idle", 24f)
-		anim == Anim.SLEEP && pet.strips.containsKey("sleep") -> Pick("sleep", 24f, loopFrom = 24)  // breaks up once, then her face floats
-		anim == Anim.JUMP && pet.strips.containsKey("jump") -> Pick("jump", 10f, loop = false)
-		anim == Anim.DIZZY && pet.strips.containsKey("dizzy") -> Pick("dizzy", 8f)
-		anim == Anim.SHAKE && pet.strips.containsKey("hurt") -> Pick("hurt", 8f, loop = false, over = Over.ALERT)
-		else -> pick(anim, seconds, still)
+	private fun choose(anim: Anim, still: Int): Pick = when (anim) {
+		Anim.OUTRO -> Pick("outro", 24f, loop = false)
+		Anim.INTRO -> Pick("outro", 24f, loop = false, reverse = true)
+		Anim.WALK -> Pick("walk", 24f, loop = false)
+		Anim.HAPPY -> Pick("happy", 24f, loopFrom = 6)  // arms thrown up, then she bobs
+		Anim.IDLE, Anim.HANG -> Pick("idle", 24f)
+		Anim.SLEEP -> Pick("sleep", 24f, loopFrom = 24)  // breaks up once, then her face floats
+		Anim.DIZZY -> Pick("dizzy", 8f)
+		Anim.SHAKE -> Pick("hurt", 8f, loop = false, over = Over.ALERT)
+		Anim.SPIN -> Pick("run", 14f)
+		Anim.SURPRISED -> Pick("sit", 0f, over = Over.ALERT)
+		Anim.LOOK -> Pick("sit", 0f)
+		Anim.REACTION -> Pick("voice", 6f, over = when (still) { 0 -> Over.HEART; 1 -> Over.ALERT; 2 -> Over.MAIL; else -> Over.MUSIC })
+		Anim.BLOW -> Pick("voice", 6f)
 	}
 
 	override fun frame(anim: Anim, seconds: Float, still: Int): Bitmap? = runCatching {
-		val p = choose(anim, seconds, still)
+		val p = choose(anim, still)
 		val (name, list) = frames(p.strip)
 		if (list.isEmpty()) return null
 		// Every one of her strips plays at 24 fps (the still ones, with fps 0, hold their first frame).
@@ -142,9 +111,8 @@ internal class SheetLook(private val pet: SheetPet) : Look {
 			p.loop -> (seconds * fps).toInt().mod(list.size)
 			else -> (seconds * fps).toInt().coerceIn(0, list.size - 1)
 		}.let { if (p.reverse) list.size - 1 - it else it }
-		val phase = (seconds * 4f).toInt() % 3
-		val key = "$name:$index:${p.over}:${if (p.over == Over.ZS || p.over == Over.SPARKLES || p.over == Over.DIZZY) phase else 0}:$outlineColour"
-		val base = cache.getOrPut(key) { compose(list[index], p.over, phase) }
+		val key = "$name:$index:${p.over}:$outlineColour"
+		val base = cache.getOrPut(key) { compose(list[index], p.over) }
 		// Her walk and spin strips are blank where the slash goes. Live walk draws it full-screen (BoltView);
 		// the picker preview and Spin draw it over her own cell with the same painter.
 		val boltF = if (anim == Anim.WALK && preview) index else -1
@@ -177,7 +145,7 @@ internal class SheetLook(private val pet: SheetPet) : Look {
 	private val headY = PAD_TOP
 	override val mouthAt: FloatArray? get() = null
 
-	private fun compose(sprite: Bitmap, over: Over, phase: Int): Bitmap {
+	private fun compose(sprite: Bitmap, over: Over): Bitmap {
 		val out = Bitmap.createBitmap(cellW, cellH, Bitmap.Config.ARGB_8888)
 		val c = Canvas(out)
 		c.drawBitmap(sprite, PAD_SIDE.toFloat(), PAD_TOP.toFloat(), paint)
@@ -186,22 +154,10 @@ internal class SheetLook(private val pet: SheetPet) : Look {
 		val y = headY - 7
 		when (over) {
 			Over.NONE -> {}
-			Over.ZS -> for (k in 0..phase) stamp(c, x - 1 + k * 2, y + 2 - k * 2, listOf("www", ".w.", "www"))
 			Over.HEART -> stamp(c, x - 4, 0, listOf(".r.r.", "rrrrr", "rrrrr", ".rrr.", "..r.."), 2)
 			Over.ALERT -> stamp(c, x - 2, 0, listOf("kyk", "kyk", "kyk", ".k.", "kyk"), 2)
 			Over.MAIL -> stamp(c, x - 6, 0, listOf("kkkkkkk", "kwkwkwk", "kwwkwwk", "kwwwwwk", "kkkkkkk"), 2)
 			Over.MUSIC -> stamp(c, x - 2, 0, listOf(".www", ".w.w", ".w.w", "ww.w", "wwww"), 2)
-			Over.BOLT -> stamp(c, x, y, listOf("..yy", ".yy.", "yyyy", ".yy.", "yy.."))
-			Over.BATTERY -> stamp(c, x - 2, y + 1, listOf("wwwwww.", "wrkkkww", "wrkkkww", "wwwwww."))
-			Over.DIZZY -> {
-				// Three little stars circling above the head.
-				val spots = listOf(-3 to 2, 1 to 0, 5 to 2)
-				for ((i, s) in spots.withIndex()) if ((i + phase) % 3 != 0) stamp(c, x + s.first, y + 2 + s.second, listOf(".y.", "yyy", ".y."))
-			}
-			Over.SPARKLES -> {
-				val spots = listOf(1 to 1, cellW - 3 to 2, cellW / 2 to 0)
-				for ((i, s) in spots.withIndex()) if ((i + phase) % 3 != 0) stamp(c, s.first - 1, s.second, listOf(".w.", "www", ".w."))
-			}
 		}
 		return out
 	}
@@ -249,17 +205,6 @@ internal class SheetLook(private val pet: SheetPet) : Look {
 		 * Part of every frame's cache key, so a change shows on the next frame.
 		 */
 		@Volatile var outlineColour = 0
-		private val FALLBACKS = mapOf(
-			"itch" to listOf("lick1", "voice"),
-			"sleep2" to listOf("sleep1"),
-			"lick2" to listOf("lick1"),
-			"stretch" to listOf("idle"),
-			"voice" to listOf("idle"),
-			"lay" to listOf("sleep1"),
-			"sit" to listOf("idle"),
-			"run" to listOf("walk"),
-		)
-
 		private val COLOURS = mapOf(
 			'w' to 0xFFFFFFFF.toInt(), 'k' to 0xFF2A1E3A.toInt(), 'y' to 0xFFFFDD33.toInt(),
 			'r' to 0xFFFF3366.toInt(),
